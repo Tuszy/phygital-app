@@ -20,7 +20,7 @@ Mobile application for creating, minting and verifying phygitals.
    4. For each flashed [Phygital NFC Tag](https://github.com/Tuszy/phygital-nfc-tag):
       1. Click the **Add Phygital** button
       2. Scan the [Phygital NFC Tag](https://github.com/Tuszy/phygital-nfc-tag) 
-         1. Reads the *Phygital id* from the NFC tag and adds it to the list
+         1. Reads the *public key* from the [Phygital NFC Tag](https://github.com/Tuszy/phygital-nfc-tag), hashes it to get the *Phygital id* and adds it to the list
    5. Click on the **Deploy** button and wait until the deployment steps are completed:
       1. App creates LSP4 metadata from input
       2. App uploads LSP4 metadata to IPFS
