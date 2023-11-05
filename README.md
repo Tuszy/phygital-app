@@ -64,8 +64,31 @@ Mobile application for creating, minting and verifying phygitals.
             4. App sends needed data to [Backend](https://github.com/Tuszy/phygital-backend) 
                1. [Backend](https://github.com/Tuszy/phygital-backend)  calls *mint* contract function with controller key
    3. App returns to **Home** screen
-   4. **Phygital Asset Minting* done
+   4. *Phygital Asset Minting* done
    
+## Phygital Asset Ownership Verification after Transfer - Workflow
+
+1. Open the [Frontend](https://github.com/Tuszy/phygital-frontend) - [https://phygital.tuszy.com](https://phygital.tuszy.com)
+   1. Click the **Add 'Verify Phygital Ownership' Permission** button
+   2. Add the requested permission to your Universal Profile by using the [🆙 Extension](https://docs.lukso.tech/install-up-browser-extension/)
+2. Download and Open the [Phygital-App](https://github.com/Tuszy/phygital-app)
+   1. Input your **Universal Profile Address** and click the **Confirm** button
+      1. App checks if the previously requested permission is set.
+         1. YES: App proceeds
+         2. NO: Error message appears
+   2. Click the **Verify Phygital Ownership** button
+      1. App opens **Verify Phygital Ownership** screen
+      2. Scan the [Phygital NFC Tag](https://github.com/Tuszy/phygital-nfc-tag) 
+         1. Checks if the phygital has been transferred to the given *Universal Profile Address*
+            1. YES: App proceeds
+            2. NO: Error message appears and exits **Mint Phygital** screen
+         2. Click on the **Verify Ownership** button and wait until the ownership verification steps are completed:
+            1. [Phygital NFC Tag](https://github.com/Tuszy/phygital-nfc-tag) signs **Universal Profile Address** with internal *private key* and returns the signature
+            2. App reads *public key* from [Phygital NFC Tag](https://github.com/Tuszy/phygital-nfc-tag) and hashes it to get **Phygital id**
+            3. App sends needed data to [Backend](https://github.com/Tuszy/phygital-backend) 
+               1. [Backend](https://github.com/Tuszy/phygital-backend)  calls *verifyOwnershipAfterTransfer* contract function with controller key
+   3. App returns to **Home** screen
+   4. *Phygital Asset Ownership Verification after Transfer* done
 
 ## Terminology
 - Phygital Address: public key of the NFC tag
