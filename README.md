@@ -28,11 +28,14 @@ Mobile application for creating, minting and verifying phygitals.
       4. App uploads merkle tree to IPFS
       5. App sends needed data to [Backend](https://github.com/Tuszy/phygital-backend) 
          1. [Backend](https://github.com/Tuszy/phygital-backend) deploys *Phygital Asset* contract instance with controller key
-   6. For each flashed [Phygital NFC Tag](https://github.com/Tuszy/phygital-nfc-tag)
+   6. App opens **Assign Phygital to Collection** screen 
+   7. For each flashed [Phygital NFC Tag](https://github.com/Tuszy/phygital-nfc-tag)
       1. Click the **Assign Phygital to Collection** button
       2. Scan the [Phygital NFC Tag](https://github.com/Tuszy/phygital-nfc-tag) 
          1. Writes the address of the deployed contract to the NFC tag (bidirectional binding)
-   7. **Phygital Asset Creation** done
+   8. Click on the **Done** button
+   9. App returns to **Home** screen
+   10. **Phygital Asset Creation** done
 
 
 
@@ -53,14 +56,15 @@ Mobile application for creating, minting and verifying phygitals.
             1. YES: App proceeds
             2. NO: Error message appears and exits **Mint Phygital** screen
          2. Click on the **Mint** button and wait until the minting steps are completed:
-            1. [Phygital NFC Tag](https://github.com/Tuszy/phygital-nfc-tag) signs **Universal Profile Address** with *private key* and returns the signature
+            1. [Phygital NFC Tag](https://github.com/Tuszy/phygital-nfc-tag) signs **Universal Profile Address** with internal *private key* and returns the signature
             2. App reads *public key* from [Phygital NFC Tag](https://github.com/Tuszy/phygital-nfc-tag) and hashes it to get **Phygital id**
             3. App fetches merkle tree from IPFS:
                1. Determines *phygital index*
                2. Calculates *merkle proof*
             4. App sends needed data to [Backend](https://github.com/Tuszy/phygital-backend) 
                1. [Backend](https://github.com/Tuszy/phygital-backend)  calls *mint* contract function with controller key
-   3. **Phygital Asset Minting* done
+   3. App returns to **Home** screen
+   4. **Phygital Asset Minting* done
    
 
 ## Terminology
