@@ -5,7 +5,7 @@ Mobile application for creating, minting and verifying phygitals.
 ## Phygital Asset Creation - Workflow
 
 1. Open the [Frontend](https://github.com/Tuszy/phygital-frontend) - [https://phygital.tuszy.com](https://phygital.tuszy.com)
-   1. Click the **Add 'Create Phygital Collection' Permission** button
+   1. Click the **Add 'Create Phygital Asset' Permission** button
    2. Add the requested permission to your Universal Profile by using the [🆙 Extension](https://docs.lukso.tech/install-up-browser-extension/)
 2. Flash an arbitrary amount of [Phygital NFC Tags](https://github.com/Tuszy/phygital-nfc-tag) with the provided [Phygital Firmware](https://github.com/Tuszy/phygital-nfc-tag/tree/main/arduino-code)
    1. On the first boot an asymmetric secp256k1 key-pair is generated, identifying the phygital in a unique way and allowing it to sign messages to verify the ownership (e.g. for minting and transferring)
@@ -14,8 +14,8 @@ Mobile application for creating, minting and verifying phygitals.
       1. App checks if the previously requested permission is set.
          1. YES: App proceeds
          2. NO: Error message appears
-   2. Click the **Create Phygital Collection** button
-      1. App opens **Create Phygital Collection** screen
+   2. Click the **Create Phygital Asset** button
+      1. App opens **Create Phygital Asset** screen
    3. Input the *Name*, *Symbol* and *Metadata* (images, descriptions, links etc.) using the given form
    4. For each flashed [Phygital NFC Tag](https://github.com/Tuszy/phygital-nfc-tag):
       1. Click the **Add Phygital** button
@@ -24,9 +24,8 @@ Mobile application for creating, minting and verifying phygitals.
    5. Click on the **Deploy** button and wait until the deployment steps are completed:
       1. App creates LSP4 metadata from input
       2. App uploads LSP4 metadata to IPFS
-      3. App creates a merkle tree using the list of phygital ids
-      4. App uploads merkle tree to IPFS
-      5. App sends needed data to [Backend](https://github.com/Tuszy/phygital-backend) 
+      3. App uploads the list of phygital ids (collection) to IPFS
+      4. App sends needed data to [Backend](https://github.com/Tuszy/phygital-backend) 
          1. [Backend](https://github.com/Tuszy/phygital-backend) deploys *Phygital Asset* contract instance with controller key
    6. App opens **Assign Phygital to Collection** screen 
    7. For each flashed [Phygital NFC Tag](https://github.com/Tuszy/phygital-nfc-tag)
@@ -58,11 +57,11 @@ Mobile application for creating, minting and verifying phygitals.
          2. Click on the **Mint** button and wait until the minting steps are completed:
             1. [Phygital NFC Tag](https://github.com/Tuszy/phygital-nfc-tag) signs **Universal Profile Address** with internal *private key* and returns the signature
             2. App reads *public key* from [Phygital NFC Tag](https://github.com/Tuszy/phygital-nfc-tag) and hashes it to get **Phygital id**
-            3. App fetches merkle tree from IPFS:
+            3. App fetches list of phygital ids (collection) from IPFS:
                1. Determines *phygital index*
                2. Calculates *merkle proof*
             4. App sends needed data to [Backend](https://github.com/Tuszy/phygital-backend) 
-               1. [Backend](https://github.com/Tuszy/phygital-backend)  calls *mint* contract function with controller key
+               1. [Backend](https://github.com/Tuszy/phygital-backend) calls *mint* contract function with controller key
    3. App returns to **Home** screen
    4. *Phygital Asset Minting* done
    
