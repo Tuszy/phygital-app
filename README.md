@@ -52,11 +52,10 @@ Mobile application for creating, minting and verifying phygitals.
             1. YES: App proceeds
             2. NO: Error message appears and exits **Mint Phygital** screen
          2. Click on the **Mint** button and wait until the minting steps are completed:
-            1. [Phygital NFC Tag](https://github.com/Tuszy/phygital-nfc-tag) signs **Universal Profile Address** with internal *private key* and returns the signature
+            1. [Phygital NFC Tag](https://github.com/Tuszy/phygital-nfc-tag) signs **Universal Profile Address** concatenated with the **Nonce 0** with internal *private key* and returns the signature
             2. App reads *public key* from [Phygital NFC Tag](https://github.com/Tuszy/phygital-nfc-tag) and hashes it to get **Phygital id**
             3. App fetches list of phygital ids (collection) from IPFS:
-               1. Determines *phygital index*
-               2. Calculates *merkle proof*
+               1. Calculates *merkle proof*
             4. App sends needed data to [Backend](https://github.com/Tuszy/phygital-backend) 
                1. [Backend](https://github.com/Tuszy/phygital-backend) calls *mint* contract function with controller key
    3. App returns to **Home** screen
@@ -79,7 +78,7 @@ Mobile application for creating, minting and verifying phygitals.
             1. YES: App proceeds
             2. NO: Error message appears and exits **Mint Phygital** screen
          2. Click on the **Verify Ownership** button and wait until the ownership verification steps are completed:
-            1. [Phygital NFC Tag](https://github.com/Tuszy/phygital-nfc-tag) signs **Universal Profile Address** with internal *private key* and returns the signature
+            1. [Phygital NFC Tag](https://github.com/Tuszy/phygital-nfc-tag) signs **Universal Profile Address** concatenated with the current **Nonce** with internal *private key* and returns the signature
             2. App reads *public key* from [Phygital NFC Tag](https://github.com/Tuszy/phygital-nfc-tag) and hashes it to get **Phygital id**
             3. App sends needed data to [Backend](https://github.com/Tuszy/phygital-backend) 
                1. [Backend](https://github.com/Tuszy/phygital-backend)  calls *verifyOwnershipAfterTransfer* contract function with controller key
