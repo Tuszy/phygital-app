@@ -17,11 +17,11 @@ Mobile application for creating, minting and verifying phygitals.
    4. For each flashed [Phygital NFC Tag](https://github.com/Tuszy/phygital-nfc-tag):
       1. Click the **Add Phygital** button
       2. Scan the [Phygital NFC Tag](https://github.com/Tuszy/phygital-nfc-tag) 
-         1. Reads the *public key* from the [Phygital NFC Tag](https://github.com/Tuszy/phygital-nfc-tag), hashes it to get the *Phygital id* and adds it to the list
+         1. Reads the *public key* from the [Phygital NFC Tag](https://github.com/Tuszy/phygital-nfc-tag)
    5. Click on the **Deploy** button and wait until the deployment steps are completed:
       1. App creates LSP4 metadata from input
       2. App uploads LSP4 metadata to IPFS
-      3. App uploads the list of phygital ids (collection) to IPFS
+      3. App uploads the list of phygital addresses (collection) to IPFS
       4. App sends needed data to [Backend](https://github.com/Tuszy/phygital-backend) 
          1. [Backend](https://github.com/Tuszy/phygital-backend) deploys *Phygital Asset* contract instance with controller key
    6. App opens **Assign Phygital to Collection** screen 
@@ -54,7 +54,7 @@ Mobile application for creating, minting and verifying phygitals.
          2. Click on the **Mint** button and wait until the minting steps are completed:
             1. [Phygital NFC Tag](https://github.com/Tuszy/phygital-nfc-tag) signs **Universal Profile Address** concatenated with the **Nonce 0** with internal *private key* and returns the signature
             2. App reads *public key* from [Phygital NFC Tag](https://github.com/Tuszy/phygital-nfc-tag) and hashes it to get **Phygital id**
-            3. App fetches list of phygital ids (collection) from IPFS:
+            3. App fetches list of phygital addresses (collection) from IPFS:
                1. Calculates *merkle proof*
             4. App sends needed data to [Backend](https://github.com/Tuszy/phygital-backend) 
                1. [Backend](https://github.com/Tuszy/phygital-backend) calls *mint* contract function with controller key
