@@ -18,15 +18,13 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.purpleAccent),
         useMaterial3: true,
       ),
-      home: const Homepage(title: "Test"),
+      home: const Homepage(),
     );
   }
 }
 
 class Homepage extends StatefulWidget {
-  const Homepage({super.key, required this.title});
-
-  final String title;
+  const Homepage({super.key});
 
   @override
   State<Homepage> createState() => _HomepageState();
@@ -57,12 +55,12 @@ class _HomepageState extends State<Homepage> with TickerProviderStateMixin {
                   vsync: this,
                   child: const ColoredBox(color: Colors.transparent)),
             ),
-            SafeArea(
+            const SafeArea(
               child: Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: <Widget>[
-                    const LogoWidget()
+                    LogoWidget()
                   ],
                 ),
               ),
