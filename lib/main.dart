@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:animated_background/animated_background.dart';
-import 'custom_drop_shadow.dart';
+import 'logo.dart';
 
 void main() {
   runApp(const MyApp());
@@ -33,10 +33,6 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
-  void _incrementCounter() {
-    setState(() {});
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -56,28 +52,17 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
             IgnorePointer(
               ignoring: true,
               child: AnimatedBackground(
-                  behaviour: SpaceBehaviour(backgroundColor: Colors.transparent),
+                  behaviour:
+                      SpaceBehaviour(backgroundColor: Colors.transparent),
                   vsync: this,
-                  child: const Positioned.fill(
-                    child: ColoredBox(color: Colors.transparent),
-                  )),
+                  child: const ColoredBox(color: Colors.transparent)),
             ),
             SafeArea(
               child: Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: <Widget>[
-                    Container(
-                      margin: const EdgeInsets.only(bottom: 8),
-                      child: const CustomDropShadow(
-                        offset: Offset(0, 0),
-                        blurRadius: 15,
-                        color: Color(0x7700ffff),
-                        child: Image(
-                          image: AssetImage("images/logo.png"),
-                        ),
-                      ),
-                    )
+                    const LogoWidget()
                   ],
                 ),
               ),
