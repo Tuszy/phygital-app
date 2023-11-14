@@ -36,6 +36,8 @@ dependencies:
   flutter_nfc_kit: ^3.4.1
   logging: ^1.2.0
   ndef: ^0.3.3
+  pointycastle: ^3.7.3
+  ethereum: ^6.0.0
 
 dev_dependencies:
   flutter_test:

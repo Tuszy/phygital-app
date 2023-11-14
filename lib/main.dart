@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
@@ -6,7 +7,9 @@ import 'package:animated_background/animated_background.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_nfc_kit/flutter_nfc_kit.dart';
 import 'package:logging/logging.dart';
+import 'package:ndef/utilities.dart';
 import 'package:phygital/Phygital.dart';
+import 'package:pointycastle/api.dart';
 import 'logo.dart';
 
 import 'package:ndef/ndef.dart' as ndef;
@@ -124,6 +127,107 @@ class _HomepageState extends State<Homepage> with TickerProviderStateMixin {
     return Phygital(address: address, contractAddress: contractAddress);
   }
 
+  Future<bool> writeContractAddress(String contractAddress) async {
+    Uint8List writeContractAddressCommand = Uint8List.fromList("02aa022A01".toBytes()+utf8.encode(contractAddress));
+    if(kDebugMode) {
+      print("Writing contract address $contractAddress:");
+      print(writeContractAddressCommand);
+    }
+    var value = await FlutterNfcKit.transceive(writeContractAddressCommand);
+    if(kDebugMode) {
+      print("Response: ${value.toHexString()}");
+    }
+
+    return value[0] == 0;
+  }
+
+  Future<int?> getMessageLength() async {
+    Uint8List readMessageLengthCommand = "02ab02".toBytes();
+    if(kDebugMode) {
+      print("Reading message length:");
+      print(readMessageLengthCommand);
+    }
+    var value = await FlutterNfcKit.transceive(readMessageLengthCommand);
+    if(kDebugMode) {
+      print("Response: ${value.toHexString()}");
+    }
+
+    return value[0] == 0 ? value[1] + 1 : null;
+  }
+
+  Future<bool> isMessageAvailable() async {
+    Uint8List readMessageBoxStateCommand = "02ad020d".toBytes();
+    if(kDebugMode) {
+      print("Reading message state:");
+      print(readMessageBoxStateCommand);
+    }
+    var value = await FlutterNfcKit.transceive(readMessageBoxStateCommand);
+    if(kDebugMode) {
+      print("Response: ${value.toHexString()} ${value[1].toRadixString(2)}");
+    }
+
+    return value[0] == 0 && (value[1] & 0x02) == 0x02;
+  }
+
+  Future<Uint8List?> readMessage() async {
+    Uint8List readMessageCommand = "02ac020000".toBytes();
+    if(kDebugMode) {
+      print("Reading message:");
+      print(readMessageCommand);
+    }
+    var value = await FlutterNfcKit.transceive(readMessageCommand);
+    if(kDebugMode) {
+      print("Response: ${value.toHexString()}");
+    }
+
+    return value[0] == 0 ? value.sublist(1) : null;
+  }
+
+  Future<bool> sendMessageToSign(Uint8List message, int nonce) async {
+    Uint8List hashedMessage = hashMessageWithNonce(message, nonce);
+    Uint8List signMessageCommand = Uint8List.fromList("02aa022000".toBytes()+hashedMessage);
+    if(kDebugMode) {
+      print("Sending message to sign (${hashedMessage.toHexString()}):");
+      print(signMessageCommand);
+    }
+    var value = await FlutterNfcKit.transceive(signMessageCommand);
+    if(kDebugMode) {
+      print("Response: ${value.toHexString()}");
+    }
+
+    return value[0] == 0;
+  }
+
+  Uint8List hashMessageWithNonce(Uint8List message, int nonce) {
+    Uint8List messageConcatenatedWithNonce = Uint8List.fromList(message+(nonce.toRadixString(16).padLeft(64, '0')).toBytes());
+    final hashedMessage = Digest('Keccak/256').process(messageConcatenatedWithNonce);
+    return hashedMessage;
+  }
+
+  Future<String?> signUniversalProfileAddress(String universalProfileAddress, int nonce) async {
+    if(universalProfileAddress.length != 42) return null;
+    if(!await sendMessageToSign(universalProfileAddress.substring(2).toBytes(), nonce)) return null;
+
+    bool isAvailable = false;
+    for(var i=0;i<10 && !isAvailable;i++) {
+      sleep(const Duration(milliseconds: 500));
+      isAvailable = await isMessageAvailable();
+    }
+
+    if(isAvailable) {
+      var message = await readMessage();
+      if(message != null) {
+        String signature = message.sublist(1).toHexString();
+        if(kDebugMode) {
+          print("Signature $signature");
+        }
+        return signature;
+      }
+    }
+
+    return null;
+  }
+
   Future<void> scanTag() async {
     try {
       NFCTag tag = await FlutterNfcKit.poll(
@@ -135,8 +239,15 @@ class _HomepageState extends State<Homepage> with TickerProviderStateMixin {
         _showMyDialog(
             title: "Error", text: "This is not a Phygital", buttonText: "OK");
       } else {
-        _showMyDialog(
-            title: "Data", text: phygital.toString(), buttonText: "OK");
+        //await writeContractAddress("0xfA3eF87642507BBE31373FC838350F75B8542734");
+
+        String? signature = await signUniversalProfileAddress("0xeDe44390389A98441ff2B9dDCe862fFAC9BeB0cd", 0);
+        if(signature != null){
+          _showMyDialog(
+              title: "Signature", text: signature, buttonText: "OK");
+        }else{
+          _showMyDialog(title: "Error", text: "Failed to sign the given universal profile address", buttonText: "OK");
+        }
       }
     } catch (e) {
       _showMyDialog(title: "Error", text: e.toString(), buttonText: "OK");
