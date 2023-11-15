@@ -7,7 +7,7 @@ import 'package:flutter_nfc_kit/flutter_nfc_kit.dart';
 import 'package:ndef/utilities.dart';
 import 'package:pointycastle/api.dart';
 
-import 'phygital.dart';
+import '../model/phygital.dart';
 
 typedef NFCTagCommandFunction = Future<dynamic> Function(
     NFCTag tag, Phygital? phygital);

@@ -1,18 +1,18 @@
 import 'package:animated_background/animated_background.dart';
 import 'package:flutter/material.dart';
 
-import 'nfc_active_backdrop.dart';
+import '../component/nfc_active_backdrop.dart';
 
-class StandardPage extends StatefulWidget {
-  const StandardPage({super.key, required this.child});
+class StandardLayout extends StatefulWidget {
+  const StandardLayout({super.key, required this.child});
 
   final Widget child;
 
   @override
-  State<StandardPage> createState() => _StandardPageState();
+  State<StandardLayout> createState() => _StandardLayoutState();
 }
 
-class _StandardPageState extends State<StandardPage>
+class _StandardLayoutState extends State<StandardLayout>
     with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {

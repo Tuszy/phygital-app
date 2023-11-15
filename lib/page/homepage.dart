@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:phygital/standard_page.dart';
+import 'package:phygital/layout/standard_layout.dart';
 import 'package:provider/provider.dart';
 
-import 'button.dart';
-import 'nfc.dart';
-import 'logo.dart';
-import 'phygital.dart';
+import '../component/button.dart';
+import '../service/nfc.dart';
+import '../component/logo.dart';
+import '../model/phygital.dart';
 
 class Homepage extends StatefulWidget {
   const Homepage({super.key});
@@ -107,7 +107,7 @@ class _HomepageState extends State<Homepage> {
   Widget build(BuildContext context) {
     NFC nfc = Provider.of<NFC>(context);
 
-    return StandardPage(
+    return StandardLayout(
       child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,

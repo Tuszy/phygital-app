@@ -3,7 +3,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import 'nfc.dart';
+import '../service/nfc.dart';
 
 class NfcActiveBackdrop extends StatelessWidget {
   const NfcActiveBackdrop({
