@@ -206,10 +206,16 @@ class _HomepageState extends State<Homepage> with TickerProviderStateMixin {
 
   Future<String?> signUniversalProfileAddress(String universalProfileAddress, int nonce) async {
     if(universalProfileAddress.length != 42) return null;
-    if(!await sendMessageToSign(universalProfileAddress.substring(2).toBytes(), nonce)) return null;
+
+    bool isSent = false;
+    for(var i=0;i<20 && !isSent;i++) {
+      sleep(const Duration(milliseconds: 500));
+      isSent = await sendMessageToSign(universalProfileAddress.substring(2).toBytes(), nonce);
+    }
+    if(!isSent) return null;
 
     bool isAvailable = false;
-    for(var i=0;i<10 && !isAvailable;i++) {
+    for(var i=0;i<20 && !isAvailable;i++) {
       sleep(const Duration(milliseconds: 500));
       isAvailable = await isMessageAvailable();
     }
@@ -239,6 +245,8 @@ class _HomepageState extends State<Homepage> with TickerProviderStateMixin {
         _showMyDialog(
             title: "Error", text: "This is not a Phygital", buttonText: "OK");
       } else {
+        sleep(const Duration(seconds: 2)); // Energy harvesting
+
         //await writeContractAddress("0xfA3eF87642507BBE31373FC838350F75B8542734");
 
         String? signature = await signUniversalProfileAddress("0xeDe44390389A98441ff2B9dDCe862fFAC9BeB0cd", 0);
