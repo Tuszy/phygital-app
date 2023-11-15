@@ -1,10 +1,9 @@
-import 'package:flutter/services.dart';
-import 'package:flutter_nfc_kit/flutter_nfc_kit.dart';
-
 import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_nfc_kit/flutter_nfc_kit.dart';
 import 'package:ndef/utilities.dart';
 import 'package:pointycastle/api.dart';
 
@@ -21,10 +20,13 @@ class NFC extends ChangeNotifier {
   factory NFC() => _shared;
 
   NFCAvailability _availability = NFCAvailability.not_supported;
+
   bool get isAvailable => _availability == NFCAvailability.available;
 
   bool _active = false;
+
   bool get isActive => _active;
+
   set active(bool newValue) {
     _active = newValue;
     notifyListeners();
@@ -46,7 +48,7 @@ class NFC extends ChangeNotifier {
 
   static const int retryCount = 20;
   static const Duration retryDelay = Duration(milliseconds: 500);
-  
+
   static const String signMessageHashCommandId = "00";
   static const String setContractAddressCommandId = "01";
 
@@ -60,8 +62,8 @@ class NFC extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<dynamic> _startNFCCommunication(Duration? energyHarvestingDuration, bool validate,
-      NFCTagCommandFunction nfcTagCommandFunction) async {
+  Future<dynamic> _startNFCCommunication(Duration? energyHarvestingDuration,
+      bool validate, NFCTagCommandFunction nfcTagCommandFunction) async {
     if (!isAvailable) throw Exception("NFC is not available");
 
     try {
@@ -72,7 +74,8 @@ class NFC extends ChangeNotifier {
       await FlutterNfcKit.setIosAlertMessage("Reading Phygital");
       Phygital? phygital = validate ? await _validate(tag) : null;
 
-      if (validate && phygital == null) throw Exception("This is not a valid Phygital");
+      if (validate && phygital == null)
+        throw Exception("This is not a valid Phygital");
 
       if (energyHarvestingDuration != null) sleep(energyHarvestingDuration);
 
@@ -82,12 +85,12 @@ class NFC extends ChangeNotifier {
       await FlutterNfcKit.finish(iosAlertMessage: "Succeeded!");
       return result;
     } catch (e) {
-      if(kDebugMode) {
+      if (kDebugMode) {
         print(e.toString());
       }
       active = false;
       await FlutterNfcKit.finish(iosAlertMessage: "Failed!");
-      if(e is PlatformException && e.code == "409") {
+      if (e is PlatformException && e.code == "409") {
         return null; // User cancelled
       }
       rethrow;
@@ -117,20 +120,20 @@ class NFC extends ChangeNotifier {
       }
 
       String uri =
-      String.fromCharCodes(ndefRecords[uriNdefIndex].payload!.sublist(1));
+          String.fromCharCodes(ndefRecords[uriNdefIndex].payload!.sublist(1));
       if (NFC.uri != uri) return null;
 
       String address = String.fromCharCodes(
           ndefRecords[phygitalAddressNdefIndex].payload!.sublist(3));
       String? contractAddress =
-      ndefRecords.length == lengthIncludingContractAddressNdefRecord
-          ? String.fromCharCodes(
-          ndefRecords[contractAddressNdefIndex].payload!.sublist(3))
-          : null;
+          ndefRecords.length == lengthIncludingContractAddressNdefRecord
+              ? String.fromCharCodes(
+                  ndefRecords[contractAddressNdefIndex].payload!.sublist(3))
+              : null;
 
       return Phygital(address: address, contractAddress: contractAddress);
-    }catch(e){
-      if(kDebugMode){
+    } catch (e) {
+      if (kDebugMode) {
         print(e.toString());
         throw Exception("Broken Phygital - Reset the contract address");
       }
@@ -188,8 +191,9 @@ class NFC extends ChangeNotifier {
 
   Future<bool> _sendMessageToSign(Uint8List message, int nonce) async {
     Uint8List hashedMessage = _hashMessageWithNonce(message, nonce);
-    Uint8List signMessageCommand =
-        Uint8List.fromList("02aa0220".toBytes() + signMessageHashCommandId.toBytes() + hashedMessage);
+    Uint8List signMessageCommand = Uint8List.fromList("02aa0220".toBytes() +
+        signMessageHashCommandId.toBytes() +
+        hashedMessage);
     if (kDebugMode) {
       print(
           "Sending message to sign (${hashedMessage.toHexString()}): ${signMessageCommand.toHexString()}");
@@ -246,8 +250,10 @@ class NFC extends ChangeNotifier {
   }
 
   Future<bool> _sendContractAddressToWrite(Uint8List contractAddress) async {
-    Uint8List writeContractAddressCommand =
-        Uint8List.fromList("02aa022A".toBytes() + setContractAddressCommandId.toBytes() + contractAddress);
+    Uint8List writeContractAddressCommand = Uint8List.fromList(
+        "02aa022A".toBytes() +
+            setContractAddressCommandId.toBytes() +
+            contractAddress);
     if (kDebugMode) {
       print(
           "Writing contract address $contractAddress: ${writeContractAddressCommand.toHexString()}");
@@ -294,7 +300,8 @@ class NFC extends ChangeNotifier {
         throw Exception(errorMessage);
       }
 
-      if (message[0] != setContractAddressCommandId.toBytes()[0]) throw Exception(errorMessage);
+      if (message[0] != setContractAddressCommandId.toBytes()[0])
+        throw Exception(errorMessage);
 
       return contractAddress;
     });
@@ -302,6 +309,9 @@ class NFC extends ChangeNotifier {
 
   Future<Phygital?> scan() async {
     return await _startNFCCommunication(
-        null, true, (NFCTag tag, Phygital? phygital) async => phygital ?? (throw Exception("Invalid phygital")));
+        null,
+        true,
+        (NFCTag tag, Phygital? phygital) async =>
+            phygital ?? (throw Exception("Invalid phygital")));
   }
 }
