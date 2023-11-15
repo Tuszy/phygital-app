@@ -159,11 +159,12 @@ class Phygital {
     return await _startNFCCommunication((NFCTag tag, Phygital phygital) async {
       String errorMessage = "Failed to sign the universal profile address";
 
+      Uint8List universalProfileAddressAsBytes = universalProfileAddress.substring(2).toBytes();
       bool isSent = false;
       for (var i = 0; i < 20 && !isSent; i++) {
         sleep(const Duration(milliseconds: 500));
         isSent = await phygital._sendMessageToSign(
-            universalProfileAddress.substring(2).toBytes(), nonce);
+            universalProfileAddressAsBytes, nonce);
       }
       if (!isSent) {
         throw Exception(errorMessage);
