@@ -55,7 +55,7 @@ class _HomepageState extends State<Homepage> with TickerProviderStateMixin {
 
   void scan() async {
     try {
-      Phygital phygital = await Phygital.scan();
+      Phygital phygital = await NFC().scan();
       showInfoDialog(title: "Phygital", text: phygital.toString(), buttonText: "OK");
     } catch (e) {
       showInfoDialog(title: "Error", text: e.toString(), buttonText: "Ok");
@@ -67,7 +67,7 @@ class _HomepageState extends State<Homepage> with TickerProviderStateMixin {
       String universalProfileAddress =
           "0xeDe44390389A98441ff2B9dDCe862fFAC9BeB0cd";
       int nonce = 0;
-      String signature = await Phygital.signUniversalProfileAddress(
+      String signature = await NFC().signUniversalProfileAddress(
           universalProfileAddress, nonce);
       showInfoDialog(title: "Signature", text: signature, buttonText: "OK");
     } catch (e) {
@@ -78,7 +78,7 @@ class _HomepageState extends State<Homepage> with TickerProviderStateMixin {
   void setContractAddress() async {
     try {
       String contractAddress = "0xeDe44390389A98441ff2B9dDCe862fFAC9BeB0cd";
-      await Phygital.setContractAddress(contractAddress);
+      contractAddress = await NFC().setContractAddress(contractAddress);
       showInfoDialog(
           title: "Contract Address", text: contractAddress, buttonText: "OK");
     } catch (e) {
