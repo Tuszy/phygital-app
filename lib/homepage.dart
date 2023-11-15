@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:phygital/standard_page.dart';
 import 'package:provider/provider.dart';
 
+import 'button.dart';
 import 'nfc.dart';
 import 'logo.dart';
 import 'phygital.dart';
@@ -21,7 +22,7 @@ class _HomepageState extends State<Homepage> {
     NFC().init();
   }
 
-  void scan() async {
+  void read() async {
     try {
       Phygital? phygital = await NFC().scan();
       if (phygital != null) {
@@ -58,6 +59,18 @@ class _HomepageState extends State<Homepage> {
     } catch (e) {
       showInfoDialog(title: "Error", text: e.toString(), buttonText: "Ok");
     }
+  }
+
+  void mint() async {
+    showInfoDialog(title: "Mint", text: "", buttonText: "OK");
+  }
+
+  void verifyOwnership() async {
+    showInfoDialog(title: "Verify Ownership", text: "", buttonText: "OK");
+  }
+
+  void create() async {
+    showInfoDialog(title: "Create", text: "", buttonText: "OK");
   }
 
   Future<void> showInfoDialog(
@@ -98,6 +111,8 @@ class _HomepageState extends State<Homepage> {
       child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisSize: MainAxisSize.max,
           children: <Widget>[
             const LogoWidget(),
             Expanded(
@@ -105,16 +120,24 @@ class _HomepageState extends State<Homepage> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   if (nfc.isAvailable)
-                    ElevatedButton(onPressed: scan, child: const Text('Scan')),
-                  if (nfc.isAvailable)
-                    ElevatedButton(
-                      onPressed: signUniversalProfileAddress,
-                      child: const Text('Sign UP Address'),
+                    Button(
+                      text: "Read",
+                      onPressed: read,
                     ),
                   if (nfc.isAvailable)
-                    ElevatedButton(
-                      onPressed: setContractAddress,
-                      child: const Text('Set Contract Address'),
+                    Button(
+                      text: "Mint",
+                      onPressed: mint,
+                    ),
+                  if (nfc.isAvailable)
+                    Button(
+                      text: "Verify Ownership",
+                      onPressed: verifyOwnership,
+                    ),
+                  if (nfc.isAvailable)
+                    Button(
+                      text: "Create",
+                      onPressed: create,
                     ),
                 ],
               ),
