@@ -1,10 +1,10 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:animated_background/animated_background.dart';
 import 'package:logging/logging.dart';
 import 'package:phygital/Phygital.dart';
 import 'package:provider/provider.dart';
 import 'NFC.dart';
+import 'standard_page.dart';
 import 'logo.dart';
 
 void main() {
@@ -45,7 +45,7 @@ class Homepage extends StatefulWidget {
   State<Homepage> createState() => _HomepageState();
 }
 
-class _HomepageState extends State<Homepage> with TickerProviderStateMixin {
+class _HomepageState extends State<Homepage> {
   @override
   void initState() {
     super.initState();
@@ -55,8 +55,11 @@ class _HomepageState extends State<Homepage> with TickerProviderStateMixin {
 
   void scan() async {
     try {
-      Phygital phygital = await NFC().scan();
-      showInfoDialog(title: "Phygital", text: phygital.toString(), buttonText: "OK");
+      Phygital? phygital = await NFC().scan();
+      if (phygital != null) {
+        showInfoDialog(
+            title: "Phygital", text: phygital.toString(), buttonText: "OK");
+      }
     } catch (e) {
       showInfoDialog(title: "Error", text: e.toString(), buttonText: "Ok");
     }
@@ -67,9 +70,11 @@ class _HomepageState extends State<Homepage> with TickerProviderStateMixin {
       String universalProfileAddress =
           "0xeDe44390389A98441ff2B9dDCe862fFAC9BeB0cd";
       int nonce = 0;
-      String signature = await NFC().signUniversalProfileAddress(
-          universalProfileAddress, nonce);
-      showInfoDialog(title: "Signature", text: signature, buttonText: "OK");
+      String? signature = await NFC()
+          .signUniversalProfileAddress(universalProfileAddress, nonce);
+      if (signature != null) {
+        showInfoDialog(title: "Signature", text: signature, buttonText: "OK");
+      }
     } catch (e) {
       showInfoDialog(title: "Error", text: e.toString(), buttonText: "Ok");
     }
@@ -78,9 +83,10 @@ class _HomepageState extends State<Homepage> with TickerProviderStateMixin {
   void setContractAddress() async {
     try {
       String contractAddress = "0xeDe44390389A98441ff2B9dDCe862fFAC9BeB0cd";
-      contractAddress = await NFC().setContractAddress(contractAddress);
-      showInfoDialog(
-          title: "Contract Address", text: contractAddress, buttonText: "OK");
+      if (await NFC().setContractAddress(contractAddress) != null) {
+        showInfoDialog(
+            title: "Contract Address", text: contractAddress, buttonText: "OK");
+      }
     } catch (e) {
       showInfoDialog(title: "Error", text: e.toString(), buttonText: "Ok");
     }
@@ -120,59 +126,31 @@ class _HomepageState extends State<Homepage> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     NFC nfc = Provider.of<NFC>(context);
 
-    return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: <Color>[
-              Color(0xffa00661),
-              Color(0xff3a0838),
-            ],
-          ),
-        ),
-        child: Stack(
-          children: [
-            IgnorePointer(
-              ignoring: true,
-              child: AnimatedBackground(
-                  behaviour:
-                      SpaceBehaviour(backgroundColor: Colors.transparent),
-                  vsync: this,
-                  child: const ColoredBox(color: Colors.transparent)),
-            ),
-            SafeArea(
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: <Widget>[
-                    const LogoWidget(),
-                    Expanded(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          if (nfc.isAvailable)
-                            ElevatedButton(
-                                onPressed: scan,
-                                child: const Text('Scan')),
-                          if (nfc.isAvailable)
-                            ElevatedButton(
-                              onPressed: signUniversalProfileAddress,
-                              child: const Text('Sign UP Address'),
-                            ),
-                          if (nfc.isAvailable)
-                            ElevatedButton(
-                              onPressed: setContractAddress,
-                              child: const Text('Set Contract Address'),
-                            ),
-                        ],
-                      ),
+    return StandardPage(
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: <Widget>[
+            const LogoWidget(),
+            Expanded(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  if (nfc.isAvailable)
+                    ElevatedButton(onPressed: scan, child: const Text('Scan')),
+                  if (nfc.isAvailable)
+                    ElevatedButton(
+                      onPressed: signUniversalProfileAddress,
+                      child: const Text('Sign UP Address'),
                     ),
-                  ],
-                ),
+                  if (nfc.isAvailable)
+                    ElevatedButton(
+                      onPressed: setContractAddress,
+                      child: const Text('Set Contract Address'),
+                    ),
+                ],
               ),
-            )
+            ),
           ],
         ),
       ),

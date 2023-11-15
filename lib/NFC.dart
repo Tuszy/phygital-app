@@ -11,7 +11,7 @@ import 'package:pointycastle/api.dart';
 import 'Phygital.dart';
 
 typedef NFCTagCommandFunction = Future<dynamic> Function(
-    NFCTag tag, Phygital phygital);
+    NFCTag tag, Phygital? phygital);
 
 class NFC extends ChangeNotifier {
   NFC._sharedInstance();
@@ -21,8 +21,14 @@ class NFC extends ChangeNotifier {
   factory NFC() => _shared;
 
   NFCAvailability _availability = NFCAvailability.not_supported;
-
   bool get isAvailable => _availability == NFCAvailability.available;
+
+  bool _active = false;
+  bool get isActive => _active;
+  set active(bool newValue) {
+    _active = newValue;
+    notifyListeners();
+  }
 
   static const String uri = "phygital.tuszy.com";
 
@@ -54,26 +60,37 @@ class NFC extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<dynamic> _startNFCCommunication(Duration? energyHarvestingDuration,
+  Future<dynamic> _startNFCCommunication(Duration? energyHarvestingDuration, bool validate,
       NFCTagCommandFunction nfcTagCommandFunction) async {
     if (!isAvailable) throw Exception("NFC is not available");
 
     try {
+      active = true;
+
       NFCTag tag = await FlutterNfcKit.poll(
           iosAlertMessage: "Hold your iPhone near the Phygital");
       await FlutterNfcKit.setIosAlertMessage("Reading Phygital");
-      Phygital? phygital = await _validate(tag);
+      Phygital? phygital = validate ? await _validate(tag) : null;
 
-      if (phygital == null) throw Exception("This is not a valid Phygital");
+      if (validate && phygital == null) throw Exception("This is not a valid Phygital");
 
       if (energyHarvestingDuration != null) sleep(energyHarvestingDuration);
 
       var result = await nfcTagCommandFunction(tag, phygital);
+
+      active = false;
       await FlutterNfcKit.finish(iosAlertMessage: "Succeeded!");
       return result;
     } catch (e) {
+      if(kDebugMode) {
+        print(e.toString());
+      }
+      active = false;
       await FlutterNfcKit.finish(iosAlertMessage: "Failed!");
-      throw Exception(e.toString());
+      if(e is PlatformException && e.code == "409") {
+        return null; // User cancelled
+      }
+      rethrow;
     }
   }
 
@@ -82,34 +99,42 @@ class NFC extends ChangeNotifier {
         "ISO 15693" != tag.standard ||
         !(tag.ndefAvailable ?? false)) return null;
 
-    var ndefRecords = await FlutterNfcKit.readNDEFRecords();
-    if (ndefRecords.length != lengthExcludingContractAddressNdefRecord &&
-        ndefRecords.length != lengthIncludingContractAddressNdefRecord) {
-      return null;
+    try {
+      var ndefRecords = await FlutterNfcKit.readNDEFRecords();
+
+      if (ndefRecords.length != lengthExcludingContractAddressNdefRecord &&
+          ndefRecords.length != lengthIncludingContractAddressNdefRecord) {
+        return null;
+      }
+
+      if (ndefRecords[uriNdefIndex].decodedType != ndefUriIdentifier ||
+          ndefRecords[phygitalAddressNdefIndex].decodedType !=
+              ndefTextIdentifier ||
+          (ndefRecords.length == lengthIncludingContractAddressNdefRecord &&
+              ndefRecords[contractAddressNdefIndex].decodedType !=
+                  ndefTextIdentifier)) {
+        return null;
+      }
+
+      String uri =
+      String.fromCharCodes(ndefRecords[uriNdefIndex].payload!.sublist(1));
+      if (NFC.uri != uri) return null;
+
+      String address = String.fromCharCodes(
+          ndefRecords[phygitalAddressNdefIndex].payload!.sublist(3));
+      String? contractAddress =
+      ndefRecords.length == lengthIncludingContractAddressNdefRecord
+          ? String.fromCharCodes(
+          ndefRecords[contractAddressNdefIndex].payload!.sublist(3))
+          : null;
+
+      return Phygital(address: address, contractAddress: contractAddress);
+    }catch(e){
+      if(kDebugMode){
+        print(e.toString());
+        throw Exception("Broken Phygital - Reset the contract address");
+      }
     }
-
-    if (ndefRecords[uriNdefIndex].decodedType != ndefUriIdentifier ||
-        ndefRecords[phygitalAddressNdefIndex].decodedType !=
-            ndefTextIdentifier ||
-        (ndefRecords.length == lengthIncludingContractAddressNdefRecord &&
-            ndefRecords[contractAddressNdefIndex].decodedType !=
-                ndefTextIdentifier)) {
-      return null;
-    }
-
-    String uri =
-        String.fromCharCodes(ndefRecords[uriNdefIndex].payload!.sublist(1));
-    if (NFC.uri != uri) return null;
-
-    String address = String.fromCharCodes(
-        ndefRecords[phygitalAddressNdefIndex].payload!.sublist(3));
-    String? contractAddress =
-        ndefRecords.length == lengthIncludingContractAddressNdefRecord
-            ? String.fromCharCodes(
-                ndefRecords[contractAddressNdefIndex].payload!.sublist(3))
-            : null;
-
-    return Phygital(address: address, contractAddress: contractAddress);
   }
 
   Future<bool> _isMessageAvailable() async {
@@ -177,14 +202,14 @@ class NFC extends ChangeNotifier {
     return value[0] == 0;
   }
 
-  Future<String> signUniversalProfileAddress(
+  Future<String?> signUniversalProfileAddress(
       String universalProfileAddress, int nonce) async {
     if (universalProfileAddress.length != luksoAddressLength || nonce < 0) {
       throw Exception("Invalid Universal Profile Address");
     }
 
-    return await _startNFCCommunication(const Duration(seconds: 3),
-        (NFCTag tag, Phygital phygital) async {
+    return await _startNFCCommunication(const Duration(seconds: 3), false,
+        (NFCTag tag, Phygital? phygital) async {
       String errorMessage = "Failed to sign the universal profile address";
 
       Uint8List universalProfileAddressAsBytes =
@@ -235,13 +260,13 @@ class NFC extends ChangeNotifier {
     return value[0] == 0;
   }
 
-  Future<String> setContractAddress(String contractAddress) async {
+  Future<String?> setContractAddress(String contractAddress) async {
     if (contractAddress.length != luksoAddressLength) {
       throw Exception("Invalid Contract Address");
     }
 
-    return await _startNFCCommunication(const Duration(seconds: 3),
-        (NFCTag tag, Phygital phygital) async {
+    return await _startNFCCommunication(const Duration(seconds: 3), false,
+        (NFCTag tag, Phygital? phygital) async {
       String errorMessage = "Failed to set the contract address";
 
       Uint8List contractAddressAsBytes =
@@ -275,8 +300,8 @@ class NFC extends ChangeNotifier {
     });
   }
 
-  Future<Phygital> scan() async {
+  Future<Phygital?> scan() async {
     return await _startNFCCommunication(
-        null, (NFCTag tag, Phygital phygital) async => phygital);
+        null, true, (NFCTag tag, Phygital? phygital) async => phygital ?? (throw Exception("Invalid phygital")));
   }
 }
