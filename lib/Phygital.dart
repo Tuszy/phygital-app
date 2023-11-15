@@ -29,6 +29,7 @@ class Phygital {
   final String? contractAddress;
 
   static Future<dynamic> _startNFCCommunication(
+      Duration? energyHarvestingDuration,
       NFCTagCommandFunction nfcTagCommandFunction) async {
     if (!NFC().isAvailable) throw Exception("NFC is not available");
 
@@ -40,7 +41,7 @@ class Phygital {
 
       if (phygital == null) throw Exception("This is not a valid Phygital");
 
-      sleep(const Duration(seconds: 2)); // Energy harvesting for MCU
+      if (energyHarvestingDuration != null) sleep(energyHarvestingDuration);
 
       var result = await nfcTagCommandFunction(tag, phygital);
       await FlutterNfcKit.finish(iosAlertMessage: "Succeeded!");
@@ -153,13 +154,15 @@ class Phygital {
 
   static Future<String> signUniversalProfileAddress(
       String universalProfileAddress, int nonce) async {
-    if (universalProfileAddress.length != luksoAddressLength ||
-        nonce < 0) throw Exception("Invalid Universal Profile Address");
+    if (universalProfileAddress.length != luksoAddressLength || nonce < 0)
+      throw Exception("Invalid Universal Profile Address");
 
-    return await _startNFCCommunication((NFCTag tag, Phygital phygital) async {
+    return await _startNFCCommunication(const Duration(seconds: 3),
+        (NFCTag tag, Phygital phygital) async {
       String errorMessage = "Failed to sign the universal profile address";
 
-      Uint8List universalProfileAddressAsBytes = universalProfileAddress.substring(2).toBytes();
+      Uint8List universalProfileAddressAsBytes =
+          universalProfileAddress.substring(2).toBytes();
       bool isSent = false;
       for (var i = 0; i < 20 && !isSent; i++) {
         sleep(const Duration(milliseconds: 500));
@@ -192,8 +195,8 @@ class Phygital {
   }
 
   Future<bool> _sendContractAddressToWrite(Uint8List contractAddress) async {
-    Uint8List writeContractAddressCommand = Uint8List.fromList(
-        "02aa022A01".toBytes() + contractAddress);
+    Uint8List writeContractAddressCommand =
+        Uint8List.fromList("02aa022A01".toBytes() + contractAddress);
     if (kDebugMode) {
       print(
           "Writing contract address $contractAddress: ${writeContractAddressCommand.toHexString()}");
@@ -206,17 +209,20 @@ class Phygital {
     return value[0] == 0;
   }
 
-  static Future<void> setContractAddress(
-      String contractAddress) async {
-    if (contractAddress.length != luksoAddressLength) throw Exception("Invalid Contract Address");
+  static Future<void> setContractAddress(String contractAddress) async {
+    if (contractAddress.length != luksoAddressLength) {
+      throw Exception("Invalid Contract Address");
+    }
 
-    return await _startNFCCommunication((NFCTag tag, Phygital phygital) async {
+    return await _startNFCCommunication(const Duration(seconds: 3),
+        (NFCTag tag, Phygital phygital) async {
       String errorMessage = "Failed to set the contract address";
 
       bool isSent = false;
       for (var i = 0; i < 20 && !isSent; i++) {
         sleep(const Duration(milliseconds: 500));
-        isSent = await phygital._sendContractAddressToWrite(Uint8List.fromList(utf8.encode(contractAddress)));
+        isSent = await phygital._sendContractAddressToWrite(
+            Uint8List.fromList(utf8.encode(contractAddress)));
       }
       if (!isSent) {
         throw Exception(errorMessage);
@@ -236,14 +242,17 @@ class Phygital {
         throw Exception(errorMessage);
       }
 
-      if(message[0] != 0x01) throw Exception(errorMessage);
+      if (message[0] != 0x01) throw Exception(errorMessage);
     });
   }
 
-
+  static Future<Phygital> scan() async {
+    return await _startNFCCommunication(
+        null, (NFCTag tag, Phygital phygital) async => phygital);
+  }
 
   @override
   String toString() {
-    return "Phygital Address: $address\n${contractAddress != null ? "Contract Address: $contractAddress\n" : ""}";
+    return "Phygital Address: $address\n\n${contractAddress != null ? "Contract Address: $contractAddress\n" : ""}";
   }
 }

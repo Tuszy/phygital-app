@@ -53,6 +53,15 @@ class _HomepageState extends State<Homepage> with TickerProviderStateMixin {
     NFC().init();
   }
 
+  void scan() async {
+    try {
+      Phygital phygital = await Phygital.scan();
+      showInfoDialog(title: "Phygital", text: phygital.toString(), buttonText: "OK");
+    } catch (e) {
+      showInfoDialog(title: "Error", text: e.toString(), buttonText: "Ok");
+    }
+  }
+
   void signUniversalProfileAddress() async {
     try {
       String universalProfileAddress =
@@ -143,6 +152,10 @@ class _HomepageState extends State<Homepage> with TickerProviderStateMixin {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
+                          if (nfc.isAvailable)
+                            ElevatedButton(
+                                onPressed: scan,
+                                child: const Text('Scan')),
                           if (nfc.isAvailable)
                             ElevatedButton(
                               onPressed: signUniversalProfileAddress,
