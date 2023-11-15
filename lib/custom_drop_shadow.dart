@@ -12,6 +12,7 @@ class CustomDropShadow extends StatelessWidget {
     required this.child,
     this.blurRadius = 10.0,
     this.borderRadius = 0.0,
+    this.borderRadiusClipArea = 0.0,
     this.offset = const Offset(0, 8),
     this.opacity = 1.0,
     this.spread = 1.0,
@@ -27,6 +28,9 @@ class CustomDropShadow extends StatelessWidget {
 
   /// BorderRadius to the image and the shadow
   final double borderRadius;
+
+  /// BorderRadius to the clip area
+  final double borderRadiusClipArea;
 
   /// Position of the shadow
   final Offset offset;
@@ -54,7 +58,7 @@ class CustomDropShadow extends StatelessWidget {
 
     /// [ClipRRect] to isolate [BackDropFilter] from other widgets
     return ClipRRect(
-      borderRadius: BorderRadius.circular(2000),
+      borderRadius: BorderRadius.circular(borderRadiusClipArea),
       child: Padding(
         /// Calculate Shadow's effect field
         padding: EdgeInsets.fromLTRB(left, top, right, bottom),
@@ -75,12 +79,12 @@ class CustomDropShadow extends StatelessWidget {
                   child: color == null
                       ? child
                       : ColorFiltered(
-                    colorFilter: ColorFilter.mode(
-                      color!,
-                      BlendMode.srcIn,
-                    ),
-                    child: child,
-                  ),
+                          colorFilter: ColorFilter.mode(
+                            color!,
+                            BlendMode.srcIn,
+                          ),
+                          child: child,
+                        ),
                 ),
               ),
             ),
@@ -95,7 +99,12 @@ class CustomDropShadow extends StatelessWidget {
                 ),
 
                 /// Filter effect field
-                child: Container( decoration: BoxDecoration(color: Colors.transparent,borderRadius: BorderRadius.circular(2000)),),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.transparent,
+                    borderRadius: BorderRadius.circular(borderRadiusClipArea),
+                  ),
+                ),
               ),
             ),
 

@@ -14,6 +14,7 @@ class LogoWidget extends StatelessWidget {
       child: const CustomDropShadow(
         offset: Offset(0, 0),
         blurRadius: 15,
+        borderRadiusClipArea: 2000,
         color: Color(0x7700ffff),
         child: Image(
           image: AssetImage("images/logo.png"),
