@@ -1,9 +1,9 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
-import 'package:phygital/Phygital.dart';
+import 'package:phygital/phygital.dart';
 import 'package:provider/provider.dart';
-import 'NFC.dart';
+import 'nfc.dart';
 import 'standard_page.dart';
 import 'logo.dart';
 

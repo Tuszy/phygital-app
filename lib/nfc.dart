@@ -8,7 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:ndef/utilities.dart';
 import 'package:pointycastle/api.dart';
 
-import 'Phygital.dart';
+import 'phygital.dart';
 
 typedef NFCTagCommandFunction = Future<dynamic> Function(
     NFCTag tag, Phygital? phygital);
