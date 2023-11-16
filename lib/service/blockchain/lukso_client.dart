@@ -5,7 +5,7 @@ import 'package:ndef/utilities.dart';
 import 'dart:convert';
 import 'package:phygital/service/backend_client.dart';
 import 'package:phygital/service/blockchain/result.dart';
-import 'package:pointycastle/api.dart';
+import 'package:phygital/util/lsp2_utils.dart';
 import 'package:web3dart/web3dart.dart';
 
 import '../../model/phygital.dart';
@@ -14,20 +14,9 @@ import 'contracts/PhygitalAsset.g.dart';
 import 'contracts/UniversalProfile.g.dart';
 
 class LuksoClient extends ChangeNotifier {
-  static const String backendUrl =
-      "http://192.168.178.70:8888"; // TODO change after tests
   static const String rpcUrl = "https://rpc.testnet.lukso.gateway.fm";
-  static const String ipfsGatewayUrl = "https://2eff.lukso.dev/ipfs/";
   static const int chainId = 4201;
 
-  static final mintEndpoint = Uri.parse("$backendUrl/api/mint");
-  static final verifyOwnershipAfterTransferEndpoint =
-      Uri.parse("$backendUrl/api/verify-ownership-after-transfer");
-  static final transferEndpoint = Uri.parse(
-      "$backendUrl/api/transfer"); // TODO remove if not used - deadline issue
-  static final createEndpoint = Uri.parse("$backendUrl/api/create");
-
-  static final keccak256HashValue = "6f357c6a".toBytes();
   static final universalProfileInterfaceId = "24871b3d".toBytes();
   static final lsp6KeyManagerInterfaceId = "23f34c62".toBytes();
   static final phygitalAssetInterfaceId = "f6021190".toBytes();
@@ -70,34 +59,8 @@ class LuksoClient extends ChangeNotifier {
   final Client _httpClient = Client();
   Web3Client? _web3client;
 
-  Future<String> _fetchLsp2JsonUrl(Uint8List lsp2JsonUrl) async {
-    // bytes4 hash func + bytes32 hashed json value (+ bytes7 'ipfs://')
-    Uint8List hashFunc = lsp2JsonUrl.sublist(0, 4);
-    if (hashFunc.toHexString() != keccak256HashValue.toHexString()) {
-      throw "Only Keccak256 hashed JSON urls are supported";
-    }
-    Uint8List jsonHash = lsp2JsonUrl.sublist(4, 36);
-    String url = utf8.decode(lsp2JsonUrl.sublist(36));
-    if (url.startsWith("ipfs://")) {
-      url = "$ipfsGatewayUrl${url.substring(7)}";
-    }
-
-    Response response = await _httpClient.get(Uri.parse(url));
-    String jsonStringified = utf8
-        .decode(response.bodyBytes)
-        .replaceAll(RegExp(r"\s+\b|\b\s|\s|\b"), "");
-    Uint8List calculatedJsonHash = Digest('Keccak/256')
-        .process(Uint8List.fromList(utf8.encode(jsonStringified)));
-
-    if (jsonHash.toHexString() != calculatedJsonHash.toHexString()) {
-      throw "JSON hash validation failed";
-    }
-
-    return jsonStringified;
-  }
-
   Future<List<EthereumAddress>> _fetchCollection(Uint8List lsp2JsonUrl) async {
-    String json = await _fetchLsp2JsonUrl(lsp2JsonUrl);
+    String json = await LSP2Utils().fetchJsonUrl(lsp2JsonUrl);
     List rawCollection = jsonDecode(json) as List;
     List<EthereumAddress> formattedCollection = rawCollection
         .map((address) =>
