@@ -214,6 +214,34 @@ class LuksoClient extends ChangeNotifier {
     return Result.necessaryPermissionsNotSet;
   }
 
+  Future<Result> validatePhygitalOwnership(
+      Phygital phygital, EthereumAddress universalProfileAddress) async {
+    if (!_initialized) return Result.notInitialized;
+    Result phygitalContractValidationResult =
+        await validatePhygitalContract(phygital.contractAddress);
+    if (Result.success != phygitalContractValidationResult) {
+      return phygitalContractValidationResult;
+    }
+
+    if (phygital.contractAddress != null) {
+      try {
+        PhygitalAsset contract = PhygitalAsset(
+            address: phygital.contractAddress!, client: _web3client!);
+        EthereumAddress address = await contract.tokenOwnerOf(phygital.id);
+        if (address == universalProfileAddress) {
+          return Result.success;
+        }
+      } catch (e) {
+        if (kDebugMode) {
+          print(
+              "Failed to check if the universal profile ${universalProfileAddress.hexEip55} is the owner of ${phygital.id} ($e)");
+        }
+      }
+    }
+
+    return Result.invalidOwnership;
+  }
+
   Future<Result> validatePhygitalContractAndUniversalProfilePermissions(
       Phygital phygital, EthereumAddress universalProfileAddress) async {
     if (!_initialized) return Result.notInitialized;
@@ -274,6 +302,10 @@ class LuksoClient extends ChangeNotifier {
     BigInt? nonce = await _getNonceOfPhygital(phygital);
     if (nonce == null) return Result.ownershipVerificationFailed;
     if (nonce.compareTo(BigInt.from(0)) == 0) return Result.notMintedYet;
+
+    Result ownershipValidationResult =
+        await validatePhygitalOwnership(phygital, universalProfileAddress);
+    if (Result.success != ownershipValidationResult) return validationResult;
 
     if (!(await _isPhygitalInCollection(phygital))) {
       return Result.notPartOfCollection;
