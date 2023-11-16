@@ -29,6 +29,11 @@ enum Result {
 
   createSucceeded,
   createFailed,
+  collectionMustNotBeEmpty,
+  nameMustNotBeEmpty,
+  symbolMustNotBeEmpty,
+  invalidBaseUri,
+  uploadingLSP4MetadataFailed,
 
   notInitialized,
   unknownError
@@ -66,6 +71,11 @@ String getMessageForResult(Result result){
 
     case Result.createSucceeded: return "Successfully created the Phygital collection.";
     case Result.createFailed: return "Failed to create the Phygital collection.\nTry again.";
+    case Result.collectionMustNotBeEmpty: return "The collection must not be empty.";
+    case Result.nameMustNotBeEmpty: return "The name must not be empty.";
+    case Result.symbolMustNotBeEmpty: return "The symbol must not be empty.";
+    case Result.invalidBaseUri: return "Invalid base uri";
+    case Result.uploadingLSP4MetadataFailed: return "Failed to upload LSP4 Metadata";
 
     case Result.notInitialized: return "Lukso Client not initialized.\nRestart the app.";
     case Result.unknownError: return "Unknown error occurred.\nTry again.";
