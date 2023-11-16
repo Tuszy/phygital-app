@@ -5,4 +5,8 @@ class LSP4Verification {
 
   final String method;
   final String data;
+
+  Map<String, dynamic> toJson() {
+    return {'method': method, 'data': data};
+  }
 }

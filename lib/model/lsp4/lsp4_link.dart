@@ -3,4 +3,8 @@ class LSP4Link {
 
   final String title;
   final String url;
+
+  Map<String, dynamic> toJson() {
+    return {'title': title, 'url': url};
+  }
 }
