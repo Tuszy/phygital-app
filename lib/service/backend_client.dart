@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart';
 import 'package:ndef/utilities.dart';
+import 'package:phygital/service/ipfs_client.dart';
+import 'package:phygital/util/lsp2_utils.dart';
 import 'dart:convert';
 import 'package:web3dart/web3dart.dart';
 
@@ -136,18 +138,36 @@ class BackendClient extends ChangeNotifier {
       {required EthereumAddress universalProfileAddress,
       required String name,
       required String symbol,
-      required List<EthereumAddress> phygitalCollection,
+      required List<Phygital> phygitalCollection,
       required LSP4Metadata metadata,
       required String baseUri}) async {
+    String? metadataLsp2JsonUrl;
+    try {
+      String stringifiedMetadata = jsonEncode(metadata);
+      String? cid = await IpfsClient().uploadJson(
+          "PhygitalAsset:Metadata:$name:$symbol:${universalProfileAddress.hexEip55}",
+          metadata);
+      if (cid == null) return (Result.uploadingLSP4MetadataFailed, null);
+      metadataLsp2JsonUrl =
+          LSP2Utils().createJsonUrl(cid, stringifiedMetadata);
+    } catch (e) {
+      if (kDebugMode) {
+        print("Failed to upload LSP4 metadata to ipfs ($e)");
+      }
+      return (Result.uploadingLSP4MetadataFailed, null);
+    }
+
     var data = {
       "universal_profile_address": universalProfileAddress.hexEip55,
       "name": name,
       "symbol": symbol,
-      "phygital_collection":
-          phygitalCollection.map((EthereumAddress address) => address.hexEip55),
-      "metadata": jsonEncode(metadata),
+      "phygital_collection": phygitalCollection
+          .map((Phygital phygital) => phygital.address.hexEip55)
+          .toList(),
+      "metadata": metadataLsp2JsonUrl,
       "base_uri": baseUri
     };
+
     Response response = await _httpClient.post(createEndpoint,
         headers: contentTypeApplicationJson, body: json.encode(data));
     String jsonStringified = utf8.decode(response.bodyBytes);
