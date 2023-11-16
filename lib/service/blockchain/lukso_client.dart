@@ -1,18 +1,17 @@
 import 'dart:async';
-import 'dart:io';
-
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart';
 import 'package:ndef/utilities.dart';
 import 'dart:convert';
-import 'package:phygital/contracts/PhygitalAsset.g.dart';
-import 'package:phygital/contracts/UniversalProfile.g.dart';
 import 'package:phygital/service/backend_client.dart';
+import 'package:phygital/service/blockchain/result.dart';
 import 'package:pointycastle/api.dart';
 import 'package:web3dart/web3dart.dart';
 
-import '../model/phygital.dart';
-import 'nfc.dart';
+import '../../model/phygital.dart';
+import '../nfc.dart';
+import 'contracts/PhygitalAsset.g.dart';
+import 'contracts/UniversalProfile.g.dart';
 
 class LuksoClient extends ChangeNotifier {
   static const String backendUrl =
@@ -145,16 +144,15 @@ class LuksoClient extends ChangeNotifier {
     }
   }
 
-  Future<void> _throwIfAddressOfPhygitalAssetContractIsInvalid(
-      EthereumAddress? address) async {
-    if (!_initialized) return;
+  Future<Result> validatePhygitalContract(EthereumAddress? address) async {
+    if (!_initialized) return Result.notInitialized;
 
     if (address != null) {
       try {
         PhygitalAsset contract =
             PhygitalAsset(address: address, client: _web3client!);
         if (await contract.supportsInterface(phygitalAssetInterfaceId)) {
-          return;
+          return Result.success;
         }
       } catch (e) {
         if (kDebugMode) {
@@ -164,19 +162,19 @@ class LuksoClient extends ChangeNotifier {
       }
     }
 
-    throw "Invalid Phygital contract address";
+    return Result.invalidPhygitalAssetContractAddress;
   }
 
-  Future<void> _throwIfAddressOfUniversalProfileIsInvalid(
+  Future<Result> validateUniversalProfileContract(
       EthereumAddress? address) async {
-    if (!_initialized) return;
+    if (!_initialized) return Result.notInitialized;
 
     if (address != null) {
       try {
         UniversalProfile contract =
             UniversalProfile(address: address, client: _web3client!);
         if (await contract.supportsInterface(universalProfileInterfaceId)) {
-          return;
+          return Result.success;
         }
       } catch (e) {
         if (kDebugMode) {
@@ -185,20 +183,25 @@ class LuksoClient extends ChangeNotifier {
         }
       }
     }
+
+    return Result.invalidUniversalProfileAddress;
   }
 
-  Future<void>
-      _throwIfAddressOfUniversalProfileHasNotTheNecessaryPermissionsSet(
-          EthereumAddress? address) async {
-    if (!_initialized) return;
-    await _throwIfAddressOfUniversalProfileIsInvalid(address);
+  Future<Result> validateUniversalProfilePermissions(
+      EthereumAddress? address) async {
+    if (!_initialized) return Result.notInitialized;
+    Result universalProfileValidationResult =
+        await validateUniversalProfileContract(address);
+    if (Result.success != universalProfileValidationResult) {
+      return universalProfileValidationResult;
+    }
 
     if (address != null) {
       try {
         UniversalProfile contract =
             UniversalProfile(address: address, client: _web3client!);
         if (await contract.supportsInterface(universalProfileInterfaceId)) {
-          return;
+          return Result.success;
         }
       } catch (e) {
         if (kDebugMode) {
@@ -208,58 +211,81 @@ class LuksoClient extends ChangeNotifier {
       }
     }
 
-    throw "Please set the necessary permissions on the Universal Profile";
+    return Result.necessaryPermissionsNotSet;
   }
 
-  Future<MintResult> mint(
+  Future<Result> validatePhygitalContractAndUniversalProfilePermissions(
       Phygital phygital, EthereumAddress universalProfileAddress) async {
-    if (!_initialized) return MintResult.fail;
+    if (!_initialized) return Result.notInitialized;
 
-    if (phygital.contractAddress == null) return MintResult.notPartOfAnyCollection;
-    await _throwIfAddressOfPhygitalAssetContractIsInvalid(
-        phygital.contractAddress);
-    await _throwIfAddressOfUniversalProfileHasNotTheNecessaryPermissionsSet(
-        universalProfileAddress);
+    if (phygital.contractAddress == null) return Result.notPartOfAnyCollection;
+
+    Result phygitalContractValidationResult =
+        await validatePhygitalContract(phygital.contractAddress);
+    if (Result.success != phygitalContractValidationResult) {
+      return phygitalContractValidationResult;
+    }
+
+    Result universalProfilePermissionsValidationResult =
+        await validateUniversalProfilePermissions(universalProfileAddress);
+    if (Result.success != universalProfilePermissionsValidationResult) {
+      return universalProfilePermissionsValidationResult;
+    }
+
+    return Result.success;
+  }
+
+  Future<Result> mint(
+      Phygital phygital, EthereumAddress universalProfileAddress) async {
+    Result validationResult =
+        await validatePhygitalContractAndUniversalProfilePermissions(
+            phygital, universalProfileAddress);
+    if (Result.success != validationResult) return validationResult;
+
+    if (phygital.contractAddress == null) return Result.notPartOfAnyCollection;
 
     BigInt? nonce = await _getNonceOfPhygital(phygital);
-    if (nonce == null) return MintResult.fail;
-    if (nonce.compareTo(BigInt.from(0)) != 0) return MintResult.alreadyMinted;
+    if (nonce == null) return Result.mintFailed;
+    if (nonce.compareTo(BigInt.from(0)) != 0) return Result.alreadyMinted;
 
     if (!(await _isPhygitalInCollection(phygital))) {
-      return MintResult.notPartOfCollection;
+      return Result.notPartOfCollection;
     }
 
     String? phygitalSignature = await NFC()
         .signUniversalProfileAddress(universalProfileAddress, nonce.toInt());
-    if (phygitalSignature == null) return MintResult.signingFailed;
+    if (phygitalSignature == null) return Result.signingFailed;
 
-    if (await BackendClient().mint(
+    return await BackendClient().mint(
         universalProfileAddress: universalProfileAddress,
         phygitalSignature: phygitalSignature,
-        phygital: phygital)) {
-      return MintResult.success;
+        phygital: phygital);
+  }
+
+  Future<Result> verifyOwnershipAfterTransfer(
+      Phygital phygital, EthereumAddress universalProfileAddress) async {
+    Result validationResult =
+        await validatePhygitalContractAndUniversalProfilePermissions(
+            phygital, universalProfileAddress);
+    if (Result.success != validationResult) return validationResult;
+
+    if (phygital.contractAddress == null) return Result.notPartOfAnyCollection;
+
+    BigInt? nonce = await _getNonceOfPhygital(phygital);
+    if (nonce == null) return Result.ownershipVerificationFailed;
+    if (nonce.compareTo(BigInt.from(0)) == 0) return Result.notMintedYet;
+
+    if (!(await _isPhygitalInCollection(phygital))) {
+      return Result.notPartOfCollection;
     }
 
-    return MintResult.fail;
-  }
-}
+    String? phygitalSignature = await NFC()
+        .signUniversalProfileAddress(universalProfileAddress, nonce.toInt());
+    if (phygitalSignature == null) return Result.signingFailed;
 
-enum MintResult {
-  success,
-  alreadyMinted,
-  notPartOfCollection,
-  notPartOfAnyCollection,
-  signingFailed,
-  fail
-}
-
-String getErrorMessageForMintResult(MintResult mintResult){
-  switch(mintResult){
-    case MintResult.success: return "Successfully minted Phygital.";
-    case MintResult.alreadyMinted: return "Phygital has already been minted.";
-    case MintResult.notPartOfCollection: return "Phygital is not part of the set collection.\nPlease check the contract address.";
-    case MintResult.notPartOfAnyCollection: return "Phygital is not part of any collection.\nNo contract address found.";
-    case MintResult.signingFailed: return "Creating phygital signature failed. Try again";
-    case MintResult.fail: return "Unknown error occurred during minting. Try again.";
+    return await BackendClient().verifyOwnershipAfterTransfer(
+        universalProfileAddress: universalProfileAddress,
+        phygitalSignature: phygitalSignature,
+        phygital: phygital);
   }
 }

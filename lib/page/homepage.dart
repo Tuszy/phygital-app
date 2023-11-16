@@ -3,11 +3,12 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:ndef/utilities.dart';
 import 'package:phygital/layout/standard_layout.dart';
-import 'package:phygital/service/lukso_client.dart';
+import 'package:phygital/service/blockchain/lukso_client.dart';
 import 'package:provider/provider.dart';
 import 'package:web3dart/web3dart.dart';
 
 import '../component/button.dart';
+import '../service/blockchain/result.dart';
 import '../service/nfc.dart';
 import '../component/logo.dart';
 import '../model/phygital.dart';
@@ -82,19 +83,41 @@ class _HomepageState extends State<Homepage> {
       // phygital.contractAddress = EthereumAddress("010bE908B3Ee4128c39528A077cD1a3cFA2Fe318".toBytes()); // already minted
       phygital.contractAddress = EthereumAddress("48379c84548B32D4582ECBAb2BE704F6a5333222".toBytes()); // unminted
 
-      MintResult result =
+      Result result =
           await LuksoClient().mint(phygital, universalProfileAddress);
       showInfoDialog(
           title: "Minting Result",
-          text: getErrorMessageForMintResult(result),
+          text: getMessageForResult(result),
           buttonText: "Ok");
     } catch (e) {
       showInfoDialog(title: "Error", text: e.toString(), buttonText: "Ok");
     }
   }
 
-  void verifyOwnership() async {
-    showInfoDialog(title: "Verify Ownership", text: "", buttonText: "OK");
+  void verifyOwnershipAfterTransfer() async {
+    EthereumAddress universalProfileAddress =
+    EthereumAddress("eDe44390389A98441ff2B9dDCe862fFAC9BeB0cd".toBytes());
+
+    try {
+      Phygital? phygital = await NFC().scan();
+      if (phygital == null) throw "Invalid Phygital";
+
+      sleep(const Duration(seconds: 5));
+
+      // TODO Remove after tests
+      // phygital.contractAddress = EthereumAddress("A9Cd64B15Cf96543332A38481C347378C843767D".toBytes()); // not part of collection
+      phygital.contractAddress = EthereumAddress("010bE908B3Ee4128c39528A077cD1a3cFA2Fe318".toBytes()); // already minted
+      // phygital.contractAddress = EthereumAddress("48379c84548B32D4582ECBAb2BE704F6a5333222".toBytes()); // unminted
+
+      Result result =
+      await LuksoClient().verifyOwnershipAfterTransfer(phygital, universalProfileAddress);
+      showInfoDialog(
+          title: "Ownership Verification Result",
+          text: getMessageForResult(result),
+          buttonText: "Ok");
+    } catch (e) {
+      showInfoDialog(title: "Error", text: e.toString(), buttonText: "Ok");
+    }
   }
 
   void create() async {
@@ -160,7 +183,7 @@ class _HomepageState extends State<Homepage> {
                   if (nfc.isAvailable)
                     Button(
                       text: "Verify Ownership",
-                      onPressed: verifyOwnership,
+                      onPressed: verifyOwnershipAfterTransfer,
                     ),
                   if (nfc.isAvailable)
                     Button(
