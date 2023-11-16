@@ -242,8 +242,8 @@ class LuksoClient extends ChangeNotifier {
     return Result.invalidOwnership;
   }
 
-  Future<Result> validatePhygitalOwnershipIsNotAlreadyVerified(
-      Phygital phygital) async {
+  Future<Result> validatePhygitalOwnershipExpectedVerificationStatus(
+      Phygital phygital, bool expectedVerificationStatus) async {
     if (!_initialized) return Result.notInitialized;
     Result phygitalContractValidationResult =
         await validatePhygitalContract(phygital.contractAddress);
@@ -255,18 +255,20 @@ class LuksoClient extends ChangeNotifier {
       try {
         PhygitalAsset contract = PhygitalAsset(
             address: phygital.contractAddress!, client: _web3client!);
-        if (!(await contract.verifiedOwnership(phygital.id))) {
+        bool verificationStatus = await contract.verifiedOwnership(phygital.id);
+        print("VERIFICATION STATUS $verificationStatus");
+        if (expectedVerificationStatus == verificationStatus) {
           return Result.success;
         }
       } catch (e) {
         if (kDebugMode) {
           print(
-              "Failed to check if the the phygital ${phygital.id} is not already verified ($e)");
+              "Failed to check if the the phygital ${phygital.id} is $expectedVerificationStatus ($e)");
         }
       }
     }
 
-    return Result.alreadyVerifiedOwnership;
+    return expectedVerificationStatus ? Result.unverifiedOwnership : Result.alreadyVerifiedOwnership;
   }
 
   Future<Result> validatePhygitalContractAndUniversalProfilePermissions(
@@ -297,8 +299,6 @@ class LuksoClient extends ChangeNotifier {
             phygital, universalProfileAddress);
     if (Result.success != validationResult) return validationResult;
 
-    if (phygital.contractAddress == null) return Result.notPartOfAnyCollection;
-
     BigInt? nonce = await _getNonceOfPhygital(phygital);
     if (nonce == null) return Result.mintFailed;
     if (nonce.compareTo(BigInt.from(0)) != 0) return Result.alreadyMinted;
@@ -324,7 +324,46 @@ class LuksoClient extends ChangeNotifier {
             phygital, universalProfileAddress);
     if (Result.success != validationResult) return validationResult;
 
-    if (phygital.contractAddress == null) return Result.notPartOfAnyCollection;
+    BigInt? nonce = await _getNonceOfPhygital(phygital);
+    if (nonce == null) return Result.ownershipVerificationFailed;
+    if (nonce.compareTo(BigInt.from(0)) == 0) return Result.notMintedYet;
+
+    Result ownershipValidationResult =
+        await validatePhygitalOwnership(phygital, universalProfileAddress);
+    if (Result.success != ownershipValidationResult) {
+      return ownershipValidationResult;
+    }
+
+    Result ownershipVerificationStatusValidationResult =
+        await validatePhygitalOwnershipExpectedVerificationStatus(phygital, false);
+    if (Result.success != ownershipVerificationStatusValidationResult) {
+      return ownershipVerificationStatusValidationResult;
+    }
+
+    String? phygitalSignature = await NFC()
+        .signUniversalProfileAddress(universalProfileAddress, nonce.toInt());
+    if (phygitalSignature == null) return Result.signingFailed;
+
+    return await BackendClient().verifyOwnershipAfterTransfer(
+        universalProfileAddress: universalProfileAddress,
+        phygitalSignature: phygitalSignature,
+        phygital: phygital);
+  }
+
+  Future<Result> transfer(
+      Phygital phygital,
+      EthereumAddress universalProfileAddress,
+      EthereumAddress toUniversalProfileAddress) async {
+    Result validationResult =
+        await validatePhygitalContractAndUniversalProfilePermissions(
+            phygital, universalProfileAddress);
+    if (Result.success != validationResult) return validationResult;
+
+    Result toUniversalProfileValidationResult =
+        await validateUniversalProfileContract(toUniversalProfileAddress);
+    if (Result.success != toUniversalProfileValidationResult) {
+      return Result.invalidReceivingUniversalProfileAddress;
+    }
 
     BigInt? nonce = await _getNonceOfPhygital(phygital);
     if (nonce == null) return Result.ownershipVerificationFailed;
@@ -337,20 +376,17 @@ class LuksoClient extends ChangeNotifier {
     }
 
     Result ownershipVerificationStatusValidationResult =
-        await validatePhygitalOwnershipIsNotAlreadyVerified(phygital);
+    await validatePhygitalOwnershipExpectedVerificationStatus(phygital, true);
     if (Result.success != ownershipVerificationStatusValidationResult) {
       return ownershipVerificationStatusValidationResult;
     }
 
-    if (!(await _isPhygitalInCollection(phygital))) {
-      return Result.notPartOfCollection;
-    }
-
     String? phygitalSignature = await NFC()
-        .signUniversalProfileAddress(universalProfileAddress, nonce.toInt());
+        .signUniversalProfileAddress(toUniversalProfileAddress, nonce.toInt());
     if (phygitalSignature == null) return Result.signingFailed;
 
-    return await BackendClient().verifyOwnershipAfterTransfer(
+    return await BackendClient().transfer(
+      toUniversalProfileAddress: toUniversalProfileAddress,
         universalProfileAddress: universalProfileAddress,
         phygitalSignature: phygitalSignature,
         phygital: phygital);

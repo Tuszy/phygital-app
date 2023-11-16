@@ -4,7 +4,7 @@ enum Result {
   invalidPhygital,
 
   invalidUniversalProfileAddress,
-  invalidTargetUniversalProfileAddress,
+  invalidReceivingUniversalProfileAddress,
   invalidPhygitalAssetContractAddress,
 
   necessaryPermissionsNotSet,
@@ -24,6 +24,9 @@ enum Result {
   unverifiedOwnership,
   alreadyVerifiedOwnership,
 
+  transferSucceeded,
+  transferFailed,
+
   notInitialized,
   unknownError
 }
@@ -35,7 +38,7 @@ String getMessageForResult(Result result){
     case Result.invalidPhygital: return "Invalid Phygital.";
 
     case Result.invalidUniversalProfileAddress: return "Invalid Universal Profile.";
-    case Result.invalidTargetUniversalProfileAddress: return "Invalid target Universal Profile.";
+    case Result.invalidReceivingUniversalProfileAddress: return "Invalid receiving Universal Profile.";
     case Result.invalidPhygitalAssetContractAddress: return "Invalid Phygital collection.\nPlease check the contract address.";
 
     case Result.necessaryPermissionsNotSet: return "Please set the necessary permissions on the Universal profile.";
@@ -55,6 +58,10 @@ String getMessageForResult(Result result){
     case Result.unverifiedOwnership: return "Phygital has an unverified ownership. Please verify first.";
     case Result.alreadyVerifiedOwnership: return "Phygital ownership is already verified.";
 
+
+    case Result.transferSucceeded: return "Successfully transferred the Phygital.";
+    case Result.transferFailed: return "Failed to transfer the Phygital.\nTry again.";
+
     case Result.notInitialized: return "Lukso Client not initialized.\nRestart the app.";
     case Result.unknownError: return "Unknown error occurred.\nTry again.";
   }
@@ -67,7 +74,7 @@ Result mapContractErrorCodeToResult(String contractErrorCode) {
     case "PhygitalAssetHasAnUnverifiedOwnership": return Result.unverifiedOwnership;
     case "PhygitalAssetHasAlreadyAVerifiedOwnership": return Result.alreadyVerifiedOwnership;
     case "LSP8NotTokenOwner": return Result.invalidOwnership;
-    case "LSP8NotifyTokenReceiverIsEOA": return Result.invalidTargetUniversalProfileAddress;
+    case "LSP8NotifyTokenReceiverIsEOA": return Result.invalidReceivingUniversalProfileAddress;
     case "LSP8TokenIdAlreadyMinted": return Result.alreadyMinted;
     default: return Result.unknownError;
   }

@@ -81,7 +81,8 @@ class _HomepageState extends State<Homepage> {
       // TODO Remove after tests
       // phygital.contractAddress = EthereumAddress("A9Cd64B15Cf96543332A38481C347378C843767D".toBytes()); // not part of collection
       // phygital.contractAddress = EthereumAddress("010bE908B3Ee4128c39528A077cD1a3cFA2Fe318".toBytes()); // already minted
-      phygital.contractAddress = EthereumAddress("48379c84548B32D4582ECBAb2BE704F6a5333222".toBytes()); // unminted
+      phygital.contractAddress = EthereumAddress(
+          "48379c84548B32D4582ECBAb2BE704F6a5333222".toBytes()); // unminted
 
       Result result =
           await LuksoClient().mint(phygital, universalProfileAddress);
@@ -96,7 +97,7 @@ class _HomepageState extends State<Homepage> {
 
   void verifyOwnershipAfterTransfer() async {
     EthereumAddress universalProfileAddress =
-    EthereumAddress("eDe44390389A98441ff2B9dDCe862fFAC9BeB0cd".toBytes());
+        EthereumAddress("eDe44390389A98441ff2B9dDCe862fFAC9BeB0cd".toBytes());
 
     try {
       Phygital? phygital = await NFC().scan();
@@ -106,13 +107,43 @@ class _HomepageState extends State<Homepage> {
 
       // TODO Remove after tests
       // phygital.contractAddress = EthereumAddress("A9Cd64B15Cf96543332A38481C347378C843767D".toBytes()); // not part of collection
-      phygital.contractAddress = EthereumAddress("010bE908B3Ee4128c39528A077cD1a3cFA2Fe318".toBytes()); // already minted
+      phygital.contractAddress = EthereumAddress(
+          "010bE908B3Ee4128c39528A077cD1a3cFA2Fe318"
+              .toBytes()); // already minted
       // phygital.contractAddress = EthereumAddress("48379c84548B32D4582ECBAb2BE704F6a5333222".toBytes()); // unminted
 
-      Result result =
-      await LuksoClient().verifyOwnershipAfterTransfer(phygital, universalProfileAddress);
+      Result result = await LuksoClient()
+          .verifyOwnershipAfterTransfer(phygital, universalProfileAddress);
       showInfoDialog(
           title: "Ownership Verification Result",
+          text: getMessageForResult(result),
+          buttonText: "Ok");
+    } catch (e) {
+      showInfoDialog(title: "Error", text: e.toString(), buttonText: "Ok");
+    }
+  }
+
+  void transfer() async {
+    EthereumAddress fromUniversalProfileAddress =
+        EthereumAddress("eDe44390389A98441ff2B9dDCe862fFAC9BeB0cd".toBytes());
+    EthereumAddress toUniversalProfileAddress =
+        EthereumAddress("1E9122dc5a7F6391d535cC3c59f20445585984db".toBytes());
+
+    try {
+      Phygital? phygital = await NFC().scan();
+      if (phygital == null) throw "Invalid Phygital";
+
+      sleep(const Duration(seconds: 5));
+
+      // TODO Remove after tests
+      // phygital.contractAddress = EthereumAddress("A9Cd64B15Cf96543332A38481C347378C843767D".toBytes()); // not part of collection
+      // phygital.contractAddress = EthereumAddress("010bE908B3Ee4128c39528A077cD1a3cFA2Fe318".toBytes()); // already minted
+      phygital.contractAddress = EthereumAddress("48379c84548B32D4582ECBAb2BE704F6a5333222".toBytes()); // minted
+
+      Result result = await LuksoClient().transfer(
+          phygital, fromUniversalProfileAddress, toUniversalProfileAddress);
+      showInfoDialog(
+          title: "Transfer Result",
           text: getMessageForResult(result),
           buttonText: "Ok");
     } catch (e) {
@@ -179,6 +210,11 @@ class _HomepageState extends State<Homepage> {
                     Button(
                       text: "Mint",
                       onPressed: mint,
+                    ),
+                  if (nfc.isAvailable)
+                    Button(
+                      text: "Transfer",
+                      onPressed: transfer,
                     ),
                   if (nfc.isAvailable)
                     Button(

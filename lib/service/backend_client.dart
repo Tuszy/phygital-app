@@ -20,7 +20,7 @@ class BackendClient extends ChangeNotifier {
   static final verifyOwnershipAfterTransferEndpoint =
       Uri.parse("$backendUrl/api/verify-ownership-after-transfer");
   static final transferEndpoint = Uri.parse(
-      "$backendUrl/api/transfer"); // TODO remove if not used - deadline issue
+      "$backendUrl/api/transfer");
   static final createEndpoint = Uri.parse("$backendUrl/api/create");
 
   BackendClient._sharedInstance();
@@ -56,7 +56,7 @@ class BackendClient extends ChangeNotifier {
       }
     } catch (e) {
       if (kDebugMode) {
-        print("Error while parsing mint receipt: $e");
+        print("Error while parsing mint response: $e");
       }
     }
 
@@ -90,10 +90,46 @@ class BackendClient extends ChangeNotifier {
       }
     } catch (e) {
       if (kDebugMode) {
-        print("Error while parsing ownership verification receipt: $e");
+        print("Error while parsing ownership verification response: $e");
       }
     }
 
     return Result.ownershipVerificationFailed;
+  }
+
+  Future<Result> transfer(
+      {required EthereumAddress universalProfileAddress,
+      required EthereumAddress toUniversalProfileAddress,
+      required String phygitalSignature,
+      required Phygital phygital}) async {
+    var data = {
+      "universal_profile_address": universalProfileAddress.hexEip55,
+      "to_universal_profile_address": toUniversalProfileAddress.hexEip55,
+      "phygital_asset_contract_address": phygital.contractAddress!.hexEip55,
+      "phygital_address": phygital.address.hexEip55,
+      "phygital_signature": "0x$phygitalSignature"
+    };
+    Response response = await _httpClient.post(
+        transferEndpoint,
+        headers: contentTypeApplicationJson,
+        body: json.encode(data));
+    String jsonStringified = utf8.decode(response.bodyBytes);
+    try {
+      var jsonObject = json.decode(jsonStringified);
+      if (kDebugMode) {
+        print("Transfer response: $jsonObject");
+      }
+      if (response.statusCode == 200) {
+        return Result.transferSucceeded;
+      } else {
+        return mapContractErrorCodeToResult(jsonObject["error"] as String);
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print("Error while parsing transfer response: $e");
+      }
+    }
+
+    return Result.transferFailed;
   }
 }
