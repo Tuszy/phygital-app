@@ -18,15 +18,14 @@ class LSP2Utils {
   static final keccak256HashValue = "6f357c6a".toBytes();
 
   Uint8List hashJson(Uint8List json) {
-    String jsonStringified =
-        utf8.decode(json).replaceAll(RegExp(r"\s+\b|\b\s|\s|\b"), "");
+    String jsonStringified = jsonEncode(jsonDecode(utf8.decode(json)));
+
     return Digest('Keccak/256')
         .process(Uint8List.fromList(utf8.encode(jsonStringified)));
   }
 
   Uint8List hashStringifiedJson(String jsonStringified) {
-    jsonStringified =
-        jsonStringified.replaceAll(RegExp(r"\s+\b|\b\s|\s|\b"), "");
+    jsonStringified = jsonEncode(jsonDecode(jsonStringified));
     return Digest('Keccak/256')
         .process(Uint8List.fromList(utf8.encode(jsonStringified)));
   }
