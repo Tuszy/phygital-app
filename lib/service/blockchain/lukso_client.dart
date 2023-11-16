@@ -2,9 +2,11 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart';
 import 'package:ndef/utilities.dart';
+import 'package:phygital/model/lsp4/lsp4_metadata.dart';
 import 'dart:convert';
 import 'package:phygital/service/backend_client.dart';
 import 'package:phygital/service/blockchain/result.dart';
+import 'package:phygital/service/ipfs_client.dart';
 import 'package:phygital/util/lsp2_utils.dart';
 import 'package:web3dart/web3dart.dart';
 
@@ -231,7 +233,9 @@ class LuksoClient extends ChangeNotifier {
       }
     }
 
-    return expectedVerificationStatus ? Result.unverifiedOwnership : Result.alreadyVerifiedOwnership;
+    return expectedVerificationStatus
+        ? Result.unverifiedOwnership
+        : Result.alreadyVerifiedOwnership;
   }
 
   Future<Result> validatePhygitalContractAndUniversalProfilePermissions(
@@ -298,7 +302,8 @@ class LuksoClient extends ChangeNotifier {
     }
 
     Result ownershipVerificationStatusValidationResult =
-        await validatePhygitalOwnershipExpectedVerificationStatus(phygital, false);
+        await validatePhygitalOwnershipExpectedVerificationStatus(
+            phygital, false);
     if (Result.success != ownershipVerificationStatusValidationResult) {
       return ownershipVerificationStatusValidationResult;
     }
@@ -339,7 +344,8 @@ class LuksoClient extends ChangeNotifier {
     }
 
     Result ownershipVerificationStatusValidationResult =
-    await validatePhygitalOwnershipExpectedVerificationStatus(phygital, true);
+        await validatePhygitalOwnershipExpectedVerificationStatus(
+            phygital, true);
     if (Result.success != ownershipVerificationStatusValidationResult) {
       return ownershipVerificationStatusValidationResult;
     }
@@ -349,9 +355,38 @@ class LuksoClient extends ChangeNotifier {
     if (phygitalSignature == null) return Result.signingFailed;
 
     return await BackendClient().transfer(
-      toUniversalProfileAddress: toUniversalProfileAddress,
+        toUniversalProfileAddress: toUniversalProfileAddress,
         universalProfileAddress: universalProfileAddress,
         phygitalSignature: phygitalSignature,
         phygital: phygital);
+  }
+
+  Future<(Result, EthereumAddress?)> create(
+      EthereumAddress universalProfileAddress,
+      String name,
+      String symbol,
+      List<Phygital> phygitalCollection,
+      LSP4Metadata metadata,
+      String baseUri) async {
+    Result validationResult =
+        await validateUniversalProfilePermissions(universalProfileAddress);
+    if (Result.success != validationResult) return (validationResult, null);
+
+    if (phygitalCollection.isEmpty) {
+      return (Result.collectionMustNotBeEmpty, null);
+    }
+    if (name.isEmpty) return (Result.nameMustNotBeEmpty, null);
+    if (symbol.isEmpty) return (Result.symbolMustNotBeEmpty, null);
+    if (baseUri.isEmpty ||
+        !baseUri.startsWith(IpfsClient.protocolPrefix) ||
+        !baseUri.endsWith("/")) return (Result.invalidBaseUri, null);
+
+    return await BackendClient().create(
+        universalProfileAddress: universalProfileAddress,
+        name: name,
+        symbol: symbol,
+        phygitalCollection: phygitalCollection,
+        metadata: metadata,
+        baseUri: baseUri);
   }
 }
