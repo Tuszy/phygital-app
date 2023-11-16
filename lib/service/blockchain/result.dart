@@ -54,7 +54,7 @@ String getMessageForResult(Result result){
     case Result.notMintedYet: return "Phygital has not been minted yet.";
     case Result.ownershipVerificationFailed: return "Ownership verification failed.\nTry again.";
 
-    case Result.invalidOwnership: return "You are not the current owner of the Phygital.";
+    case Result.invalidOwnership: return "You are not the owner of the Phygital.";
     case Result.unverifiedOwnership: return "Phygital has an unverified ownership. Please verify first.";
     case Result.alreadyVerifiedOwnership: return "Phygital ownership is already verified.";
 
