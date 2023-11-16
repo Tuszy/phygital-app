@@ -5,7 +5,10 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart';
 import 'dart:convert';
 
+import 'package:phygital/model/IpfsUploadWrapper.dart';
+
 class IpfsClient extends ChangeNotifier {
+  static const String protocolPrefix = "ipfs://";
   static const String gatewayUrl = "https://2eff.lukso.dev/ipfs/";
 
   static const String apiUrl =
@@ -18,12 +21,14 @@ class IpfsClient extends ChangeNotifier {
 
   static const contentTypeApplicationJson = {
     "Content-Type": "application/json",
-    "Accept": "application/json"
+    "Accept": "application/json",
+    "Authorization": "Bearer $jwt"
   };
 
   static const contentTypeMultipartFormData = {
     "Content-Type": "multipart/form-data",
-    "Accept": "application/json"
+    "Accept": "application/json",
+    "Authorization": "Bearer $jwt"
   };
 
   static final pinFileEndpoint = Uri.parse("$apiUrl/pinning/pinFileToIPFS");
@@ -37,36 +42,24 @@ class IpfsClient extends ChangeNotifier {
 
   final Client _httpClient = Client();
 
-  Future<void> uploadFile(File file) async {
+  Future<void> uploadFile(File file) async {}
 
-  }
+  Future<String?> uploadJson(String name, dynamic content) async {
+    IpfsUploadWrapper ipfsUploadWrapper =
+        IpfsUploadWrapper(content: content, name: name);
+    String jsonRequestStringified = json.encode(ipfsUploadWrapper);
 
-  Future<String?> uploadJson(String name, dynamic json) async {
-    String jsonRequestStringified = json.encode({
-      "pinataContent": json,
-      "pinataMetadata": {
-        "name": name,
-      },
-      "pinataOptions": {
-        "cidVersion": 0,
-      }
-    });
-
-
-
-    Response response = await _httpClient.post(
-        pinJsonEndpoint,
-        headers: contentTypeApplicationJson,
-        body: jsonRequestStringified);
+    Response response = await _httpClient.post(pinJsonEndpoint,
+        headers: contentTypeApplicationJson, body: jsonRequestStringified);
     String jsonResponseStringified = utf8.decode(response.bodyBytes);
     try {
       Map<String, dynamic> jsonObject = json.decode(jsonResponseStringified);
       if (kDebugMode) {
         print("Upload json to ipfs response: $jsonObject");
       }
-      if (response.statusCode == 200 && jsonObject.containsKey("ipfsHash")) {
-        String cid = jsonObject["ipfsHash"] as String;
-        return "ipfs://$cid";
+      if (response.statusCode == 200 && jsonObject.containsKey("IpfsHash")) {
+        String cid = jsonObject["IpfsHash"] as String;
+        return "$protocolPrefix$cid";
       }
     } catch (e) {
       if (kDebugMode) {
