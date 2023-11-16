@@ -148,8 +148,7 @@ class BackendClient extends ChangeNotifier {
           "PhygitalAsset:Metadata:$name:$symbol:${universalProfileAddress.hexEip55}",
           metadata);
       if (cid == null) return (Result.uploadingLSP4MetadataFailed, null);
-      metadataLsp2JsonUrl =
-          LSP2Utils().createJsonUrl(cid, stringifiedMetadata);
+      metadataLsp2JsonUrl = LSP2Utils().createJsonUrl(cid, stringifiedMetadata);
     } catch (e) {
       if (kDebugMode) {
         print("Failed to upload LSP4 metadata to ipfs ($e)");
@@ -180,7 +179,8 @@ class BackendClient extends ChangeNotifier {
           jsonObject.containsKey("contractAddress")) {
         return (
           Result.createSucceeded,
-          EthereumAddress((jsonObject["contractAddress"] as String).toBytes())
+          EthereumAddress(
+              (jsonObject["contractAddress"] as String).toBytes().sublist(2))
         );
       } else {
         return (
