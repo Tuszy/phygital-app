@@ -31,10 +31,12 @@ class LSP2Utils {
         .process(Uint8List.fromList(utf8.encode(jsonStringified)));
   }
 
-  Uint8List createJsonUrl(String url, String jsonStringified) {
-    return Uint8List.fromList(keccak256HashValue +
-        hashStringifiedJson(jsonStringified) +
-        utf8.encode(url));
+  String createJsonUrl(String url, String jsonStringified) {
+    return "0x${Uint8List.fromList(keccak256HashValue + hashStringifiedJson(jsonStringified) + utf8.encode(url)).toHexString()}";
+  }
+
+  String createJsonUrlForIpfs(String cid, String jsonStringified) {
+    return createJsonUrl("${IpfsClient.protocolPrefix}$cid", jsonStringified);
   }
 
   Future<String> fetchJsonUrl(Uint8List lsp2JsonUrl) async {
