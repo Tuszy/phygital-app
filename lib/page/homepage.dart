@@ -1,6 +1,11 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:ndef/utilities.dart';
 import 'package:phygital/layout/standard_layout.dart';
+import 'package:phygital/service/lukso_client.dart';
 import 'package:provider/provider.dart';
+import 'package:web3dart/web3dart.dart';
 
 import '../component/button.dart';
 import '../service/nfc.dart';
@@ -62,7 +67,38 @@ class _HomepageState extends State<Homepage> {
   }
 
   void mint() async {
-    showInfoDialog(title: "Mint", text: "", buttonText: "OK");
+    try {
+      Phygital? phygital = await NFC().scan();
+      if (phygital == null) throw Exception("Invalid Phygital");
+
+      if(phygital.contractAddress == null) {
+        showInfoDialog(
+            title: "Minting",
+            text: "Failed to mint the Phygital because it is not part of any collection.",
+            buttonText: "Ok");
+        return;
+      }
+
+      // TODO Remove after tests
+      //phygital.contractAddress = EthereumAddress("A9Cd64B15Cf96543332A38481C347378C843767D".toBytes()); // not part of collection
+      //phygital.contractAddress = EthereumAddress("010bE908B3Ee4128c39528A077cD1a3cFA2Fe318".toBytes()); // already minted
+      phygital.contractAddress = EthereumAddress("48379c84548B32D4582ECBAb2BE704F6a5333222".toBytes()); // unminted
+
+      MintResult result = await LuksoClient().mint(phygital);
+      if (MintResult.success == result) {
+        showInfoDialog(
+            title: "Minting",
+            text: "Successfully minted the Phygital",
+            buttonText: "Ok");
+      } else {
+        showInfoDialog(
+            title: "Minting",
+            text: "Failed to mint the Phygital ($result)",
+            buttonText: "Ok");
+      }
+    } catch (e) {
+      showInfoDialog(title: "Error", text: e.toString(), buttonText: "Ok");
+    }
   }
 
   void verifyOwnership() async {
