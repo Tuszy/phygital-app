@@ -3,6 +3,10 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:ndef/utilities.dart';
 import 'package:phygital/layout/standard_layout.dart';
+import 'package:phygital/model/lsp4/lsp4_image.dart';
+import 'package:phygital/model/lsp4/lsp4_link.dart';
+import 'package:phygital/model/lsp4/lsp4_metadata.dart';
+import 'package:phygital/model/lsp4/lsp4_verification.dart';
 import 'package:phygital/service/blockchain/lukso_client.dart';
 import 'package:provider/provider.dart';
 import 'package:web3dart/web3dart.dart';
@@ -107,10 +111,9 @@ class _HomepageState extends State<Homepage> {
 
       // TODO Remove after tests
       // phygital.contractAddress = EthereumAddress("A9Cd64B15Cf96543332A38481C347378C843767D".toBytes()); // not part of collection
+      // phygital.contractAddress = EthereumAddress("010bE908B3Ee4128c39528A077cD1a3cFA2Fe318".toBytes()); // already minted
       phygital.contractAddress = EthereumAddress(
-          "010bE908B3Ee4128c39528A077cD1a3cFA2Fe318"
-              .toBytes()); // already minted
-      // phygital.contractAddress = EthereumAddress("48379c84548B32D4582ECBAb2BE704F6a5333222".toBytes()); // unminted
+          "48379c84548B32D4582ECBAb2BE704F6a5333222".toBytes()); // unminted
 
       Result result = await LuksoClient()
           .verifyOwnershipAfterTransfer(phygital, universalProfileAddress);
@@ -138,7 +141,8 @@ class _HomepageState extends State<Homepage> {
       // TODO Remove after tests
       // phygital.contractAddress = EthereumAddress("A9Cd64B15Cf96543332A38481C347378C843767D".toBytes()); // not part of collection
       // phygital.contractAddress = EthereumAddress("010bE908B3Ee4128c39528A077cD1a3cFA2Fe318".toBytes()); // already minted
-      phygital.contractAddress = EthereumAddress("48379c84548B32D4582ECBAb2BE704F6a5333222".toBytes()); // minted
+      phygital.contractAddress = EthereumAddress(
+          "48379c84548B32D4582ECBAb2BE704F6a5333222".toBytes()); // minted
 
       Result result = await LuksoClient().transfer(
           phygital, fromUniversalProfileAddress, toUniversalProfileAddress);
@@ -152,7 +156,54 @@ class _HomepageState extends State<Homepage> {
   }
 
   void create() async {
-    showInfoDialog(title: "Create", text: "", buttonText: "OK");
+    EthereumAddress universalProfileAddress =
+        EthereumAddress("eDe44390389A98441ff2B9dDCe862fFAC9BeB0cd".toBytes());
+    String name = "Sneaker";
+    String symbol = "SNKR";
+    List<Phygital> phygitalCollection = [
+      Phygital(
+          address: EthereumAddress(
+              "0A942309aEF13Ae9823AcfAaAb169Da8A942EC92".toBytes())),
+      Phygital(
+          address: EthereumAddress(
+              "3C44CdDdB6a900fa2b585dd299e03d12FA4293BC".toBytes())),
+      Phygital(
+          address: EthereumAddress(
+              "90F79bf6EB2c4f870365E785982E1f101E93b906".toBytes()))
+    ];
+    String baseUri = "ipfs://QmYFAK6UbQbAZS6HZKeVro4SerVpLmL7WY1C1h8QaV9Mci/";
+    LSP4Image lsp4image = LSP4Image(
+        width: 400,
+        height: 400,
+        url: "ifps://QmTCqXeST1vFBjUW15f9zXJMJKSz9JcG5gi7wajxs8MGwK",
+        verification: LSP4Verification(
+            data:
+                "0x6b3a0632917e88438de44d42a32115f6104b58f1cc025e00738debf2e65d5acb"));
+    LSP4Metadata metadata =
+        LSP4Metadata(description: "Phygital Sneaker Collection", links: [
+      LSP4Link(title: "Homepage", url: "https://phygital.tuszy.com")
+    ], icon: [
+      lsp4image
+    ], images: [
+      [lsp4image]
+    ]);
+
+    try {
+      (Result, EthereumAddress?) result = await LuksoClient().create(
+          universalProfileAddress,
+          name,
+          symbol,
+          phygitalCollection,
+          metadata,
+          baseUri);
+      showInfoDialog(
+          title: "Creation Result",
+          text: getMessageForResult(result.$1) +
+              (result.$2 != null ? "\n${result.$2!.hexEip55}" : ""),
+          buttonText: "Ok");
+    } catch (e) {
+      showInfoDialog(title: "Error", text: e.toString(), buttonText: "Ok");
+    }
   }
 
   Future<void> showInfoDialog(
