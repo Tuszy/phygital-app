@@ -65,7 +65,7 @@ class NFC extends ChangeNotifier {
 
   Future<dynamic> _startNFCCommunication(Duration? energyHarvestingDuration,
       bool validate, NFCTagCommandFunction nfcTagCommandFunction) async {
-    if (!isAvailable) throw Exception("NFC is not available");
+    if (!isAvailable) throw "NFC is not available";
 
     try {
       active = true;
@@ -76,7 +76,7 @@ class NFC extends ChangeNotifier {
       Phygital? phygital = validate ? await _validate(tag) : null;
 
       if (validate && phygital == null) {
-        throw Exception("This is not a valid Phygital");
+        throw "This is not a valid Phygital";
       }
 
       if (energyHarvestingDuration != null) sleep(energyHarvestingDuration);
@@ -141,7 +141,7 @@ class NFC extends ChangeNotifier {
       if (kDebugMode) {
         print(e.toString());
       }
-      throw Exception("Scan failed. Please retry.");
+      throw "Scan failed. Please retry.";
     }
   }
 
@@ -212,25 +212,23 @@ class NFC extends ChangeNotifier {
   }
 
   Future<String?> signUniversalProfileAddress(
-      String universalProfileAddress, int nonce) async {
-    if (universalProfileAddress.length != luksoAddressLength || nonce < 0) {
-      throw Exception("Invalid Universal Profile Address");
+      EthereumAddress universalProfileAddress, int nonce) async {
+    if (nonce < 0) {
+      throw "Invalid nonce";
     }
 
     return await _startNFCCommunication(const Duration(seconds: 3), false,
         (NFCTag tag, Phygital? phygital) async {
       String errorMessage = "Failed to sign the universal profile address";
 
-      Uint8List universalProfileAddressAsBytes =
-          universalProfileAddress.substring(2).toBytes();
       bool isSent = false;
       for (int i = 0; i < retryCount && !isSent; i++) {
         sleep(retryDelay);
-        isSent =
-            await _sendMessageToSign(universalProfileAddressAsBytes, nonce);
+        isSent = await _sendMessageToSign(
+            universalProfileAddress.addressBytes, nonce);
       }
       if (!isSent) {
-        throw Exception(errorMessage);
+        throw errorMessage;
       }
 
       bool isAvailable = false;
@@ -239,12 +237,12 @@ class NFC extends ChangeNotifier {
         isAvailable = await _isMessageAvailable();
       }
       if (!isAvailable) {
-        throw Exception(errorMessage);
+        throw errorMessage;
       }
 
       var message = await _readMessage();
       if (message == null) {
-        throw Exception(errorMessage);
+        throw errorMessage;
       }
 
       String signature = message.sublist(1).toHexString();
@@ -271,24 +269,21 @@ class NFC extends ChangeNotifier {
     return value[0] == 0;
   }
 
-  Future<String?> setContractAddress(String contractAddress) async {
-    if (contractAddress.length != luksoAddressLength) {
-      throw Exception("Invalid Contract Address");
-    }
-
+  Future<EthereumAddress?> setContractAddress(
+      EthereumAddress contractAddress) async {
     return await _startNFCCommunication(const Duration(seconds: 3), false,
         (NFCTag tag, Phygital? phygital) async {
       String errorMessage = "Failed to set the contract address";
 
       Uint8List contractAddressAsBytes =
-          Uint8List.fromList(utf8.encode(contractAddress));
+          Uint8List.fromList(utf8.encode(contractAddress.hexEip55));
       bool isSent = false;
       for (int i = 0; i < retryCount && !isSent; i++) {
         sleep(retryDelay);
         isSent = await _sendContractAddressToWrite(contractAddressAsBytes);
       }
       if (!isSent) {
-        throw Exception(errorMessage);
+        throw errorMessage;
       }
 
       bool isAvailable = false;
@@ -297,16 +292,17 @@ class NFC extends ChangeNotifier {
         isAvailable = await _isMessageAvailable();
       }
       if (!isAvailable) {
-        throw Exception(errorMessage);
+        throw errorMessage;
       }
 
       var message = await _readMessage();
       if (message == null) {
-        throw Exception(errorMessage);
+        throw errorMessage;
       }
 
-      if (message[0] != setContractAddressCommandId.toBytes()[0])
-        throw Exception(errorMessage);
+      if (message[0] != setContractAddressCommandId.toBytes()[0]) {
+        throw errorMessage;
+      }
 
       return contractAddress;
     });
@@ -317,6 +313,6 @@ class NFC extends ChangeNotifier {
         null,
         true,
         (NFCTag tag, Phygital? phygital) async =>
-            phygital ?? (throw Exception("Invalid phygital")));
+            phygital ?? (throw "Invalid phygital"));
   }
 }

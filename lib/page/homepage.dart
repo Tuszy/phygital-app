@@ -41,8 +41,8 @@ class _HomepageState extends State<Homepage> {
 
   void signUniversalProfileAddress() async {
     try {
-      String universalProfileAddress =
-          "0xeDe44390389A98441ff2B9dDCe862fFAC9BeB0cd";
+      EthereumAddress universalProfileAddress =
+          EthereumAddress("eDe44390389A98441ff2B9dDCe862fFAC9BeB0cd".toBytes());
       int nonce = 0;
       String? signature = await NFC()
           .signUniversalProfileAddress(universalProfileAddress, nonce);
@@ -56,10 +56,13 @@ class _HomepageState extends State<Homepage> {
 
   void setContractAddress() async {
     try {
-      String contractAddress = "0xeDe44390389A98441ff2B9dDCe862fFAC9BeB0cd";
+      EthereumAddress contractAddress =
+          EthereumAddress("eDe44390389A98441ff2B9dDCe862fFAC9BeB0cd".toBytes());
       if (await NFC().setContractAddress(contractAddress) != null) {
         showInfoDialog(
-            title: "Contract Address", text: contractAddress, buttonText: "OK");
+            title: "Contract Address",
+            text: contractAddress.hexEip55,
+            buttonText: "OK");
       }
     } catch (e) {
       showInfoDialog(title: "Error", text: e.toString(), buttonText: "Ok");
@@ -67,35 +70,24 @@ class _HomepageState extends State<Homepage> {
   }
 
   void mint() async {
+    EthereumAddress universalProfileAddress =
+        EthereumAddress("eDe44390389A98441ff2B9dDCe862fFAC9BeB0cd".toBytes());
+
     try {
       Phygital? phygital = await NFC().scan();
-      if (phygital == null) throw Exception("Invalid Phygital");
-
-      if(phygital.contractAddress == null) {
-        showInfoDialog(
-            title: "Minting",
-            text: "Failed to mint the Phygital because it is not part of any collection.",
-            buttonText: "Ok");
-        return;
-      }
+      if (phygital == null) throw "Invalid Phygital";
 
       // TODO Remove after tests
-      //phygital.contractAddress = EthereumAddress("A9Cd64B15Cf96543332A38481C347378C843767D".toBytes()); // not part of collection
-      //phygital.contractAddress = EthereumAddress("010bE908B3Ee4128c39528A077cD1a3cFA2Fe318".toBytes()); // already minted
+      // phygital.contractAddress = EthereumAddress("A9Cd64B15Cf96543332A38481C347378C843767D".toBytes()); // not part of collection
+      // phygital.contractAddress = EthereumAddress("010bE908B3Ee4128c39528A077cD1a3cFA2Fe318".toBytes()); // already minted
       phygital.contractAddress = EthereumAddress("48379c84548B32D4582ECBAb2BE704F6a5333222".toBytes()); // unminted
 
-      MintResult result = await LuksoClient().mint(phygital);
-      if (MintResult.success == result) {
-        showInfoDialog(
-            title: "Minting",
-            text: "Successfully minted the Phygital",
-            buttonText: "Ok");
-      } else {
-        showInfoDialog(
-            title: "Minting",
-            text: "Failed to mint the Phygital ($result)",
-            buttonText: "Ok");
-      }
+      MintResult result =
+          await LuksoClient().mint(phygital, universalProfileAddress);
+      showInfoDialog(
+          title: "Minting Result",
+          text: getErrorMessageForMintResult(result),
+          buttonText: "Ok");
     } catch (e) {
       showInfoDialog(title: "Error", text: e.toString(), buttonText: "Ok");
     }
