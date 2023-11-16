@@ -66,8 +66,7 @@ class IpfsClient extends ChangeNotifier {
       }
       if (response.statusCode == 200 && jsonObject.containsKey("ipfsHash")) {
         String cid = jsonObject["ipfsHash"] as String;
-
-        return cid;
+        return "ipfs://$cid";
       }
     } catch (e) {
       if (kDebugMode) {
