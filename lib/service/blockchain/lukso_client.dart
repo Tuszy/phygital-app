@@ -242,6 +242,33 @@ class LuksoClient extends ChangeNotifier {
     return Result.invalidOwnership;
   }
 
+  Future<Result> validatePhygitalOwnershipIsNotAlreadyVerified(
+      Phygital phygital) async {
+    if (!_initialized) return Result.notInitialized;
+    Result phygitalContractValidationResult =
+        await validatePhygitalContract(phygital.contractAddress);
+    if (Result.success != phygitalContractValidationResult) {
+      return phygitalContractValidationResult;
+    }
+
+    if (phygital.contractAddress != null) {
+      try {
+        PhygitalAsset contract = PhygitalAsset(
+            address: phygital.contractAddress!, client: _web3client!);
+        if (!(await contract.verifiedOwnership(phygital.id))) {
+          return Result.success;
+        }
+      } catch (e) {
+        if (kDebugMode) {
+          print(
+              "Failed to check if the the phygital ${phygital.id} is not already verified ($e)");
+        }
+      }
+    }
+
+    return Result.alreadyVerifiedOwnership;
+  }
+
   Future<Result> validatePhygitalContractAndUniversalProfilePermissions(
       Phygital phygital, EthereumAddress universalProfileAddress) async {
     if (!_initialized) return Result.notInitialized;
@@ -305,7 +332,15 @@ class LuksoClient extends ChangeNotifier {
 
     Result ownershipValidationResult =
         await validatePhygitalOwnership(phygital, universalProfileAddress);
-    if (Result.success != ownershipValidationResult) return validationResult;
+    if (Result.success != ownershipValidationResult) {
+      return ownershipValidationResult;
+    }
+
+    Result ownershipVerificationStatusValidationResult =
+        await validatePhygitalOwnershipIsNotAlreadyVerified(phygital);
+    if (Result.success != ownershipVerificationStatusValidationResult) {
+      return ownershipVerificationStatusValidationResult;
+    }
 
     if (!(await _isPhygitalInCollection(phygital))) {
       return Result.notPartOfCollection;
