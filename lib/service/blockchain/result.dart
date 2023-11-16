@@ -27,6 +27,9 @@ enum Result {
   transferSucceeded,
   transferFailed,
 
+  createSucceeded,
+  createFailed,
+
   notInitialized,
   unknownError
 }
@@ -39,14 +42,14 @@ String getMessageForResult(Result result){
 
     case Result.invalidUniversalProfileAddress: return "Invalid Universal Profile.";
     case Result.invalidReceivingUniversalProfileAddress: return "Invalid receiving Universal Profile.";
-    case Result.invalidPhygitalAssetContractAddress: return "Invalid Phygital collection.\nPlease check the contract address.";
+    case Result.invalidPhygitalAssetContractAddress: return "Invalid Phygital collection.\n(Dev: Please check the contract address.)";
 
     case Result.necessaryPermissionsNotSet: return "Please set the necessary permissions on the Universal profile.";
 
     case Result.mintSucceeded: return "Successfully minted Phygital.";
     case Result.alreadyMinted: return "Phygital has already been minted.";
-    case Result.notPartOfCollection: return "Phygital is not part of the set collection.\nPlease check the contract address.";
-    case Result.notPartOfAnyCollection: return "Phygital is not part of any collection.\nNo contract address found.";
+    case Result.notPartOfCollection: return "Phygital is not part of the set collection.\n(Dev: Please check the contract address.)";
+    case Result.notPartOfAnyCollection: return "Phygital is not part of any collection.\n(Dev: No contract address found.)";
     case Result.signingFailed: return "Creating phygital signature failed.\nTry again.";
     case Result.mintFailed: return "Minting failed.\nTry again.";
 
@@ -58,9 +61,11 @@ String getMessageForResult(Result result){
     case Result.unverifiedOwnership: return "Phygital has an unverified ownership. Please verify first.";
     case Result.alreadyVerifiedOwnership: return "Phygital ownership is already verified.";
 
-
     case Result.transferSucceeded: return "Successfully transferred the Phygital.";
     case Result.transferFailed: return "Failed to transfer the Phygital.\nTry again.";
+
+    case Result.createSucceeded: return "Successfully created the Phygital collection.";
+    case Result.createFailed: return "Failed to create the Phygital collection.\nTry again.";
 
     case Result.notInitialized: return "Lukso Client not initialized.\nRestart the app.";
     case Result.unknownError: return "Unknown error occurred.\nTry again.";
