@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_nfc_kit/flutter_nfc_kit.dart';
 import 'package:ndef/utilities.dart';
 import 'package:pointycastle/api.dart';
+import 'package:web3dart/credentials.dart';
 
 import '../model/phygital.dart';
 
@@ -74,8 +75,9 @@ class NFC extends ChangeNotifier {
       await FlutterNfcKit.setIosAlertMessage("Reading Phygital");
       Phygital? phygital = validate ? await _validate(tag) : null;
 
-      if (validate && phygital == null)
+      if (validate && phygital == null) {
         throw Exception("This is not a valid Phygital");
+      }
 
       if (energyHarvestingDuration != null) sleep(energyHarvestingDuration);
 
@@ -123,20 +125,23 @@ class NFC extends ChangeNotifier {
           String.fromCharCodes(ndefRecords[uriNdefIndex].payload!.sublist(1));
       if (NFC.uri != uri) return null;
 
-      String address = String.fromCharCodes(
-          ndefRecords[phygitalAddressNdefIndex].payload!.sublist(3));
-      String? contractAddress =
+      EthereumAddress address = EthereumAddress(String.fromCharCodes(
+              ndefRecords[phygitalAddressNdefIndex].payload!.sublist(5))
+          .toBytes());
+
+      EthereumAddress? contractAddress =
           ndefRecords.length == lengthIncludingContractAddressNdefRecord
-              ? String.fromCharCodes(
-                  ndefRecords[contractAddressNdefIndex].payload!.sublist(3))
+              ? EthereumAddress(String.fromCharCodes(
+                      ndefRecords[contractAddressNdefIndex].payload!.sublist(5))
+                  .toBytes())
               : null;
 
       return Phygital(address: address, contractAddress: contractAddress);
     } catch (e) {
       if (kDebugMode) {
         print(e.toString());
-        throw Exception("Broken Phygital - Reset the contract address");
       }
+      throw Exception("Scan failed. Please retry.");
     }
   }
 
