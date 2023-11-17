@@ -1,3 +1,5 @@
+import 'package:ndef/utilities.dart';
+import 'package:phygital/model/compressed_image.dart';
 import 'package:phygital/model/lsp4/lsp4_verification.dart';
 
 class LSP4Image {
@@ -19,5 +21,15 @@ class LSP4Image {
       'url': url,
       'verification': verification
     };
+  }
+
+  factory LSP4Image.fromCompressedImage(
+      String url, CompressedImage compressedImage) {
+    return LSP4Image(
+        width: compressedImage.width,
+        height: compressedImage.height,
+        url: url,
+        verification:
+            LSP4Verification(data: "0x${compressedImage.hash.toHexString()}"));
   }
 }

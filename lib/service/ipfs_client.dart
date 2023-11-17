@@ -7,6 +7,7 @@ import 'dart:convert';
 
 import 'package:phygital/model/IpfsUploadWrapper.dart';
 import 'package:phygital/model/compressed_image.dart';
+import 'package:phygital/model/lsp4/lsp4_image.dart';
 import 'package:phygital/service/image_processor.dart';
 
 class IpfsClient extends ChangeNotifier {
@@ -46,7 +47,7 @@ class IpfsClient extends ChangeNotifier {
 
   final Client _httpClient = Client();
 
-  Future<(String, CompressedImage)?> uploadImage(String name, File file) async {
+  Future<LSP4Image?> uploadImage(String name, File file) async {
     MediaType? contentType = ImageProcessor().getMediaType(file);
     if (contentType == null) return null;
     CompressedImage? compressedImage = await ImageProcessor().compress(file);
@@ -70,7 +71,7 @@ class IpfsClient extends ChangeNotifier {
       }
       if (response.statusCode == 200 && jsonObject.containsKey(ipfsHashKey)) {
         String cid = jsonObject[ipfsHashKey] as String;
-        return ("$protocolPrefix$cid", compressedImage);
+        return LSP4Image.fromCompressedImage("$protocolPrefix$cid", compressedImage);
       }
     } catch (e) {
       if (kDebugMode) {
