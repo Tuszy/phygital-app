@@ -26,7 +26,7 @@ class App extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.purpleAccent),
         useMaterial3: true,
       ),
-      home: const ImageUpload(),
+      home: const Homepage(),
     );
   }
 }
