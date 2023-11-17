@@ -9,6 +9,7 @@ import 'package:phygital/model/lsp4/lsp4_image.dart';
 import 'package:phygital/model/lsp4/lsp4_link.dart';
 import 'package:phygital/model/lsp4/lsp4_metadata.dart';
 import 'package:phygital/model/lsp4/lsp4_verification.dart';
+import 'package:phygital/model/universal_profile.dart';
 import 'package:phygital/service/blockchain/lukso_client.dart';
 import 'package:provider/provider.dart';
 import 'package:web3dart/web3dart.dart';
@@ -27,6 +28,8 @@ class Homepage extends StatefulWidget {
 }
 
 class _HomepageState extends State<Homepage> {
+  UniversalProfile? _universalProfile;
+
   @override
   void initState() {
     super.initState();
@@ -238,9 +241,15 @@ class _HomepageState extends State<Homepage> {
     CustomDialog.showQrScanner(
         context: context,
         title: "Universal Profile",
-        onScanSuccess: (code) {
+        onScanSuccess: (code) async {
+          if (code == null) return;
+          String addressAsString = code.replaceAll("ethereum:0x", "").split("@").first;
+
+          UniversalProfile? universalProfile = await LuksoClient().fetchUniversalProfile(EthereumAddress(
+              addressAsString.toBytes()));
+
           setState(() {
-            print(code);
+            _universalProfile = universalProfile;
           });
         });
   }
@@ -271,28 +280,21 @@ class _HomepageState extends State<Homepage> {
           mainAxisSize: MainAxisSize.max,
           children: <Widget>[
             const LogoWidget(),
-            ImagePreview(
-              lsp4image: LSP4Image(
-                width: 400,
-                height: 400,
-                url: "ipfs://QmTCqXeST1vFBjUW15f9zXJMJKSz9JcG5gi7wajxs8MGwK",
-                verification: LSP4Verification(
-                  data:
-                      "0x6b3a0632917e88438de44d42a32115f6104b58f1cc025e00738debf2e65d5acb",
-                ),
+            if (_universalProfile != null && _universalProfile!.profileImages != null && _universalProfile!.profileImages!.isNotEmpty)
+              ImagePreview(
+                image: _universalProfile!.profileImages![0],
+                width: 150,
+                height: 150,
               ),
-              width: 150,
-              height: 150,
-            ),
-            const Expanded(
+            Expanded(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  /*Button(
+                  Button(
                     text: "Scan QR Code",
                     onPressed: scanQRCode,
                   ),
-                  Button(
+                  /*Button(
                     text: "Show QR Code",
                     onPressed: showQRCode,
                   ),

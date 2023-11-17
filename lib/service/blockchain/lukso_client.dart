@@ -5,15 +5,16 @@ import 'package:ndef/utilities.dart';
 import 'package:phygital/model/lsp4/lsp4_metadata.dart';
 import 'dart:convert';
 import 'package:phygital/service/backend_client.dart';
+import 'package:phygital/service/blockchain/contracts/LSP0ERC725Account.g.dart';
 import 'package:phygital/service/blockchain/result.dart';
 import 'package:phygital/service/ipfs_client.dart';
 import 'package:phygital/util/lsp2_utils.dart';
 import 'package:web3dart/web3dart.dart';
 
 import '../../model/phygital.dart';
+import '../../model/universal_profile.dart';
 import '../nfc.dart';
 import 'contracts/PhygitalAsset.g.dart';
-import 'contracts/UniversalProfile.g.dart';
 
 class LuksoClient extends ChangeNotifier {
   static const String rpcUrl = "https://rpc.testnet.lukso.gateway.fm";
@@ -24,6 +25,9 @@ class LuksoClient extends ChangeNotifier {
   static final phygitalAssetInterfaceId = "f6021190".toBytes();
   static final phygitalAssetCollectionUriKey =
       "4eff76d745d12fd5e5f7b38e8f396dd0d099124739e69a289ca1faa7ebc53768"
+          .toBytes();
+  static final universalProfileDataKey =
+      "5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5"
           .toBytes();
 
   static final controllerKey =
@@ -95,6 +99,7 @@ class LuksoClient extends ChangeNotifier {
           address: phygital.contractAddress!, client: _web3client!);
       Uint8List lsp2JsonUrl =
           await contract.getData(phygitalAssetCollectionUriKey);
+      if (lsp2JsonUrl.isEmpty) return false;
       List<EthereumAddress> collection = await _fetchCollection(lsp2JsonUrl);
       if (kDebugMode) {
         print("Phygital collection: $collection");
@@ -136,8 +141,8 @@ class LuksoClient extends ChangeNotifier {
 
     if (address != null) {
       try {
-        UniversalProfile contract =
-            UniversalProfile(address: address, client: _web3client!);
+        LSP0ERC725Account contract =
+            LSP0ERC725Account(address: address, client: _web3client!);
         if (await contract.supportsInterface(universalProfileInterfaceId)) {
           return Result.success;
         }
@@ -163,8 +168,8 @@ class LuksoClient extends ChangeNotifier {
 
     if (address != null) {
       try {
-        UniversalProfile contract =
-            UniversalProfile(address: address, client: _web3client!);
+        LSP0ERC725Account contract =
+            LSP0ERC725Account(address: address, client: _web3client!);
         if (await contract.supportsInterface(universalProfileInterfaceId)) {
           return Result.success;
         }
@@ -388,5 +393,22 @@ class LuksoClient extends ChangeNotifier {
         phygitalCollection: phygitalCollection,
         metadata: metadata,
         baseUri: baseUri);
+  }
+
+  Future<UniversalProfile?> fetchUniversalProfile(
+      EthereumAddress universalProfileAddress) async {
+    Result validationResult =
+        await validateUniversalProfileContract(universalProfileAddress);
+    if (validationResult != Result.success) return null;
+
+    LSP0ERC725Account contract = LSP0ERC725Account(
+        address: universalProfileAddress, client: _web3client!);
+    Uint8List lsp2JsonUrl = await contract.getData(universalProfileDataKey);
+    if (lsp2JsonUrl.isEmpty) return null;
+
+    String json = await LSP2Utils().fetchJsonUrl(lsp2JsonUrl);
+    Map<String, dynamic> universalProfileData = jsonDecode(json);
+    return UniversalProfile.fromJson(
+        universalProfileAddress, universalProfileData);
   }
 }
