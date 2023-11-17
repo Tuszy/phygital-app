@@ -141,18 +141,11 @@ class BackendClient extends ChangeNotifier {
       required List<Phygital> phygitalCollection,
       required LSP4Metadata metadata,
       required String baseUri}) async {
-    String? metadataLsp2JsonUrl;
-    try {
-      String stringifiedMetadata = jsonEncode(metadata);
-      String? cid = await IpfsClient().uploadJson(
-          "PhygitalAsset:Metadata:$name:$symbol:${universalProfileAddress.hexEip55}",
-          metadata);
-      if (cid == null) return (Result.uploadingLSP4MetadataFailed, null);
-      metadataLsp2JsonUrl = LSP2Utils().createJsonUrl(cid, stringifiedMetadata);
-    } catch (e) {
-      if (kDebugMode) {
-        print("Failed to upload LSP4 metadata to ipfs ($e)");
-      }
+    String? metadataLsp2JsonUrl = await metadata.uploadToIpfs(
+        name: name,
+        symbol: symbol,
+        universalProfileAddress: universalProfileAddress);
+    if (metadataLsp2JsonUrl == null) {
       return (Result.uploadingLSP4MetadataFailed, null);
     }
 
