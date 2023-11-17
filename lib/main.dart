@@ -25,10 +25,6 @@ class App extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.purpleAccent),
         useMaterial3: true,
-        dialogTheme: const DialogTheme(
-          backgroundColor: Colors.black,
-          shadowColor: Colors.yellow,
-        ),
       ),
       home: const Homepage(),
     );
