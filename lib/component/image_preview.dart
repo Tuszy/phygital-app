@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
-import '../model/lsp4/lsp4_image.dart';
+import 'package:phygital/model/lsp_image.dart';
 
 class ImagePreview extends StatefulWidget {
-  const ImagePreview({super.key, required this.lsp4image, required this.width, required this.height});
+  const ImagePreview(
+      {super.key,
+      required this.image,
+      required this.width,
+      required this.height});
 
-  final LSP4Image lsp4image;
+  final LSPImage image;
   final double width;
   final double height;
 
@@ -26,8 +30,8 @@ class _ImagePreviewState extends State<ImagePreview> {
   initState() {
     super.initState();
 
-    _width = widget.lsp4image.width.toDouble();
-    _height = widget.lsp4image.height.toDouble();
+    _width = widget.image.width.toDouble();
+    _height = widget.image.height.toDouble();
 
     if (_height > widget.width ||
         _height > widget.height ||
@@ -35,7 +39,7 @@ class _ImagePreviewState extends State<ImagePreview> {
         _width > widget.height) {
       if (_width > _height) {
         _height = widget.height * (_height / _width) + 2;
-      } else if (_width <_height) {
+      } else if (_width < _height) {
         _width = widget.width * (_width / _height) + 2;
       }
     }
@@ -82,7 +86,7 @@ class _ImagePreviewState extends State<ImagePreview> {
                     decoration:
                         BoxDecoration(borderRadius: BorderRadius.circular(26)),
                     child: Image.network(
-                      widget.lsp4image.gatewayUrl,
+                      widget.image.gatewayUrl,
                       width: _width,
                       height: _height,
                     ),
