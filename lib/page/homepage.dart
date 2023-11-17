@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:ndef/utilities.dart';
 import 'package:phygital/component/custom_dialog.dart';
+import 'package:phygital/component/image_preview.dart';
 import 'package:phygital/layout/standard_layout.dart';
 import 'package:phygital/model/lsp4/lsp4_image.dart';
 import 'package:phygital/model/lsp4/lsp4_link.dart';
@@ -199,7 +200,7 @@ class _HomepageState extends State<Homepage> {
     LSP4Image lsp4image = LSP4Image(
         width: 400,
         height: 400,
-        url: "ifps://QmTCqXeST1vFBjUW15f9zXJMJKSz9JcG5gi7wajxs8MGwK",
+        url: "ipfs://QmTCqXeST1vFBjUW15f9zXJMJKSz9JcG5gi7wajxs8MGwK",
         verification: LSP4Verification(
             data:
                 "0x6b3a0632917e88438de44d42a32115f6104b58f1cc025e00738debf2e65d5acb"));
@@ -248,8 +249,7 @@ class _HomepageState extends State<Homepage> {
     CustomDialog.showQrCode(
       context: context,
       title: "Test",
-      data:
-          '0x6b3a0632917e88438de44d42a32115f6104b58f1cc025e00738debf2e65d5acb',
+      data: 'ethereum:0x1E9122dc5a7F6391d535cC3c59f20445585984db@4201',
       onPressed: () {},
     );
   }
@@ -271,11 +271,24 @@ class _HomepageState extends State<Homepage> {
           mainAxisSize: MainAxisSize.max,
           children: <Widget>[
             const LogoWidget(),
-            Expanded(
+            ImagePreview(
+              lsp4image: LSP4Image(
+                width: 400,
+                height: 400,
+                url: "ipfs://QmTCqXeST1vFBjUW15f9zXJMJKSz9JcG5gi7wajxs8MGwK",
+                verification: LSP4Verification(
+                  data:
+                      "0x6b3a0632917e88438de44d42a32115f6104b58f1cc025e00738debf2e65d5acb",
+                ),
+              ),
+              width: 150,
+              height: 150,
+            ),
+            const Expanded(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Button(
+                  /*Button(
                     text: "Scan QR Code",
                     onPressed: scanQRCode,
                   ),
@@ -288,7 +301,7 @@ class _HomepageState extends State<Homepage> {
                       text: "Read",
                       onPressed: read,
                     ),
-                  /*if (nfc.isAvailable)
+                  if (nfc.isAvailable)
                     Button(
                       text: "Mint",
                       onPressed: mint,

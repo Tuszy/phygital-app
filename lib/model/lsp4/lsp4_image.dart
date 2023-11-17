@@ -1,6 +1,7 @@
 import 'package:ndef/utilities.dart';
 import 'package:phygital/model/image.dart';
 import 'package:phygital/model/lsp4/lsp4_verification.dart';
+import 'package:phygital/service/ipfs_client.dart';
 
 class LSP4Image {
   LSP4Image(
@@ -13,6 +14,8 @@ class LSP4Image {
   final int height;
   final String url;
   final LSP4Verification verification;
+
+  String get gatewayUrl => url.replaceFirst(IpfsClient.protocolPrefix, IpfsClient.gatewayUrl);
 
   Map<String, dynamic> toJson() {
     return {

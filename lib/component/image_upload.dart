@@ -70,7 +70,7 @@ class _ImageUploadState extends State<ImageUpload> {
               ImageSizeGetter.getSize(FileInput(File(pickedImage.path)));
           _rotate = size.needRotate;
 
-          if (size.width > widget.width ||
+          if (size.height > widget.width ||
               size.height > widget.height ||
               size.width > widget.width ||
               size.width > widget.height) {
