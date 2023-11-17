@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
-
+import 'dart:io';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:ndef/utilities.dart';
 import 'package:phygital/service/ipfs_client.dart';
 import 'package:pointycastle/api.dart';
@@ -16,6 +17,18 @@ class LSP2Utils {
   final Client _httpClient = Client();
 
   static final keccak256HashValue = "6f357c6a".toBytes();
+
+  Uint8List hashBytes(Uint8List bytes) {
+    return Digest('Keccak/256').process(bytes);
+  }
+
+  Future<Uint8List> hashFile(File file) async {
+    return hashBytes(await file.readAsBytes());
+  }
+
+  Future<Uint8List> hashXFile(XFile file) async {
+    return hashBytes(await file.readAsBytes());
+  }
 
   Uint8List hashJson(Uint8List json) {
     String jsonStringified = jsonEncode(jsonDecode(utf8.decode(json)));
