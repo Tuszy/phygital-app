@@ -245,13 +245,13 @@ class _HomepageState extends State<Homepage> {
   }
 
   void showQRCode() {
-    CustomDialog.showInfo(
-        context: context,
-        title: "Test",
-        text: "Hallo wie gehts meine Freunde",
-        onPressed: () {
-          print("PENG");
-        });
+    CustomDialog.showQrCode(
+      context: context,
+      title: "Test",
+      data:
+          '0x6b3a0632917e88438de44d42a32115f6104b58f1cc025e00738debf2e65d5acb',
+      onPressed: () {},
+    );
   }
 
   Future<void> showInfoDialog(
