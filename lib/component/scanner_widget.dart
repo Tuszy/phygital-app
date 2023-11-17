@@ -23,11 +23,15 @@ class _ScannerWidgetState extends State<ScannerWidget> {
 
   @override
   void reassemble() {
-    super.reassemble();
-    if (Platform.isAndroid) {
-      controller?.pauseCamera();
-    } else if (Platform.isIOS) {
-      controller?.resumeCamera();
+    try {
+      super.reassemble();
+      if (Platform.isAndroid) {
+        controller?.pauseCamera();
+      } else if (Platform.isIOS) {
+        controller?.resumeCamera();
+      }
+    } catch (e) {
+      Navigator.pop(context);
     }
   }
 
@@ -47,10 +51,9 @@ class _ScannerWidgetState extends State<ScannerWidget> {
           padding: const EdgeInsets.symmetric(vertical: 8),
           child: DefaultTextStyle(
             style: const TextStyle(
-              color: Colors.white,
-              fontSize: 24,
-              fontWeight: FontWeight.w800,
-            ),
+                color: Color(0xddffffff),
+                fontSize: 24,
+                fontWeight: FontWeight.w700),
             child: Text(
               widget.title,
             ),
@@ -65,19 +68,33 @@ class _ScannerWidgetState extends State<ScannerWidget> {
             ),
           ),
         ),
+        Container(
+          color: Colors.white70,
+          height: 2,
+          margin: const EdgeInsets.only(top: 16),
+        ),
         TextButton(
+          style: TextButton.styleFrom(
+            foregroundColor: const Color(0xcdffffff),
+            backgroundColor: const Color(0x22000000),
+            padding: const EdgeInsets.all(16.0),
+            textStyle: const TextStyle(
+              letterSpacing: 3,
+              fontSize: 24,
+              fontWeight: FontWeight.w900,
+            ),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+          ),
           onPressed: () {
             Navigator.pop(context);
           },
-          child: Text(
-            "STOP",
-            style: TextStyle(
-              color: Colors.red.shade900,
-              fontWeight: FontWeight.w800,
-              fontSize: 18,
-            ),
+          child: const Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.max,
+            children: [Text("Close")],
           ),
-        ),
+        )
       ],
     );
   }
@@ -104,11 +121,15 @@ class _ScannerWidgetState extends State<ScannerWidget> {
 
   void _onQRViewCreated(QRViewController controller) {
     this.controller = controller;
-    controller.scannedDataStream.listen((Barcode scanData) async {
-      if (!isScanned) {
-        isScanned = true;
-        widget.onScanSuccess(scanData.code);
-      }
-    });
+    try {
+      controller.scannedDataStream.listen((Barcode scanData) async {
+        if (!isScanned) {
+          isScanned = true;
+          widget.onScanSuccess(scanData.code);
+        }
+      });
+    } catch (e) {
+      Navigator.pop(context);
+    }
   }
 }
