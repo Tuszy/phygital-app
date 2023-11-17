@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:phygital/page/image_upload.dart';
 import 'package:provider/provider.dart';
 import 'page/homepage.dart';
 import 'service/nfc.dart';
@@ -25,7 +26,7 @@ class App extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.purpleAccent),
         useMaterial3: true,
       ),
-      home: const Homepage(),
+      home: const ImageUpload(),
     );
   }
 }

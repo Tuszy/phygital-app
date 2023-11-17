@@ -6,16 +6,19 @@ import 'dart:io';
 import 'dart:convert';
 
 import 'package:phygital/model/IpfsUploadWrapper.dart';
-import 'package:phygital/model/compressed_image.dart';
+import 'package:image_size_getter/image_size_getter.dart';
+import 'package:image_size_getter/file_input.dart';
+import 'package:phygital/model/image.dart';
 import 'package:phygital/model/lsp4/lsp4_image.dart';
-import 'package:phygital/service/image_processor.dart';
+import 'package:mime/mime.dart';
+
+import '../util/lsp2_utils.dart';
 
 class IpfsClient extends ChangeNotifier {
   static const String protocolPrefix = "ipfs://";
   static const String gatewayUrl = "https://2eff.lukso.dev/ipfs/";
 
-  static const String apiUrl =
-      "https://api.pinata.cloud";
+  static const String apiUrl = "https://api.pinata.cloud";
   static const String apiKey = "e29a6447fab35e5";
   static const String apiSecret =
       "7a99e975a1dac46ecaaa9ad2f6163cb1499a71633fd8e6228a9fc9757c5cc0fb";
@@ -48,12 +51,15 @@ class IpfsClient extends ChangeNotifier {
   final Client _httpClient = Client();
 
   Future<LSP4Image?> uploadImage(String name, File file) async {
-    MediaType? contentType = ImageProcessor().getMediaType(file);
+    String? mimeType = lookupMimeType(file.path);
+    MediaType? contentType =
+        mimeType != null ? MediaType.parse(mimeType) : null;
     if (contentType == null) return null;
-    CompressedImage? compressedImage = await ImageProcessor().compress(file);
-    if (compressedImage == null) return null;
+    Uint8List bytes = await file.readAsBytes();
+    Size size = ImageSizeGetter.getSize(FileInput(file));
+    Uint8List hash = LSP2Utils().hashBytes(bytes);
 
-    MultipartFile multipartFile = MultipartFile.fromBytes("file", compressedImage.bytes,
+    MultipartFile multipartFile = MultipartFile.fromBytes("file", bytes,
         filename: name, contentType: contentType);
 
     MultipartRequest request = MultipartRequest("POST", pinFileEndpoint);
@@ -71,7 +77,14 @@ class IpfsClient extends ChangeNotifier {
       }
       if (response.statusCode == 200 && jsonObject.containsKey(ipfsHashKey)) {
         String cid = jsonObject[ipfsHashKey] as String;
-        return LSP4Image.fromCompressedImage("$protocolPrefix$cid", compressedImage);
+        return LSP4Image.fromImage(
+            "$protocolPrefix$cid",
+            Image(
+                bytes: bytes,
+                width: size.width,
+                height: size.height,
+                mediaType: contentType,
+                hash: hash));
       }
     } catch (e) {
       if (kDebugMode) {

@@ -1,8 +1,8 @@
 import 'dart:typed_data';
 import 'package:http_parser/http_parser.dart';
 
-class CompressedImage {
-  CompressedImage(
+class Image {
+  Image(
       {required this.bytes,
       required this.width,
       required this.height,

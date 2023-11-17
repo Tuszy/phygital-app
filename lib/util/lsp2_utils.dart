@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'dart:typed_data';
 import 'dart:io';
-import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:ndef/utilities.dart';
 import 'package:phygital/service/ipfs_client.dart';
 import 'package:pointycastle/api.dart';
@@ -23,10 +22,6 @@ class LSP2Utils {
   }
 
   Future<Uint8List> hashFile(File file) async {
-    return hashBytes(await file.readAsBytes());
-  }
-
-  Future<Uint8List> hashXFile(XFile file) async {
     return hashBytes(await file.readAsBytes());
   }
 

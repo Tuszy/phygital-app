@@ -1,5 +1,5 @@
 import 'package:ndef/utilities.dart';
-import 'package:phygital/model/compressed_image.dart';
+import 'package:phygital/model/image.dart';
 import 'package:phygital/model/lsp4/lsp4_verification.dart';
 
 class LSP4Image {
@@ -23,8 +23,8 @@ class LSP4Image {
     };
   }
 
-  factory LSP4Image.fromCompressedImage(
-      String url, CompressedImage compressedImage) {
+  factory LSP4Image.fromImage(
+      String url, Image compressedImage) {
     return LSP4Image(
         width: compressedImage.width,
         height: compressedImage.height,
