@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:ndef/utilities.dart';
-import 'package:phygital/component/qr_code_scanner.dart';
+import 'package:phygital/component/custom_dialog.dart';
 import 'package:phygital/layout/standard_layout.dart';
 import 'package:phygital/model/lsp4/lsp4_image.dart';
 import 'package:phygital/model/lsp4/lsp4_link.dart';
@@ -26,8 +26,6 @@ class Homepage extends StatefulWidget {
 }
 
 class _HomepageState extends State<Homepage> {
-  final _qrCodeScanner = QrCodeScanner();
-
   @override
   void initState() {
     super.initState();
@@ -40,10 +38,15 @@ class _HomepageState extends State<Homepage> {
       Phygital? phygital = await NFC().scan();
       if (phygital != null) {
         showInfoDialog(
-            title: "Phygital", text: phygital.toString(), buttonText: "OK");
+          title: "Phygital",
+          text: phygital.toString(),
+        );
       }
     } catch (e) {
-      showInfoDialog(title: "Error", text: e.toString(), buttonText: "Ok");
+      showInfoDialog(
+        title: "Error",
+        text: e.toString(),
+      );
     }
   }
 
@@ -55,10 +58,16 @@ class _HomepageState extends State<Homepage> {
       String? signature = await NFC()
           .signUniversalProfileAddress(universalProfileAddress, nonce);
       if (signature != null) {
-        showInfoDialog(title: "Signature", text: signature, buttonText: "OK");
+        showInfoDialog(
+          title: "Signature",
+          text: signature,
+        );
       }
     } catch (e) {
-      showInfoDialog(title: "Error", text: e.toString(), buttonText: "Ok");
+      showInfoDialog(
+        title: "Error",
+        text: e.toString(),
+      );
     }
   }
 
@@ -68,12 +77,15 @@ class _HomepageState extends State<Homepage> {
           EthereumAddress("eDe44390389A98441ff2B9dDCe862fFAC9BeB0cd".toBytes());
       if (await NFC().setContractAddress(contractAddress) != null) {
         showInfoDialog(
-            title: "Contract Address",
-            text: contractAddress.hexEip55,
-            buttonText: "OK");
+          title: "Contract Address",
+          text: contractAddress.hexEip55,
+        );
       }
     } catch (e) {
-      showInfoDialog(title: "Error", text: e.toString(), buttonText: "Ok");
+      showInfoDialog(
+        title: "Error",
+        text: e.toString(),
+      );
     }
   }
 
@@ -94,11 +106,14 @@ class _HomepageState extends State<Homepage> {
       Result result =
           await LuksoClient().mint(phygital, universalProfileAddress);
       showInfoDialog(
-          title: "Minting Result",
-          text: getMessageForResult(result),
-          buttonText: "Ok");
+        title: "Minting Result",
+        text: getMessageForResult(result),
+      );
     } catch (e) {
-      showInfoDialog(title: "Error", text: e.toString(), buttonText: "Ok");
+      showInfoDialog(
+        title: "Error",
+        text: e.toString(),
+      );
     }
   }
 
@@ -121,11 +136,14 @@ class _HomepageState extends State<Homepage> {
       Result result = await LuksoClient()
           .verifyOwnershipAfterTransfer(phygital, universalProfileAddress);
       showInfoDialog(
-          title: "Ownership Verification Result",
-          text: getMessageForResult(result),
-          buttonText: "Ok");
+        title: "Ownership Verification Result",
+        text: getMessageForResult(result),
+      );
     } catch (e) {
-      showInfoDialog(title: "Error", text: e.toString(), buttonText: "Ok");
+      showInfoDialog(
+        title: "Error",
+        text: e.toString(),
+      );
     }
   }
 
@@ -150,11 +168,14 @@ class _HomepageState extends State<Homepage> {
       Result result = await LuksoClient().transfer(
           phygital, fromUniversalProfileAddress, toUniversalProfileAddress);
       showInfoDialog(
-          title: "Transfer Result",
-          text: getMessageForResult(result),
-          buttonText: "Ok");
+        title: "Transfer Result",
+        text: getMessageForResult(result),
+      );
     } catch (e) {
-      showInfoDialog(title: "Error", text: e.toString(), buttonText: "Ok");
+      showInfoDialog(
+        title: "Error",
+        text: e.toString(),
+      );
     }
   }
 
@@ -200,17 +221,20 @@ class _HomepageState extends State<Homepage> {
           metadata,
           baseUri);
       showInfoDialog(
-          title: "Creation Result",
-          text: getMessageForResult(result.$1) +
-              (result.$2 != null ? "\n${result.$2!.hexEip55}" : ""),
-          buttonText: "Ok");
+        title: "Creation Result",
+        text: getMessageForResult(result.$1) +
+            (result.$2 != null ? "\n${result.$2!.hexEip55}" : ""),
+      );
     } catch (e) {
-      showInfoDialog(title: "Error", text: e.toString(), buttonText: "Ok");
+      showInfoDialog(
+        title: "Error",
+        text: e.toString(),
+      );
     }
   }
 
   void scanQRCode() {
-    _qrCodeScanner.scanQrCode(
+    CustomDialog.showQrScanner(
         context: context,
         title: "Universal Profile",
         onScanSuccess: (code) {
@@ -220,34 +244,19 @@ class _HomepageState extends State<Homepage> {
         });
   }
 
+  void showQRCode() {
+    CustomDialog.showInfo(
+        context: context,
+        title: "Test",
+        text: "Hallo wie gehts meine Freunde",
+        onPressed: () {
+          print("PENG");
+        });
+  }
+
   Future<void> showInfoDialog(
-      {required String title,
-      required String text,
-      required String buttonText}) async {
-    return showDialog<void>(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(title),
-          content: SingleChildScrollView(
-            child: ListBody(
-              children: <Widget>[
-                Text(text),
-              ],
-            ),
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: Text(buttonText),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
+      {required String title, required String text}) async {
+    return CustomDialog.showInfo(title: title, text: text, onPressed: () {});
   }
 
   @override
@@ -269,6 +278,10 @@ class _HomepageState extends State<Homepage> {
                   Button(
                     text: "Scan QR Code",
                     onPressed: scanQRCode,
+                  ),
+                  Button(
+                    text: "Show QR Code",
+                    onPressed: showQRCode,
                   ),
                   if (nfc.isAvailable)
                     Button(

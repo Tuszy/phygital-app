@@ -57,19 +57,22 @@ class _ScannerWidgetState extends State<ScannerWidget> {
           ),
         ),
         Flexible(
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(10),
-            child: _buildQrView(context),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: _buildQrView(context),
+            ),
           ),
         ),
         TextButton(
           onPressed: () {
             Navigator.pop(context);
           },
-          child: const Text(
+          child: Text(
             "STOP",
             style: TextStyle(
-              color: Colors.red,
+              color: Colors.red.shade900,
               fontWeight: FontWeight.w800,
               fontSize: 18,
             ),
