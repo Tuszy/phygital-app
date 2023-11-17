@@ -11,4 +11,12 @@ class LSP4Asset {
   Map<String, dynamic> toJson() {
     return {'url': url, 'verification': verification, 'fileType': fileType};
   }
+
+  factory LSP4Asset.fromJson(final Map<String, dynamic> data) {
+    return LSP4Asset(
+      fileType: data["fileType"],
+      url: data["url"],
+      verification: LSP4Verification.fromJson(data["verification"]),
+    );
+  }
 }

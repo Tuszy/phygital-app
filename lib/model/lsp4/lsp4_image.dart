@@ -1,21 +1,16 @@
 import 'package:ndef/utilities.dart';
 import 'package:phygital/model/image.dart';
 import 'package:phygital/model/lsp4/lsp4_verification.dart';
-import 'package:phygital/service/ipfs_client.dart';
+import 'package:phygital/model/lsp_image.dart';
 
-class LSP4Image {
+class LSP4Image extends LSPImage {
   LSP4Image(
-      {required this.width,
-      required this.height,
-      required this.url,
-      required this.verification});
+      {required int width,
+      required int height,
+      required String url,
+      required this.verification}) : super(width: width, height: height, url: url);
 
-  final int width;
-  final int height;
-  final String url;
   final LSP4Verification verification;
-
-  String get gatewayUrl => url.replaceFirst(IpfsClient.protocolPrefix, IpfsClient.gatewayUrl);
 
   Map<String, dynamic> toJson() {
     return {
@@ -26,8 +21,16 @@ class LSP4Image {
     };
   }
 
-  factory LSP4Image.fromImage(
-      String url, Image compressedImage) {
+  factory LSP4Image.fromJson(final Map<String, dynamic> data) {
+    return LSP4Image(
+      width: data["width"],
+      height: data["height"],
+      url: data["url"],
+      verification: LSP4Verification.fromJson(data["verification"]),
+    );
+  }
+
+  factory LSP4Image.fromImage(String url, Image compressedImage) {
     return LSP4Image(
         width: compressedImage.width,
         height: compressedImage.height,

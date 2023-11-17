@@ -7,4 +7,8 @@ class LSP4Link {
   Map<String, dynamic> toJson() {
     return {'title': title, 'url': url};
   }
+
+  factory LSP4Link.fromJson(final Map<String, dynamic> data) {
+    return LSP4Link(title: data["title"], url: data["url"]);
+  }
 }
