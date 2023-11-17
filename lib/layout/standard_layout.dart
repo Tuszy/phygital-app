@@ -30,14 +30,14 @@ class _StandardLayoutState extends State<StandardLayout>
         ),
         child: Stack(
           children: [
-            IgnorePointer(
+            /*IgnorePointer(
               ignoring: true,
               child: AnimatedBackground(
                   behaviour:
                       SpaceBehaviour(backgroundColor: Colors.transparent),
                   vsync: this,
                   child: const ColoredBox(color: Colors.transparent)),
-            ),
+            ),*/
             SafeArea(
               child: widget.child,
             ),

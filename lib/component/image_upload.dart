@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:image_size_getter/file_input.dart';
 import 'package:image_size_getter/image_size_getter.dart';
-import 'package:phygital/page/custom_icon_button.dart';
+import 'package:phygital/component/custom_icon_button.dart';
 
 typedef OnImageChangeCallback = void Function(File?);
 

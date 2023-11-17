@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:ndef/utilities.dart';
+import 'package:phygital/component/qr_code_scanner.dart';
 import 'package:phygital/layout/standard_layout.dart';
 import 'package:phygital/model/lsp4/lsp4_image.dart';
 import 'package:phygital/model/lsp4/lsp4_link.dart';
@@ -25,6 +26,8 @@ class Homepage extends StatefulWidget {
 }
 
 class _HomepageState extends State<Homepage> {
+  final _qrCodeScanner = QrCodeScanner();
+
   @override
   void initState() {
     super.initState();
@@ -206,6 +209,17 @@ class _HomepageState extends State<Homepage> {
     }
   }
 
+  void scanQRCode() {
+    _qrCodeScanner.scanQrCode(
+        context: context,
+        title: "Universal Profile",
+        onScanSuccess: (code) {
+          setState(() {
+            print(code);
+          });
+        });
+  }
+
   Future<void> showInfoDialog(
       {required String title,
       required String text,
@@ -252,12 +266,16 @@ class _HomepageState extends State<Homepage> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
+                  Button(
+                    text: "Scan QR Code",
+                    onPressed: scanQRCode,
+                  ),
                   if (nfc.isAvailable)
                     Button(
                       text: "Read",
                       onPressed: read,
                     ),
-                  if (nfc.isAvailable)
+                  /*if (nfc.isAvailable)
                     Button(
                       text: "Mint",
                       onPressed: mint,
@@ -276,7 +294,7 @@ class _HomepageState extends State<Homepage> {
                     Button(
                       text: "Create",
                       onPressed: create,
-                    ),
+                    ),*/
                 ],
               ),
             ),

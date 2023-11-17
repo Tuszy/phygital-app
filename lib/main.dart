@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:phygital/page/image_upload.dart';
+import 'package:phygital/component/image_upload.dart';
 import 'package:provider/provider.dart';
 import 'page/homepage.dart';
 import 'service/nfc.dart';
@@ -25,6 +25,10 @@ class App extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.purpleAccent),
         useMaterial3: true,
+        dialogTheme: const DialogTheme(
+          backgroundColor: Colors.black,
+          shadowColor: Colors.yellow,
+        ),
       ),
       home: const Homepage(),
     );
