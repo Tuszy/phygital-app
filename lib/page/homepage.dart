@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:ndef/utilities.dart';
 import 'package:phygital/model/phygital_with_data.dart';
+import 'package:phygital/page/phygital/phygital_data_page.dart';
 import 'package:phygital/service/blockchain/lukso_client.dart';
 import 'package:phygital/service/custom_dialog.dart';
 import 'package:phygital/component/image_preview.dart';
@@ -9,7 +9,6 @@ import 'package:phygital/model/lsp0/universal_profile.dart';
 import 'package:phygital/service/global_state.dart';
 import 'package:phygital/service/qr_code.dart';
 import 'package:provider/provider.dart';
-import 'package:web3dart/credentials.dart';
 
 import '../component/button.dart';
 import '../service/result.dart';
@@ -25,7 +24,7 @@ class Homepage extends StatefulWidget {
 }
 
 class _HomepageState extends State<Homepage> {
-  UniversalProfile? _universalProfile;
+  static const String frontendUrl = "www.phygital.tuszy.com";
 
   @override
   void initState() {
@@ -34,7 +33,7 @@ class _HomepageState extends State<Homepage> {
     NFC().init();
   }
 
-  void readPhygital() async {
+  void scanPhygital() async {
     try {
       Phygital? phygital = await NFC().scan();
       if (phygital == null) return;
@@ -46,17 +45,32 @@ class _HomepageState extends State<Homepage> {
         return;
       }
 
-      (Result, PhygitalWithData?) phygitalWithData =
+      (Result, PhygitalWithData?) result =
           await LuksoClient().fetchPhygitalData(phygital);
-      if (Result.success != phygitalWithData.$1) {
+      if (Result.success != result.$1) {
         showInfoDialog(
           title: "Read Result",
-          text: getMessageForResult(phygitalWithData.$1),
+          text: getMessageForResult(result.$1),
         );
         return;
       }
 
-      // TODO OPEN PHYGITAL PAGE
+      if (result.$2 == null) {
+        showInfoDialog(
+          title: "Read Result",
+          text: getMessageForResult(Result.invalidPhygitalData),
+        );
+        return;
+      }
+
+      if (!mounted) return;
+
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => PhygitalDataPage(phygitalWithData: result.$2!),
+        ),
+      );
     } catch (e) {
       showInfoDialog(
         title: "Error",
@@ -65,7 +79,8 @@ class _HomepageState extends State<Homepage> {
     }
   }
 
-  void scanQRCode() async {
+  void loginWithUniversalProfile() async {
+
     String? scannedCode = await CustomDialog.showQrScanner(
       context: context,
       title: "Universal Profile",
@@ -73,28 +88,32 @@ class _HomepageState extends State<Homepage> {
 
     if (!mounted || scannedCode == null) return;
 
+    GlobalState().loading = true;
     (Result, UniversalProfile?)? result = await QRCode().getUniversalProfile(
       scannedCode: scannedCode,
       validatePermissions: true,
     );
-
-    if (Result.success != result.$1) {
+    if (Result.necessaryPermissionsNotSet == result.$1) {
+      showQRCode(
+          "Missing permissions.\nSet them on: $frontendUrl", frontendUrl);
+    } else if (Result.success != result.$1) {
       showInfoDialog(
         title: "Scan Result",
         text: getMessageForResult(result.$1),
       );
     }
 
-    setState(() {
-      _universalProfile = result.$2;
-    });
+    GlobalState().universalProfile = result.$2;
+    GlobalState().loading = false;
   }
 
-  void showQRCode() {
+  void logout() => GlobalState().universalProfile = null;
+
+  void showQRCode(String title, String data) {
     CustomDialog.showQrCode(
       context: context,
-      title: "Test",
-      data: 'ethereum:0x1E9122dc5a7F6391d535cC3c59f20445585984db@4201',
+      title: title,
+      data: data,
       onPressed: () {},
     );
   }
@@ -108,6 +127,7 @@ class _HomepageState extends State<Homepage> {
   @override
   Widget build(BuildContext context) {
     GlobalState globalState = Provider.of<GlobalState>(context);
+    UniversalProfile? universalProfile = globalState.universalProfile;
 
     return StandardLayout(
       child: Center(
@@ -117,11 +137,10 @@ class _HomepageState extends State<Homepage> {
           mainAxisSize: MainAxisSize.max,
           children: <Widget>[
             const LogoWidget(),
-            if (_universalProfile != null &&
-                _universalProfile!.profileImages != null &&
-                _universalProfile!.profileImages!.isNotEmpty)
+            if (universalProfile != null &&
+                universalProfile.profileImage != null)
               ImagePreview(
-                image: _universalProfile!.profileImages![0],
+                image: universalProfile.profileImage!,
                 width: 150,
                 height: 150,
               ),
@@ -131,42 +150,19 @@ class _HomepageState extends State<Homepage> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Button(
-                          text: "Read Phygital",
-                          onPressed: readPhygital,
+                          text: "Scan Phygital",
+                          onPressed: scanPhygital,
                         ),
-                        Button(
-                          text: "Scan QR Code",
-                          onPressed: scanQRCode,
-                        ),
-                        /*Button(
-                    text: "Show QR Code",
-                    onPressed: showQRCode,
-                  ),
-                  if (nfc.isAvailable)
-                    Button(
-                      text: "Read",
-                      onPressed: read,
-                    ),
-                  if (nfc.isAvailable)
-                    Button(
-                      text: "Mint",
-                      onPressed: mint,
-                    ),
-                  if (nfc.isAvailable)
-                    Button(
-                      text: "Transfer",
-                      onPressed: transfer,
-                    ),
-                  if (nfc.isAvailable)
-                    Button(
-                      text: "Verify Ownership",
-                      onPressed: verifyOwnershipAfterTransfer,
-                    ),
-                  if (nfc.isAvailable)
-                    Button(
-                      text: "Create",
-                      onPressed: create,
-                    ),*/
+                        if (universalProfile == null)
+                          Button(
+                            text: "Login with Universal Profile",
+                            onPressed: loginWithUniversalProfile,
+                          ),
+                        if (universalProfile != null)
+                          Button(
+                            text: "Logout",
+                            onPressed: logout,
+                          ),
                       ],
                     )
                   : Center(

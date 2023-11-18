@@ -52,4 +52,13 @@ class GlobalState extends ChangeNotifier {
     }
     notifyListeners();
   }
+
+  bool _loading = false;
+
+  bool get loading => _loading;
+
+  set loading(bool newValue) {
+    _loading = newValue;
+    notifyListeners();
+  }
 }
