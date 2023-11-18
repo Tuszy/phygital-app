@@ -11,7 +11,7 @@ import 'package:web3dart/credentials.dart';
 import '../model/phygital.dart';
 
 typedef NFCTagCommandFunction = Future<dynamic> Function(
-    NFCTag tag, Phygital? phygital);
+    NFCTag tag, Phygital phygital);
 
 class NFC extends ChangeNotifier {
   NFC._sharedInstance();
@@ -63,20 +63,37 @@ class NFC extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<dynamic> _startNFCCommunication(Duration? energyHarvestingDuration,
-      bool validate, NFCTagCommandFunction nfcTagCommandFunction) async {
+  Future<dynamic> _startNFCCommunication({
+    required String message,
+    Duration? energyHarvestingDuration,
+    Phygital? expectedPhygital,
+    bool? mustHaveContractAddress,
+    bool? mustNotHaveContractAddress,
+    required NFCTagCommandFunction nfcTagCommandFunction,
+  }) async {
     if (!isAvailable) throw "NFC is not available";
 
     try {
       active = true;
 
       NFCTag tag = await FlutterNfcKit.poll(
-          iosAlertMessage: "Hold your iPhone near the Phygital");
-      await FlutterNfcKit.setIosAlertMessage("Reading Phygital");
-      Phygital? phygital = validate ? await _validate(tag) : null;
+        iosAlertMessage: "Hold your iPhone near the Phygital",
+      );
+      if (expectedPhygital != null && expectedPhygital.tagId != tag.id) {
+        throw "Different Phygital detected.";
+      }
+      await FlutterNfcKit.setIosAlertMessage(message);
 
-      if (validate && phygital == null) {
+      Phygital? phygital = expectedPhygital ?? await _validate(tag);
+      if (phygital == null) {
         throw "This is not a valid Phygital";
+      }
+
+      if (mustHaveContractAddress == true && phygital.contractAddress == null) {
+        throw "Unassigned Phygital";
+      } else if (mustNotHaveContractAddress == true &&
+          phygital.contractAddress != null) {
+        throw "Phygital is already assigned to a collection";
       }
 
       if (energyHarvestingDuration != null) sleep(energyHarvestingDuration);
@@ -84,19 +101,20 @@ class NFC extends ChangeNotifier {
       var result = await nfcTagCommandFunction(tag, phygital);
 
       active = false;
+
       await FlutterNfcKit.finish(iosAlertMessage: "Succeeded!");
+
       return result;
     } catch (e) {
-      if (kDebugMode) {
-        print(e.toString());
-      }
+      if (kDebugMode) print("NFC communication failed ($e)");
       active = false;
       await FlutterNfcKit.finish(iosAlertMessage: "Failed!");
-      if (e is PlatformException && e.code == "409") {
-        return null; // User cancelled
-      }
-      if (e is PlatformException && e.code == "500") {
-        throw "Phygital connection lost.\nKeep your mobile phone close while processing.";
+      if (e is PlatformException) {
+        if (e.code == "409") {
+          throw "You have cancelled the NFC communication"; // User cancelled
+        } else if (e.code == "500") {
+          throw "Phygital connection lost.\nPlease hold your mobile phone as close as possible while processing.";
+        }
       }
       rethrow;
     }
@@ -139,7 +157,8 @@ class NFC extends ChangeNotifier {
                   .toBytes())
               : null;
 
-      return Phygital(address: address, contractAddress: contractAddress);
+      return Phygital(
+          tagId: tag.id, address: address, contractAddress: contractAddress);
     } catch (e) {
       if (kDebugMode) {
         print(e.toString());
@@ -214,45 +233,51 @@ class NFC extends ChangeNotifier {
     return value[0] == 0;
   }
 
-  Future<String?> signUniversalProfileAddress(
-      EthereumAddress universalProfileAddress, int nonce) async {
-    if (nonce < 0) {
-      throw "Invalid nonce";
-    }
+  Future<String?> signUniversalProfileAddress({
+    required Phygital phygital,
+    required EthereumAddress universalProfileAddress,
+    required int nonce,
+  }) async {
+    if (nonce < 0) throw "Invalid nonce";
 
-    return await _startNFCCommunication(const Duration(seconds: 3), false,
-        (NFCTag tag, Phygital? phygital) async {
-      String errorMessage = "Failed to sign the universal profile address";
+    return await _startNFCCommunication(
+      expectedPhygital: phygital,
+      message:
+          "Signing Universal Profile Address\n${universalProfileAddress.hexEip55}",
+      energyHarvestingDuration: const Duration(seconds: 3),
+      nfcTagCommandFunction: (NFCTag tag, Phygital phygital) async {
+        String errorMessage = "Failed to sign the universal profile address";
 
-      bool isSent = false;
-      for (int i = 0; i < retryCount && !isSent; i++) {
-        sleep(retryDelay);
-        isSent = await _sendMessageToSign(
-            universalProfileAddress.addressBytes, nonce);
-      }
-      if (!isSent) {
-        throw errorMessage;
-      }
+        bool isSent = false;
+        for (int i = 0; i < retryCount && !isSent; i++) {
+          sleep(retryDelay);
+          isSent = await _sendMessageToSign(
+              universalProfileAddress.addressBytes, nonce);
+        }
+        if (!isSent) {
+          throw errorMessage;
+        }
 
-      bool isAvailable = false;
-      for (int i = 0; i < retryCount && !isAvailable; i++) {
-        sleep(retryDelay);
-        isAvailable = await _isMessageAvailable();
-      }
-      if (!isAvailable) {
-        throw errorMessage;
-      }
+        bool isAvailable = false;
+        for (int i = 0; i < retryCount && !isAvailable; i++) {
+          sleep(retryDelay);
+          isAvailable = await _isMessageAvailable();
+        }
+        if (!isAvailable) {
+          throw errorMessage;
+        }
 
-      var message = await _readMessage();
-      if (message == null) {
-        throw errorMessage;
-      }
+        Uint8List? message = await _readMessage();
+        if (message == null) {
+          throw errorMessage;
+        }
 
-      String signature = message.sublist(1).toHexString();
-      if (kDebugMode) print("Signature $signature");
+        String signature = message.sublist(1).toHexString();
+        if (kDebugMode) print("Signature $signature");
 
-      return signature;
-    });
+        return signature;
+      },
+    );
   }
 
   Future<bool> _sendContractAddressToWrite(Uint8List contractAddress) async {
@@ -264,7 +289,8 @@ class NFC extends ChangeNotifier {
       print(
           "Writing contract address $contractAddress: ${writeContractAddressCommand.toHexString()}");
     }
-    var value = await FlutterNfcKit.transceive(writeContractAddressCommand);
+    Uint8List value =
+        await FlutterNfcKit.transceive(writeContractAddressCommand);
     if (kDebugMode) {
       print("Response: ${value.toHexString()}");
     }
@@ -273,49 +299,56 @@ class NFC extends ChangeNotifier {
   }
 
   Future<EthereumAddress?> setContractAddress(
-      EthereumAddress contractAddress) async {
-    return await _startNFCCommunication(const Duration(seconds: 3), false,
-        (NFCTag tag, Phygital? phygital) async {
-      String errorMessage = "Failed to set the contract address";
+    Phygital phygital,
+    EthereumAddress contractAddress,
+  ) async {
+    return await _startNFCCommunication(
+      message: "Setting Contract Address\n${contractAddress.hexEip55}",
+      energyHarvestingDuration: const Duration(seconds: 3),
+      nfcTagCommandFunction: (NFCTag tag, Phygital? phygital) async {
+        String errorMessage = "Failed to set the contract address";
+        Uint8List contractAddressAsBytes =
+            Uint8List.fromList(utf8.encode(contractAddress.hexEip55));
 
-      Uint8List contractAddressAsBytes =
-          Uint8List.fromList(utf8.encode(contractAddress.hexEip55));
-      bool isSent = false;
-      for (int i = 0; i < retryCount && !isSent; i++) {
-        sleep(retryDelay);
-        isSent = await _sendContractAddressToWrite(contractAddressAsBytes);
-      }
-      if (!isSent) {
-        throw errorMessage;
-      }
+        bool isSent = false;
+        for (int i = 0; i < retryCount && !isSent; i++) {
+          sleep(retryDelay);
+          isSent = await _sendContractAddressToWrite(contractAddressAsBytes);
+        }
+        if (!isSent) {
+          throw errorMessage;
+        }
 
-      bool isAvailable = false;
-      for (int i = 0; i < retryCount && !isAvailable; i++) {
-        sleep(retryDelay);
-        isAvailable = await _isMessageAvailable();
-      }
-      if (!isAvailable) {
-        throw errorMessage;
-      }
+        bool isAvailable = false;
+        for (int i = 0; i < retryCount && !isAvailable; i++) {
+          sleep(retryDelay);
+          isAvailable = await _isMessageAvailable();
+        }
+        if (!isAvailable) {
+          throw errorMessage;
+        }
 
-      var message = await _readMessage();
-      if (message == null) {
-        throw errorMessage;
-      }
+        Uint8List? message = await _readMessage();
+        if (message == null) {
+          throw errorMessage;
+        }
 
-      if (message[0] != setContractAddressCommandId.toBytes()[0]) {
-        throw errorMessage;
-      }
+        if (message[0] != setContractAddressCommandId.toBytes()[0]) {
+          throw errorMessage;
+        }
 
-      return contractAddress;
-    });
+        return contractAddress;
+      },
+    );
   }
 
-  Future<Phygital?> scan() async {
+  Future<Phygital> read(
+      {bool? mustHaveContractAddress, bool? mustNotHaveContractAddress}) async {
     return await _startNFCCommunication(
-        null,
-        true,
-        (NFCTag tag, Phygital? phygital) async =>
-            phygital ?? (throw "Invalid phygital"));
+      message: 'Reading Phygital',
+      mustHaveContractAddress: mustHaveContractAddress,
+      mustNotHaveContractAddress: mustNotHaveContractAddress,
+      nfcTagCommandFunction: (NFCTag tag, Phygital phygital) async => phygital,
+    );
   }
 }

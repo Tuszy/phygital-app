@@ -31,34 +31,16 @@ class _MenuPageState extends State<MenuPage> {
         context: context, title: title, text: text, onPressed: () {});
   }
 
-  void scanPhygital() async {
+  void read() async {
     try {
-      Phygital? phygital = await NFC().scan();
-      if (phygital == null) return;
-      if (phygital.contractAddress == null) {
-        showInfoDialog(
-          title: "Unassigned Phygital",
-          text: phygital.toString(),
-        );
-        return;
-      }
+      Phygital phygital = await NFC().read(mustHaveContractAddress: true);
 
       (Result, PhygitalWithData?) result =
-      await LuksoClient().fetchPhygitalData(phygital);
+          await LuksoClient().fetchPhygitalData(phygital: phygital);
       if (Result.success != result.$1) {
-        showInfoDialog(
-          title: "Scan Result",
-          text: getMessageForResult(result.$1),
-        );
-        return;
-      }
-
-      if (result.$2 == null) {
-        showInfoDialog(
-          title: "Scan Result",
-          text: getMessageForResult(Result.invalidPhygitalData),
-        );
-        return;
+        throw getMessageForResult(result.$1);
+      } else if (result.$2 == null) {
+        throw getMessageForResult(Result.invalidPhygitalData);
       }
 
       if (!mounted) return;
@@ -71,7 +53,7 @@ class _MenuPageState extends State<MenuPage> {
       );
     } catch (e) {
       showInfoDialog(
-        title: "Error",
+        title: "Scan Result",
         text: e.toString(),
       );
     }
@@ -91,46 +73,37 @@ class _MenuPageState extends State<MenuPage> {
 
     return StandardLayout(
       title: "Menu",
-      child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisSize: MainAxisSize.max,
-          children: <Widget>[
-            Expanded(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Button(
-                    disabled: !nfc.isAvailable,
-                    text: "Read",
-                    onPressed: scanPhygital,
-                  ),
-                  Button(
-                    disabled: !nfc.isAvailable,
-                    text: "Mint",
-                    onPressed: mint,
-                  ),
-                  Button(
-                    disabled: !nfc.isAvailable,
-                    text: "Verify Ownership After Transfer",
-                    onPressed: verifyOwnershipAfterTransfer,
-                  ),
-                  Button(
-                    disabled: !nfc.isAvailable,
-                    text: "Transfer",
-                    onPressed: transfer,
-                  ),
-                  Button(
-                    disabled: !nfc.isAvailable,
-                    text: "Create Collection",
-                    onPressed: create,
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisSize: MainAxisSize.max,
+        children: <Widget>[
+          Button(
+            disabled: !nfc.isAvailable,
+            text: "Read",
+            onPressed: read,
+          ),
+          Button(
+            disabled: !nfc.isAvailable,
+            text: "Mint",
+            onPressed: mint,
+          ),
+          Button(
+            disabled: !nfc.isAvailable,
+            text: "Verify Ownership After Transfer",
+            onPressed: verifyOwnershipAfterTransfer,
+          ),
+          Button(
+            disabled: !nfc.isAvailable,
+            text: "Transfer",
+            onPressed: transfer,
+          ),
+          Button(
+            disabled: !nfc.isAvailable,
+            text: "Create Collection",
+            onPressed: create,
+          ),
+        ],
       ),
     );
   }

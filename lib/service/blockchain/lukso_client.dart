@@ -157,8 +157,9 @@ class LuksoClient extends ChangeNotifier {
     return Result.invalidPhygitalAssetContractAddress;
   }
 
-  Future<Result> validateUniversalProfileContract(
-      EthereumAddress? address) async {
+  Future<Result> validateUniversalProfileContract({
+    required EthereumAddress? address,
+  }) async {
     if (!_initialized) return Result.notInitialized;
 
     if (address != null) {
@@ -179,11 +180,12 @@ class LuksoClient extends ChangeNotifier {
     return Result.invalidUniversalProfileAddress;
   }
 
-  Future<Result> validateUniversalProfilePermissions(
-      EthereumAddress? address) async {
+  Future<Result> validateUniversalProfilePermissions({
+    required EthereumAddress? address,
+  }) async {
     if (!_initialized) return Result.notInitialized;
     Result universalProfileValidationResult =
-        await validateUniversalProfileContract(address);
+        await validateUniversalProfileContract(address: address);
     if (Result.success != universalProfileValidationResult) {
       return universalProfileValidationResult;
     }
@@ -211,8 +213,10 @@ class LuksoClient extends ChangeNotifier {
     return Result.necessaryPermissionsNotSet;
   }
 
-  Future<Result> validatePhygitalOwnership(
-      Phygital phygital, EthereumAddress universalProfileAddress) async {
+  Future<Result> validatePhygitalOwnership({
+    required Phygital phygital,
+    required EthereumAddress universalProfileAddress,
+  }) async {
     if (!_initialized) return Result.notInitialized;
     Result phygitalContractValidationResult =
         await validatePhygitalContract(phygital.contractAddress);
@@ -239,8 +243,10 @@ class LuksoClient extends ChangeNotifier {
     return Result.invalidOwnership;
   }
 
-  Future<Result> validatePhygitalOwnershipExpectedVerificationStatus(
-      Phygital phygital, bool expectedVerificationStatus) async {
+  Future<Result> validatePhygitalOwnershipExpectedVerificationStatus({
+    required Phygital phygital,
+    required bool expectedVerificationStatus,
+  }) async {
     if (!_initialized) return Result.notInitialized;
     Result phygitalContractValidationResult =
         await validatePhygitalContract(phygital.contractAddress);
@@ -270,8 +276,10 @@ class LuksoClient extends ChangeNotifier {
         : Result.alreadyVerifiedOwnership;
   }
 
-  Future<Result> validatePhygitalContractAndUniversalProfilePermissions(
-      Phygital phygital, EthereumAddress universalProfileAddress) async {
+  Future<Result> validatePhygitalContractAndUniversalProfilePermissions({
+    required Phygital phygital,
+    required EthereumAddress universalProfileAddress,
+  }) async {
     if (!_initialized) return Result.notInitialized;
 
     if (phygital.contractAddress == null) return Result.notPartOfAnyCollection;
@@ -283,7 +291,9 @@ class LuksoClient extends ChangeNotifier {
     }
 
     Result universalProfilePermissionsValidationResult =
-        await validateUniversalProfilePermissions(universalProfileAddress);
+        await validateUniversalProfilePermissions(
+      address: universalProfileAddress,
+    );
     if (Result.success != universalProfilePermissionsValidationResult) {
       return universalProfilePermissionsValidationResult;
     }
@@ -291,11 +301,15 @@ class LuksoClient extends ChangeNotifier {
     return Result.success;
   }
 
-  Future<Result> mint(
-      Phygital phygital, EthereumAddress universalProfileAddress) async {
+  Future<Result> mint({
+    required Phygital phygital,
+    required EthereumAddress universalProfileAddress,
+  }) async {
     Result validationResult =
         await validatePhygitalContractAndUniversalProfilePermissions(
-            phygital, universalProfileAddress);
+      phygital: phygital,
+      universalProfileAddress: universalProfileAddress,
+    );
     if (Result.success != validationResult) return validationResult;
 
     BigInt? nonce = await _getNonceOfPhygital(phygital);
@@ -306,61 +320,82 @@ class LuksoClient extends ChangeNotifier {
       return Result.notPartOfCollection;
     }
 
-    String? phygitalSignature = await NFC()
-        .signUniversalProfileAddress(universalProfileAddress, nonce.toInt());
+    String? phygitalSignature = await NFC().signUniversalProfileAddress(
+      phygital: phygital,
+      universalProfileAddress: universalProfileAddress,
+      nonce: nonce.toInt(),
+    );
     if (phygitalSignature == null) return Result.signingFailed;
 
     return await BackendClient().mint(
-        universalProfileAddress: universalProfileAddress,
-        phygitalSignature: phygitalSignature,
-        phygital: phygital);
+      universalProfileAddress: universalProfileAddress,
+      phygitalSignature: phygitalSignature,
+      phygital: phygital,
+    );
   }
 
-  Future<Result> verifyOwnershipAfterTransfer(
-      Phygital phygital, EthereumAddress universalProfileAddress) async {
+  Future<Result> verifyOwnershipAfterTransfer({
+    required Phygital phygital,
+    required EthereumAddress universalProfileAddress,
+  }) async {
     Result validationResult =
         await validatePhygitalContractAndUniversalProfilePermissions(
-            phygital, universalProfileAddress);
+      phygital: phygital,
+      universalProfileAddress: universalProfileAddress,
+    );
     if (Result.success != validationResult) return validationResult;
 
     BigInt? nonce = await _getNonceOfPhygital(phygital);
     if (nonce == null) return Result.ownershipVerificationFailed;
     if (nonce.compareTo(BigInt.from(0)) == 0) return Result.notMintedYet;
 
-    Result ownershipValidationResult =
-        await validatePhygitalOwnership(phygital, universalProfileAddress);
+    Result ownershipValidationResult = await validatePhygitalOwnership(
+      phygital: phygital,
+      universalProfileAddress: universalProfileAddress,
+    );
     if (Result.success != ownershipValidationResult) {
       return ownershipValidationResult;
     }
 
     Result ownershipVerificationStatusValidationResult =
         await validatePhygitalOwnershipExpectedVerificationStatus(
-            phygital, false);
+      phygital: phygital,
+      expectedVerificationStatus: false,
+    );
     if (Result.success != ownershipVerificationStatusValidationResult) {
       return ownershipVerificationStatusValidationResult;
     }
 
-    String? phygitalSignature = await NFC()
-        .signUniversalProfileAddress(universalProfileAddress, nonce.toInt());
+    String? phygitalSignature = await NFC().signUniversalProfileAddress(
+      phygital: phygital,
+      universalProfileAddress: universalProfileAddress,
+      nonce: nonce.toInt(),
+    );
     if (phygitalSignature == null) return Result.signingFailed;
 
     return await BackendClient().verifyOwnershipAfterTransfer(
-        universalProfileAddress: universalProfileAddress,
-        phygitalSignature: phygitalSignature,
-        phygital: phygital);
+      universalProfileAddress: universalProfileAddress,
+      phygitalSignature: phygitalSignature,
+      phygital: phygital,
+    );
   }
 
-  Future<Result> transfer(
-      Phygital phygital,
-      EthereumAddress universalProfileAddress,
-      EthereumAddress toUniversalProfileAddress) async {
+  Future<Result> transfer({
+    required Phygital phygital,
+    required EthereumAddress universalProfileAddress,
+    required EthereumAddress toUniversalProfileAddress,
+  }) async {
     Result validationResult =
         await validatePhygitalContractAndUniversalProfilePermissions(
-            phygital, universalProfileAddress);
+      phygital: phygital,
+      universalProfileAddress: universalProfileAddress,
+    );
     if (Result.success != validationResult) return validationResult;
 
     Result toUniversalProfileValidationResult =
-        await validateUniversalProfileContract(toUniversalProfileAddress);
+        await validateUniversalProfileContract(
+      address: toUniversalProfileAddress,
+    );
     if (Result.success != toUniversalProfileValidationResult) {
       return Result.invalidReceivingUniversalProfileAddress;
     }
@@ -369,39 +404,49 @@ class LuksoClient extends ChangeNotifier {
     if (nonce == null) return Result.ownershipVerificationFailed;
     if (nonce.compareTo(BigInt.from(0)) == 0) return Result.notMintedYet;
 
-    Result ownershipValidationResult =
-        await validatePhygitalOwnership(phygital, universalProfileAddress);
+    Result ownershipValidationResult = await validatePhygitalOwnership(
+      phygital: phygital,
+      universalProfileAddress: universalProfileAddress,
+    );
     if (Result.success != ownershipValidationResult) {
       return ownershipValidationResult;
     }
 
     Result ownershipVerificationStatusValidationResult =
         await validatePhygitalOwnershipExpectedVerificationStatus(
-            phygital, true);
+      phygital: phygital,
+      expectedVerificationStatus: true,
+    );
     if (Result.success != ownershipVerificationStatusValidationResult) {
       return ownershipVerificationStatusValidationResult;
     }
 
-    String? phygitalSignature = await NFC()
-        .signUniversalProfileAddress(toUniversalProfileAddress, nonce.toInt());
+    String? phygitalSignature = await NFC().signUniversalProfileAddress(
+      phygital: phygital,
+      universalProfileAddress: toUniversalProfileAddress,
+      nonce: nonce.toInt(),
+    );
     if (phygitalSignature == null) return Result.signingFailed;
 
     return await BackendClient().transfer(
-        toUniversalProfileAddress: toUniversalProfileAddress,
-        universalProfileAddress: universalProfileAddress,
-        phygitalSignature: phygitalSignature,
-        phygital: phygital);
+      toUniversalProfileAddress: toUniversalProfileAddress,
+      universalProfileAddress: universalProfileAddress,
+      phygitalSignature: phygitalSignature,
+      phygital: phygital,
+    );
   }
 
-  Future<(Result, EthereumAddress?)> create(
-      EthereumAddress universalProfileAddress,
-      String name,
-      String symbol,
-      List<Phygital> phygitalCollection,
-      LSP4Metadata metadata,
-      String baseUri) async {
-    Result validationResult =
-        await validateUniversalProfilePermissions(universalProfileAddress);
+  Future<(Result, EthereumAddress?)> create({
+    required EthereumAddress universalProfileAddress,
+    required String name,
+    required String symbol,
+    required List<Phygital> phygitalCollection,
+    required LSP4Metadata metadata,
+    required String baseUri,
+  }) async {
+    Result validationResult = await validateUniversalProfilePermissions(
+      address: universalProfileAddress,
+    );
     if (Result.success != validationResult) return (validationResult, null);
 
     if (phygitalCollection.isEmpty) {
@@ -422,10 +467,12 @@ class LuksoClient extends ChangeNotifier {
         baseUri: baseUri);
   }
 
-  Future<UniversalProfile?> fetchUniversalProfile(
-      EthereumAddress universalProfileAddress) async {
-    Result validationResult =
-        await validateUniversalProfileContract(universalProfileAddress);
+  Future<UniversalProfile?> fetchUniversalProfile({
+    required EthereumAddress universalProfileAddress,
+  }) async {
+    Result validationResult = await validateUniversalProfileContract(
+      address: universalProfileAddress,
+    );
     if (validationResult != Result.success) return null;
 
     LSP0ERC725Account contract = LSP0ERC725Account(
@@ -439,8 +486,9 @@ class LuksoClient extends ChangeNotifier {
         universalProfileAddress, universalProfileData);
   }
 
-  Future<(Result, PhygitalWithData?)> fetchPhygitalData(
-      Phygital phygital) async {
+  Future<(Result, PhygitalWithData?)> fetchPhygitalData({
+    required Phygital phygital,
+  }) async {
     Result validationResult =
         await validatePhygitalContract(phygital.contractAddress);
     if (validationResult != Result.success) return (validationResult, null);
@@ -451,7 +499,9 @@ class LuksoClient extends ChangeNotifier {
     UniversalProfile? owner;
     try {
       EthereumAddress ownerAddress = await contract.tokenOwnerOf(phygital.id);
-      owner = await fetchUniversalProfile(ownerAddress);
+      owner = await fetchUniversalProfile(
+        universalProfileAddress: ownerAddress,
+      );
     } catch (e) {
       /*Not minted yet*/
     }
@@ -499,8 +549,9 @@ class LuksoClient extends ChangeNotifier {
         .toList();
     List<UniversalProfile> creators = [];
     for (int i = 0; i < creatorAddresses.length; i++) {
-      UniversalProfile? creatorUniversalProfile =
-          await fetchUniversalProfile(creatorAddresses[i]);
+      UniversalProfile? creatorUniversalProfile = await fetchUniversalProfile(
+        universalProfileAddress: creatorAddresses[i],
+      );
       if (creatorUniversalProfile != null) {
         creators.add(creatorUniversalProfile);
       }

@@ -30,12 +30,16 @@ class QRCode {
 
     if (validatePermissions) {
       Result validationResult =
-          await LuksoClient().validateUniversalProfilePermissions(address);
+          await LuksoClient().validateUniversalProfilePermissions(
+        address: address,
+      );
       if (Result.success != validationResult) return (validationResult, null);
     }
 
     UniversalProfile? universalProfile =
-        await LuksoClient().fetchUniversalProfile(address);
+        await LuksoClient().fetchUniversalProfile(
+      universalProfileAddress: address,
+    );
     if (universalProfile == null) {
       return (Result.invalidUniversalProfileData, null);
     }

@@ -5,8 +5,9 @@ import 'package:pointycastle/api.dart';
 import 'package:web3dart/credentials.dart';
 
 class Phygital {
-  Phygital({required this.address, this.contractAddress});
+  Phygital({required this.address, required this.tagId, this.contractAddress});
 
+  final String tagId;
   final EthereumAddress address;
   EthereumAddress? contractAddress;
 

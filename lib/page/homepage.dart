@@ -35,34 +35,16 @@ class _HomepageState extends State<Homepage> {
     NFC().init();
   }
 
-  void scanPhygital() async {
+  void read() async {
     try {
-      Phygital? phygital = await NFC().scan();
-      if (phygital == null) return;
-      if (phygital.contractAddress == null) {
-        showInfoDialog(
-          title: "Unassigned Phygital",
-          text: phygital.toString(),
-        );
-        return;
-      }
+      Phygital phygital = await NFC().read(mustHaveContractAddress: true);
 
       (Result, PhygitalWithData?) result =
-          await LuksoClient().fetchPhygitalData(phygital);
+          await LuksoClient().fetchPhygitalData(phygital: phygital);
       if (Result.success != result.$1) {
-        showInfoDialog(
-          title: "Scan Result",
-          text: getMessageForResult(result.$1),
-        );
-        return;
-      }
-
-      if (result.$2 == null) {
-        showInfoDialog(
-          title: "Scan Result",
-          text: getMessageForResult(Result.invalidPhygitalData),
-        );
-        return;
+        throw getMessageForResult(result.$1);
+      } else if (result.$2 == null) {
+        throw getMessageForResult(Result.invalidPhygitalData);
       }
 
       if (!mounted) return;
@@ -75,7 +57,7 @@ class _HomepageState extends State<Homepage> {
       );
     } catch (e) {
       showInfoDialog(
-        title: "Error",
+        title: "Scan Result",
         text: e.toString(),
       );
     }
@@ -160,7 +142,7 @@ class _HomepageState extends State<Homepage> {
                           Button(
                             disabled: !nfc.isAvailable,
                             text: "Scan Phygital",
-                            onPressed: scanPhygital,
+                            onPressed: read,
                           ),
                         if (universalProfile == null)
                           Button(
