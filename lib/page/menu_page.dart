@@ -31,7 +31,9 @@ class _MenuPageState extends State<MenuPage> {
         context: context, title: title, text: text, onPressed: () {});
   }
 
-  void read() async {
+  void scan(
+      {bool mustHaveValidPhygitalData = true,
+      required Function(PhygitalWithData) onSuccess}) async {
     try {
       Phygital phygital = await NFC().read(mustHaveContractAddress: true);
 
@@ -45,18 +47,28 @@ class _MenuPageState extends State<MenuPage> {
 
       if (!mounted) return;
 
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => PhygitalDataPage(phygitalWithData: result.$2!),
-        ),
-      );
+      onSuccess(result.$2!);
     } catch (e) {
       showInfoDialog(
         title: "Scan Result",
         text: e.toString(),
       );
     }
+  }
+
+  void read() async {
+    scan(
+      onSuccess: (PhygitalWithData? phygitalWithData) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => PhygitalDataPage(
+              phygitalWithData: phygitalWithData!,
+            ),
+          ),
+        );
+      },
+    );
   }
 
   Future<void> mint() async {}
