@@ -37,6 +37,7 @@ class Button extends StatelessWidget {
                 ),
                 child: TextButton(
                   style: TextButton.styleFrom(
+                    alignment: Alignment.center,
                     foregroundColor: Colors.white,
                     backgroundColor: const Color(0x3300ffff),
                     padding: const EdgeInsets.all(16.0),
@@ -67,7 +68,10 @@ class Button extends StatelessWidget {
                         borderRadius: BorderRadius.circular(16)),
                   ),
                   onPressed: onPressed,
-                  child: Text(text),
+                  child: Text(
+                    text,
+                    textAlign: TextAlign.center,
+                  ),
                 ),
               ),
             ),
