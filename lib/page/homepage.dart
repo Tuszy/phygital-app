@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:phygital/component/universal_profile_preview.dart';
 import 'package:phygital/model/phygital_with_data.dart';
+import 'package:phygital/page/menu_page.dart';
 import 'package:phygital/page/phygital/phygital_data_page.dart';
 import 'package:phygital/service/blockchain/lukso_client.dart';
 import 'package:phygital/service/custom_dialog.dart';
@@ -49,7 +51,7 @@ class _HomepageState extends State<Homepage> {
           await LuksoClient().fetchPhygitalData(phygital);
       if (Result.success != result.$1) {
         showInfoDialog(
-          title: "Read Result",
+          title: "Scan Result",
           text: getMessageForResult(result.$1),
         );
         return;
@@ -57,7 +59,7 @@ class _HomepageState extends State<Homepage> {
 
       if (result.$2 == null) {
         showInfoDialog(
-          title: "Read Result",
+          title: "Scan Result",
           text: getMessageForResult(Result.invalidPhygitalData),
         );
         return;
@@ -79,8 +81,17 @@ class _HomepageState extends State<Homepage> {
     }
   }
 
-  void loginWithUniversalProfile() async {
+  void openMenu() {
+    if (GlobalState().universalProfile == null) return;
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const MenuPage(),
+      ),
+    );
+  }
 
+  void loginWithUniversalProfile() async {
     String? scannedCode = await CustomDialog.showQrScanner(
       context: context,
       title: "Universal Profile",
@@ -126,6 +137,7 @@ class _HomepageState extends State<Homepage> {
 
   @override
   Widget build(BuildContext context) {
+    NFC nfc = Provider.of<NFC>(context);
     GlobalState globalState = Provider.of<GlobalState>(context);
     UniversalProfile? universalProfile = globalState.universalProfile;
 
@@ -137,26 +149,29 @@ class _HomepageState extends State<Homepage> {
           mainAxisSize: MainAxisSize.max,
           children: <Widget>[
             const LogoWidget(),
-            if (universalProfile != null &&
-                universalProfile.profileImage != null)
-              ImagePreview(
-                image: universalProfile.profileImage!,
-                width: 150,
-                height: 150,
-              ),
+            if (universalProfile != null)
+              UniversalProfilePreview(universalProfile: universalProfile),
             Expanded(
               child: globalState.initialized
                   ? Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Button(
-                          text: "Scan Phygital",
-                          onPressed: scanPhygital,
-                        ),
+                        if (universalProfile == null)
+                          Button(
+                            disabled: !nfc.isAvailable,
+                            text: "Scan Phygital",
+                            onPressed: scanPhygital,
+                          ),
                         if (universalProfile == null)
                           Button(
                             text: "Login with Universal Profile",
                             onPressed: loginWithUniversalProfile,
+                          ),
+                        if (universalProfile != null)
+                          Button(
+                            disabled: !nfc.isAvailable,
+                            text: "Menu",
+                            onPressed: openMenu,
                           ),
                         if (universalProfile != null)
                           Button(
