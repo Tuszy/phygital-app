@@ -20,6 +20,9 @@ class UniversalProfile {
   List<LSPImage>? profileImages;
   List<LSPImage>? backgroundImages;
 
+  LSPImage? get profileImage => profileImages?.elementAtOrNull(0);
+  LSPImage? get backgroundImage => backgroundImages?.elementAtOrNull(0);
+
   factory UniversalProfile.fromJson(
       EthereumAddress address, final Map<String, dynamic> rawData) {
     Map<String, dynamic> data = rawData["LSP3Profile"];
