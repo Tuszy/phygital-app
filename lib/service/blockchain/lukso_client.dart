@@ -564,6 +564,7 @@ class LuksoClient extends ChangeNotifier {
     return (
       Result.success,
       PhygitalWithData(
+        tagId: phygital.tagId,
         address: phygital.address,
         contractAddress: phygital.contractAddress!,
         owner: owner,
