@@ -19,6 +19,7 @@ class _ScannerWidgetState extends State<ScannerWidget> {
   QRViewController? controller;
   GlobalKey qrKey = GlobalKey(debugLabel: 'scanner');
 
+  bool isInitialized = false;
   bool isScanned = false;
 
   @override
@@ -79,28 +80,31 @@ class _ScannerWidgetState extends State<ScannerWidget> {
           height: 2,
           margin: const EdgeInsets.only(top: 16),
         ),
-        TextButton(
-          style: TextButton.styleFrom(
-            foregroundColor: const Color(0xcdffffff),
-            backgroundColor: const Color(0x22000000),
-            padding: const EdgeInsets.all(16.0),
-            textStyle: const TextStyle(
-              letterSpacing: 3,
-              fontSize: 24,
-              fontWeight: FontWeight.w900,
+        IgnorePointer(
+          ignoring: !isInitialized,
+          child: TextButton(
+            style: TextButton.styleFrom(
+              foregroundColor: const Color(0xcdffffff),
+              backgroundColor: const Color(0x22000000),
+              padding: const EdgeInsets.all(16.0),
+              textStyle: const TextStyle(
+                letterSpacing: 3,
+                fontSize: 24,
+                fontWeight: FontWeight.w900,
+              ),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(4)),
             ),
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.max,
+              children: [Text(isInitialized ? "Close" : "Initializing...")],
+            ),
           ),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-          child: const Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            mainAxisSize: MainAxisSize.max,
-            children: [Text("Close")],
-          ),
-        )
+        ),
       ],
     );
   }
@@ -117,11 +121,12 @@ class _ScannerWidgetState extends State<ScannerWidget> {
         _onQRViewCreated(controller);
       },
       overlay: QrScannerOverlayShape(
-          borderColor: Colors.red,
-          borderRadius: 10,
-          borderLength: 30,
-          borderWidth: 10,
-          cutOutSize: smallestDimension - 140),
+        borderColor: Colors.red,
+        borderRadius: 10,
+        borderLength: 30,
+        borderWidth: 10,
+        cutOutSize: smallestDimension - 140,
+      ),
     );
   }
 
@@ -133,6 +138,13 @@ class _ScannerWidgetState extends State<ScannerWidget> {
           isScanned = true;
           widget.onScanSuccess(scanData.code);
         }
+      });
+
+      Future.delayed(const Duration(seconds: 1), () {
+        if (!mounted) return;
+        setState(() {
+          isInitialized = true;
+        });
       });
     } catch (e) {
       Navigator.pop(context);
