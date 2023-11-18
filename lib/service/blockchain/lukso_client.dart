@@ -448,9 +448,10 @@ class LuksoClient extends ChangeNotifier {
     PhygitalAsset contract =
         PhygitalAsset(address: phygital.contractAddress!, client: _web3client!);
 
-    EthereumAddress? owner;
+    UniversalProfile? owner;
     try {
-      owner = await contract.tokenOwnerOf(phygital.id);
+      EthereumAddress ownerAddress = await contract.tokenOwnerOf(phygital.id);
+      owner = await fetchUniversalProfile(ownerAddress);
     } catch (e) {
       /*Not minted yet*/
     }
@@ -493,9 +494,17 @@ class LuksoClient extends ChangeNotifier {
     List<Uint8List> creatorsData = creatorsIndexKeys.isNotEmpty
         ? await contract.getDataBatch(creatorsIndexKeys)
         : [];
-    List<EthereumAddress> creators = creatorsData
+    List<EthereumAddress> creatorAddresses = creatorsData
         .map((creatorAddress) => EthereumAddress(creatorAddress))
         .toList();
+    List<UniversalProfile> creators = [];
+    for (int i = 0; i < creatorAddresses.length; i++) {
+      UniversalProfile? creatorUniversalProfile =
+          await fetchUniversalProfile(creatorAddresses[i]);
+      if (creatorUniversalProfile != null) {
+        creators.add(creatorUniversalProfile);
+      }
+    }
 
     String json =
         await LSP2Utils().fetchJson("$baseUri${phygital.id.toHexString()}");
