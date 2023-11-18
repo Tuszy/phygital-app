@@ -298,10 +298,10 @@ class NFC extends ChangeNotifier {
     return value[0] == 0;
   }
 
-  Future<EthereumAddress?> setContractAddress(
-    Phygital phygital,
-    EthereumAddress contractAddress,
-  ) async {
+  Future<EthereumAddress?> setContractAddress({
+    required Phygital phygital,
+    required EthereumAddress contractAddress,
+  }) async {
     return await _startNFCCommunication(
       message: "Setting Contract Address\n${contractAddress.hexEip55}",
       energyHarvestingDuration: const Duration(seconds: 3),
