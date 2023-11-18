@@ -23,6 +23,8 @@ class UniversalProfile {
   LSPImage? get profileImage => profileImages?.elementAtOrNull(0);
   LSPImage? get backgroundImage => backgroundImages?.elementAtOrNull(0);
 
+  String get formattedName => "${name ?? "Anonymous"}#${address.hexEip55.substring(2, 6)}";
+
   factory UniversalProfile.fromJson(
       EthereumAddress address, final Map<String, dynamic> rawData) {
     Map<String, dynamic> data = rawData["LSP3Profile"];

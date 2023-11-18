@@ -37,7 +37,7 @@ class UniversalProfilePreview extends StatelessWidget {
             ),
           if (universalProfile.name != null)
             Text(
-              "${universalProfile.name ?? "Anonymous"}#${universalProfile.address.hexEip55.substring(2, 6)}",
+              universalProfile.formattedName,
               style: const TextStyle(
                 color: Colors.white,
                 fontSize: 20,
