@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:phygital/component/scanner_widget.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
-import 'dialog_content.dart';
+import '../component/dialog_content.dart';
 
 class CustomDialog {
   static void showQrScanner(
