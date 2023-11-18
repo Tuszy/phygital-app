@@ -95,6 +95,9 @@ class NFC extends ChangeNotifier {
       if (e is PlatformException && e.code == "409") {
         return null; // User cancelled
       }
+      if (e is PlatformException && e.code == "500") {
+        throw "Phygital connection lost.\nKeep your mobile phone close while processing.";
+      }
       rethrow;
     }
   }
