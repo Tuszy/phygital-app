@@ -10,7 +10,6 @@ import 'package:phygital/service/blockchain/contracts/LSP0ERC725Account.g.dart';
 import 'package:phygital/service/result.dart';
 import 'package:phygital/service/ipfs_client.dart';
 import 'package:phygital/util/lsp2_utils.dart';
-import 'package:web3dart/json_rpc.dart';
 import 'package:web3dart/web3dart.dart';
 
 import '../../model/phygital.dart';
@@ -51,22 +50,26 @@ class LuksoClient extends ChangeNotifier {
 
   static final controllerKey =
       EthereumAddress("Ac11803507C05A21daAF9D354F7100B1dC9CD590".toBytes());
-  static final necessaryPermissions = {
-    "keys": [
-      "0x4b80742de2bf82acb3630000ac11803507c05a21daaf9d354f7100b1dc9cd590",
-      // Call & SetData
-      "0x4b80742de2bf393a64c70000ac11803507c05a21daaf9d354f7100b1dc9cd590",
-      // Call Phygital Asset Functions: mint, verifyOwnershipAfterTransfer and transfer
-      "0x4b80742de2bf866c29110000ac11803507c05a21daaf9d354f7100b1dc9cd590",
-      // SetData LSP12IssuedAssets array and map
-    ],
-    "values": [
-      // assign permissions to controller key
-      "0x0000000000000000000000000000000000000000000000000000000000040800",
-      "0x002000000002fffffffffffffffffffffffffffffffffffffffff602119031646613002000000002fffffffffffffffffffffffffffffffffffffffff602119041b3d513002000000002fffffffffffffffffffffffffffffffffffffffff6021190511b6952",
-      "0x00107c8c3416d6cda87cd42c71ea1843df28000c74ac2555c10b9349e78f0000",
-    ],
-  };
+  static final List<Uint8List> necessaryPermissionKeys = [
+    "4b80742de2bf82acb3630000ac11803507c05a21daaf9d354f7100b1dc9cd590"
+        .toBytes(),
+    // Call & SetData
+    "4b80742de2bf393a64c70000ac11803507c05a21daaf9d354f7100b1dc9cd590"
+        .toBytes(),
+    // Call Phygital Asset Functions: mint, verifyOwnershipAfterTransfer and transfer
+    "4b80742de2bf866c29110000ac11803507c05a21daaf9d354f7100b1dc9cd590"
+        .toBytes(),
+    // SetData LSP12IssuedAssets array and map
+  ];
+  static final List<Uint8List> necessaryPermissionValues = [
+    // assign permissions to controller key
+    "0000000000000000000000000000000000000000000000000000000000040800"
+        .toBytes(),
+    "002000000002fffffffffffffffffffffffffffffffffffffffff602119031646613002000000002fffffffffffffffffffffffffffffffffffffffff602119041b3d513002000000002fffffffffffffffffffffffffffffffffffffffff6021190511b6952"
+        .toBytes(),
+    "00107c8c3416d6cda87cd42c71ea1843df28000c74ac2555c10b9349e78f0000"
+        .toBytes(),
+  ];
 
   LuksoClient._sharedInstance();
 
@@ -189,7 +192,12 @@ class LuksoClient extends ChangeNotifier {
       try {
         LSP0ERC725Account contract =
             LSP0ERC725Account(address: address, client: _web3client!);
-        if (await contract.supportsInterface(universalProfileInterfaceId)) {
+        List<Uint8List> permissions =
+            await contract.getDataBatch(necessaryPermissionKeys);
+
+        if (permissions.indexed.every((indexedPermission) =>
+            indexedPermission.$2.toHexString() ==
+            necessaryPermissionValues[indexedPermission.$1].toHexString())) {
           return Result.success;
         }
       } catch (e) {
@@ -441,9 +449,11 @@ class LuksoClient extends ChangeNotifier {
         PhygitalAsset(address: phygital.contractAddress!, client: _web3client!);
 
     EthereumAddress? owner;
-    try{
+    try {
       owner = await contract.tokenOwnerOf(phygital.id);
-    }catch(e){/*Not minted yet*/}
+    } catch (e) {
+      /*Not minted yet*/
+    }
 
     List<Uint8List> data = await contract.getDataBatch([
       phygitalAssetMetadataKey,
