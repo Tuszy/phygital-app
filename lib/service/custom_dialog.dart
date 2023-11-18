@@ -13,6 +13,7 @@ class CustomDialog {
   }) async {
     return await showDialog(
       context: context,
+      barrierDismissible: false,
       builder: (context) => BackdropFilter(
           filter: ImageFilter.blur(
             sigmaX: 5,
@@ -39,6 +40,7 @@ class CustomDialog {
   }) async {
     await showDialog(
       context: context,
+      barrierDismissible: false,
       builder: (context) => DialogContent(
           child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
@@ -108,6 +110,7 @@ class CustomDialog {
   }) async {
     await showDialog(
       context: context,
+      barrierDismissible: false,
       builder: (context) => DialogContent(
           child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
