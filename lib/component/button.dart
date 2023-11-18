@@ -26,10 +26,10 @@ class Button extends StatelessWidget {
               child: DecoratedBox(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(width: 4, color: Colors.white),
-                  boxShadow: const [
+                  border: Border.all(width: 4, color: disabled ? const Color(0x33999999) : Colors.white),
+                  boxShadow: [
                     BoxShadow(
-                      color: Color(0x7700ffff),
+                      color: disabled ? const Color(0x44555555) : const Color(0x7700ffff),
                       spreadRadius: 2,
                       blurRadius: 8,
                     ),
@@ -38,33 +38,33 @@ class Button extends StatelessWidget {
                 child: TextButton(
                   style: TextButton.styleFrom(
                     alignment: Alignment.center,
-                    foregroundColor: Colors.white,
-                    backgroundColor: const Color(0x3300ffff),
+                    foregroundColor: disabled ? const Color(0xaa999999) : Colors.white,
+                    backgroundColor: disabled ? const Color(0x33555555) : const Color(0x3300ffff),
                     padding: const EdgeInsets.all(16.0),
-                    textStyle: const TextStyle(
+                    textStyle:  TextStyle(
                         letterSpacing: 3,
                         fontSize: 30,
                         fontWeight: FontWeight.w700,
                         shadows: [
                           Shadow(
                               // bottomLeft
-                              offset: Offset(-1.25, -1.25),
-                              color: Color(0x7700ffff)),
+                              offset: const Offset(-1.25, -1.25),
+                              color: disabled ? const Color(0x33555555) : const Color(0x7700ffff)),
                           Shadow(
                               // bottomRight
-                              offset: Offset(1.25, -1.25),
-                              color: Color(0x7700ffff)),
+                              offset: const Offset(1.25, -1.25),
+                              color: disabled ? const Color(0x33555555) : const Color(0x7700ffff)),
                           Shadow(
                               // topRight
-                              offset: Offset(1.25, 1.25),
-                              color: Color(0x7700ffff)),
+                              offset: const Offset(1.25, 1.25),
+                              color: disabled ? const Color(0x33555555) : const Color(0x7700ffff)),
                           Shadow(
                               // topLeft
-                              offset: Offset(-1.25, 1.25),
-                              color: Color(0x7700ffff)),
+                              offset: const Offset(-1.25, 1.25),
+                              color: disabled ? const Color(0x33555555) : const Color(0x7700ffff)),
                         ]),
                     shape: RoundedRectangleBorder(
-                        side: const BorderSide(color: Colors.white, width: 2),
+                        side: BorderSide(color: disabled ? const Color(0x33999999) : Colors.white, width: 2),
                         borderRadius: BorderRadius.circular(16)),
                   ),
                   onPressed: onPressed,
