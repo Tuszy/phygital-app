@@ -3,7 +3,7 @@ import 'dart:ui';
 import 'package:animated_background/animated_background.dart';
 import 'package:flutter/material.dart';
 
-import '../component/nfc_active_backdrop.dart';
+import '../component/loading_backdrop.dart';
 
 class StandardLayout extends StatefulWidget {
   const StandardLayout({super.key, required this.child, this.title});
@@ -72,7 +72,7 @@ class _StandardLayoutState extends State<StandardLayout>
             SafeArea(
               child: widget.child,
             ),
-            const NfcActiveBackdrop()
+            const LoadingBackdrop()
           ],
         ),
       ),
