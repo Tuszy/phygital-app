@@ -7,14 +7,12 @@ import 'package:qr_flutter/qr_flutter.dart';
 import '../component/dialog_content.dart';
 
 class CustomDialog {
-  static void showQrScanner(
-      {BuildContext? context,
-      required String title,
-      required Function(String? code) onScanSuccess}) {
-    assert(context != null);
-
-    showDialog(
-      context: context!,
+  static Future<String?> showQrScanner({
+    required BuildContext context,
+    required String title,
+  }) async {
+    return await showDialog(
+      context: context,
       builder: (context) => BackdropFilter(
           filter: ImageFilter.blur(
             sigmaX: 5,
@@ -26,23 +24,21 @@ class CustomDialog {
                 title: title,
                 onScanSuccess: (code) {
                   if (code != null) {
-                    Navigator.pop(context);
-                    onScanSuccess(code);
+                    Navigator.pop(context, code);
                   }
                 }),
           )),
     );
   }
 
-  static void showQrCode(
-      {BuildContext? context,
-      required String title,
-      required String data,
-      required VoidCallback onPressed}) {
-    assert(context != null);
-
-    showDialog(
-      context: context!,
+  static Future<void> showQrCode({
+    required BuildContext context,
+    required String title,
+    required String data,
+    required VoidCallback onPressed,
+  }) async {
+    await showDialog(
+      context: context,
       builder: (context) => DialogContent(
           child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
@@ -104,15 +100,14 @@ class CustomDialog {
     );
   }
 
-  static void showInfo(
-      {BuildContext? context,
-      required String title,
-      required String text,
-      required VoidCallback onPressed}) {
-    assert(context != null);
-
-    showDialog(
-      context: context!,
+  static Future<void> showInfo({
+    required BuildContext context,
+    required String title,
+    required String text,
+    required VoidCallback onPressed,
+  }) async {
+    await showDialog(
+      context: context,
       builder: (context) => DialogContent(
           child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
