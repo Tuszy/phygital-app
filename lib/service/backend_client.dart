@@ -3,14 +3,12 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart';
 import 'package:ndef/utilities.dart';
-import 'package:phygital/service/ipfs_client.dart';
-import 'package:phygital/util/lsp2_utils.dart';
 import 'dart:convert';
 import 'package:web3dart/web3dart.dart';
 
 import '../model/lsp4/lsp4_metadata.dart';
 import '../model/phygital.dart';
-import 'blockchain/result.dart';
+import 'result.dart';
 
 class BackendClient extends ChangeNotifier {
   static const String backendUrl =

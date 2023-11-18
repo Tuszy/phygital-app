@@ -6,7 +6,7 @@ import 'package:phygital/model/lsp4/lsp4_metadata.dart';
 import 'dart:convert';
 import 'package:phygital/service/backend_client.dart';
 import 'package:phygital/service/blockchain/contracts/LSP0ERC725Account.g.dart';
-import 'package:phygital/service/blockchain/result.dart';
+import 'package:phygital/service/result.dart';
 import 'package:phygital/service/ipfs_client.dart';
 import 'package:phygital/util/lsp2_utils.dart';
 import 'package:web3dart/web3dart.dart';

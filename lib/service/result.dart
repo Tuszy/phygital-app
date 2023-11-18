@@ -4,8 +4,10 @@ enum Result {
   invalidPhygital,
 
   invalidUniversalProfileAddress,
+  invalidUniversalProfileData,
   invalidReceivingUniversalProfileAddress,
   invalidPhygitalAssetContractAddress,
+  invalidPhygitalCollectionData,
 
   necessaryPermissionsNotSet,
 
@@ -46,8 +48,10 @@ String getMessageForResult(Result result){
     case Result.invalidPhygital: return "Invalid Phygital.";
 
     case Result.invalidUniversalProfileAddress: return "Invalid Universal Profile.";
+    case Result.invalidUniversalProfileData: return "Invalid Universal Profile Data.";
     case Result.invalidReceivingUniversalProfileAddress: return "Invalid receiving Universal Profile.";
     case Result.invalidPhygitalAssetContractAddress: return "Invalid Phygital collection.\n(Dev: Please check the contract address.)";
+    case Result.invalidPhygitalCollectionData: return "Invalid Phygital collection data.";
 
     case Result.necessaryPermissionsNotSet: return "Please set the necessary permissions on the Universal profile.";
 
