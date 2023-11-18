@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:ndef/utilities.dart';
 import 'package:phygital/service/ipfs_client.dart';
 import 'package:pointycastle/api.dart';
@@ -59,15 +60,23 @@ class LSP2Utils {
       url = "${IpfsClient.gatewayUrl}${url.substring(7)}";
     }
 
-    Response response = await _httpClient.get(Uri.parse(url));
-    String jsonStringified = utf8.decode(response.bodyBytes);
-    Uint8List calculatedJsonHash = hashJson(response.bodyBytes);
+    try {
+      Response response = await _httpClient.get(Uri.parse(url));
 
-    if (jsonHash.toHexString() != calculatedJsonHash.toHexString()) {
-      throw "JSON hash validation failed";
+      String jsonStringified = utf8.decode(response.bodyBytes);
+      Uint8List calculatedJsonHash = hashJson(response.bodyBytes);
+
+      if (jsonHash.toHexString() != calculatedJsonHash.toHexString()) {
+        throw "JSON hash validation failed";
+      }
+
+      return jsonStringified;
+    } catch (e) {
+      if (kDebugMode) {
+        print("Fetching JSON failed ($e)");
+      }
+      throw "Failed to fetch the JSON data";
     }
-
-    return jsonStringified;
   }
 
   Future<String> fetchJson(String url) async {
@@ -75,8 +84,15 @@ class LSP2Utils {
       url = "${IpfsClient.gatewayUrl}${url.substring(7)}";
     }
 
-    Response response = await _httpClient.get(Uri.parse(url));
-    return utf8.decode(response.bodyBytes);
+    try {
+      Response response = await _httpClient.get(Uri.parse(url));
+      return utf8.decode(response.bodyBytes);
+    } catch (e) {
+      if (kDebugMode) {
+        print("Fetching JSON failed ($e)");
+      }
+      throw "Failed to fetch the JSON data";
+    }
   }
 
   Uint8List getArrayIndexKey(Uint8List arrayKey, int index) {

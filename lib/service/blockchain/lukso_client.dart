@@ -10,6 +10,7 @@ import 'package:phygital/service/blockchain/contracts/LSP0ERC725Account.g.dart';
 import 'package:phygital/service/result.dart';
 import 'package:phygital/service/ipfs_client.dart';
 import 'package:phygital/util/lsp2_utils.dart';
+import 'package:web3dart/json_rpc.dart';
 import 'package:web3dart/web3dart.dart';
 
 import '../../model/phygital.dart';
@@ -438,6 +439,12 @@ class LuksoClient extends ChangeNotifier {
 
     PhygitalAsset contract =
         PhygitalAsset(address: phygital.contractAddress!, client: _web3client!);
+
+    EthereumAddress? owner;
+    try{
+      owner = await contract.tokenOwnerOf(phygital.id);
+    }catch(e){/*Not minted yet*/}
+
     List<Uint8List> data = await contract.getDataBatch([
       phygitalAssetMetadataKey,
       phygitalAssetBaseUriKey,
@@ -483,13 +490,13 @@ class LuksoClient extends ChangeNotifier {
     String json =
         await LSP2Utils().fetchJson("$baseUri${phygital.id.toHexString()}");
     if (json.isEmpty) return (Result.invalidPhygitalData, null);
-
     Map<String, dynamic> rawData = jsonDecode(json);
     return (
       Result.success,
       PhygitalWithData(
         address: phygital.address,
         contractAddress: phygital.contractAddress!,
+        owner: owner,
         name: name,
         symbol: symbol,
         baseUri: baseUri,

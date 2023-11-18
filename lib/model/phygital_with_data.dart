@@ -11,6 +11,7 @@ class PhygitalWithData {
   PhygitalWithData({
     required this.address,
     required this.contractAddress,
+    required this.owner,
     required this.name,
     required this.symbol,
     required this.baseUri,
@@ -20,6 +21,7 @@ class PhygitalWithData {
 
   final EthereumAddress address;
   final EthereumAddress contractAddress;
+  final EthereumAddress? owner;
   final String name;
   final String symbol;
   final String baseUri;
