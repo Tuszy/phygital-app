@@ -62,9 +62,15 @@ class _ScannerWidgetState extends State<ScannerWidget> {
         Flexible(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(10),
-              child: _buildQrView(context),
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                color: Colors.black,
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: _buildQrView(context),
+              ),
             ),
           ),
         ),
