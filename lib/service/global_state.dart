@@ -20,11 +20,14 @@ class GlobalState extends ChangeNotifier {
     String? universalProfileAddress =
         _prefs!.getString(universalProfileAddressKey);
     if (universalProfileAddress != null) {
-      LuksoClient().fetchUniversalProfile(
+      _universalProfile = await LuksoClient().fetchUniversalProfile(
         EthereumAddress(
           universalProfileAddress.toBytes(),
         ),
       );
+      if (universalProfile == null) {
+        await _prefs!.remove(universalProfileAddressKey);
+      }
     }
     _initialized = true;
     notifyListeners();
