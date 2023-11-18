@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:ndef/utilities.dart';
 import 'package:phygital/page/phygital/phygital_data_page.dart';
 import 'package:phygital/service/custom_dialog.dart';
 import 'package:phygital/layout/standard_layout.dart';
 import 'package:phygital/service/blockchain/lukso_client.dart';
+import 'package:phygital/service/global_state.dart';
 import 'package:provider/provider.dart';
+import 'package:web3dart/credentials.dart';
 
 import '../component/button.dart';
 import '../model/phygital_with_data.dart';
@@ -71,13 +74,81 @@ class _MenuPageState extends State<MenuPage> {
     );
   }
 
-  Future<void> mint() async {}
+  Future<void> mint() async {
+    if(GlobalState().universalProfile == null) return;
+
+    scan(
+      onSuccess: (PhygitalWithData? phygitalWithData) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => PhygitalDataPage(
+              onConfirmButtonText: "MINT",
+              onConfirm: () async {
+                try {
+                  Result result = await LuksoClient().mint(
+                    phygital: phygitalWithData.phygital,
+                    universalProfileAddress:
+                        GlobalState().universalProfile!.address,
+                  );
+                  showInfoDialog(
+                    title: "Minting Result",
+                    text: getMessageForResult(result),
+                  );
+                } catch (e) {
+                  showInfoDialog(
+                    title: "Error",
+                    text: e.toString(),
+                  );
+                }
+              },
+              phygitalWithData: phygitalWithData!,
+            ),
+          ),
+        );
+      },
+    );
+  }
 
   Future<void> verifyOwnershipAfterTransfer() async {}
 
   Future<void> transfer() async {}
 
   Future<void> create() async {}
+
+  Future<void> setContractAddress() async {
+    EthereumAddress newContractAddress = EthereumAddress("61b882aa41B88DD6e9b196aF55E0A48889f23cF5".toBytes());
+    scan(
+      onSuccess: (PhygitalWithData? phygitalWithData) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => PhygitalDataPage(
+              onConfirmButtonText: "SET CONTRACT",
+              onConfirm: () async {
+                try {
+                  await NFC().setContractAddress(
+                    phygital: phygitalWithData.phygital,
+                    contractAddress: newContractAddress
+                  );
+                  showInfoDialog(
+                    title: "Result",
+                    text: newContractAddress.hexEip55,
+                  );
+                } catch (e) {
+                  showInfoDialog(
+                    title: "Error",
+                    text: e.toString(),
+                  );
+                }
+              },
+              phygitalWithData: phygitalWithData!,
+            ),
+          ),
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -114,6 +185,11 @@ class _MenuPageState extends State<MenuPage> {
             disabled: !nfc.isAvailable,
             text: "Create Collection",
             onPressed: create,
+          ),
+          Button(
+            disabled: !nfc.isAvailable,
+            text: "Set Contract Address",
+            onPressed: setContractAddress,
           ),
         ],
       ),
