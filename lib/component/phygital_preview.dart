@@ -13,7 +13,7 @@ class PhygitalPreview extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),
-      padding: const EdgeInsets.symmetric(vertical: 16),
+      padding: const EdgeInsets.symmetric(vertical: 8),
       decoration: BoxDecoration(
         color: const Color(0x22000000),
         borderRadius: BorderRadius.circular(16),
@@ -35,8 +35,8 @@ class PhygitalPreview extends StatelessWidget {
             phygitalWithData.name,
             style: const TextStyle(
               color: Colors.white,
-              fontSize: 30,
-              fontWeight: FontWeight.w700,
+              fontSize: 28,
+              fontWeight: FontWeight.w800,
             ),
           ),
           if (phygitalWithData.metadata.image != null)
@@ -49,7 +49,7 @@ class PhygitalPreview extends StatelessWidget {
             "\$${phygitalWithData.symbol}",
             style: const TextStyle(
               color: Colors.white,
-              fontSize: 24,
+              fontSize: 22,
               fontWeight: FontWeight.w800,
             ),
           ),
@@ -58,20 +58,20 @@ class PhygitalPreview extends StatelessWidget {
             text: phygitalWithData.contractAddress.hexEip55,
           ),
           PhygitalPreviewSection(
-            label: "Phygital Id",
+            label: "Phygital ID",
             text: phygitalWithData.id.toHexString(),
           ),
           PhygitalPreviewSection(
             label: "Owner",
             text: phygitalWithData.owner == null
-                ? "Not minted yet"
+                ? "Not minted yet."
                 : phygitalWithData.owner!.formattedName,
           ),
           if (phygitalWithData.creators.isNotEmpty)
             PhygitalPreviewSection(
               label: "Creators",
               text: phygitalWithData.creators
-                  .map((creator) => creator.formattedName)
+                  .map((creator) => "- ${creator.formattedName}")
                   .join("\n"),
             )
         ],

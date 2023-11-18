@@ -11,8 +11,8 @@ class PhygitalPreviewSection extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       clipBehavior: Clip.antiAlias,
-      margin: const EdgeInsets.only(top: 12),
-      padding: const EdgeInsets.only(top: 12, left: 8, right: 8, bottom: 8),
+      margin: const EdgeInsets.only(top: 8),
+      padding: const EdgeInsets.only(top: 8, left: 12, right: 12, bottom: 8),
       decoration: const BoxDecoration(
         border: Border(
           top: BorderSide(width: 2, color: Colors.white38),
@@ -30,24 +30,23 @@ class PhygitalPreviewSection extends StatelessWidget {
                   label,
                   style: const TextStyle(
                     color: Colors.white,
-                    fontSize: 16,
+                    fontSize: 18,
                     fontWeight: FontWeight.w800,
                   ),
-                  maxLines: 3,
-                  overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(
-                  height: 6,
+                  height: 4,
                 ),
-                Text(
-                  text,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700,
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 2),
+                  child: Text(
+                    text,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
-                  maxLines: 3,
-                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),
