@@ -6,11 +6,17 @@ import 'package:flutter/material.dart';
 import '../component/loading_backdrop.dart';
 
 class StandardLayout extends StatefulWidget {
-  const StandardLayout({super.key, required this.child, this.title, this.onConfirm});
+  const StandardLayout(
+      {super.key,
+      required this.child,
+      this.title,
+      this.onConfirm,
+      this.onConfirmButtonText});
 
   final String? title;
   final Widget child;
   final VoidCallback? onConfirm;
+  final String? onConfirmButtonText;
 
   @override
   State<StandardLayout> createState() => _StandardLayoutState();
@@ -91,56 +97,58 @@ class _StandardLayoutState extends State<StandardLayout>
                     },
                   ),
                 ),
-                if(widget.onConfirm != null)
-                Container(
-                  decoration: const BoxDecoration(
-                    //color: Color(0x8800ffff),
-                    border: Border(
-                      top: BorderSide(width: 2, color: Colors.white38),
+                if (widget.onConfirm != null)
+                  Container(
+                    decoration: const BoxDecoration(
+                      //color: Color(0x8800ffff),
+                      border: Border(
+                        top: BorderSide(width: 2, color: Colors.white38),
+                      ),
+                      color: Color(0x7700ff00),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Color(0x7700ff00),
+                          spreadRadius: 5,
+                          blurRadius: 8,
+                        ),
+                      ],
                     ),
-                    color: Color(0x7700ff00),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Color(0x7700ff00),
-                        spreadRadius: 5,
-                        blurRadius: 8,
-                      ),
-                    ],
-                  ),
-                  child: ClipRRect(
-                    child: BackdropFilter(
-                      filter: ImageFilter.blur(
-                        sigmaX: 3,
-                        sigmaY: 3,
-                      ),
+                    child: ClipRRect(
+                      child: BackdropFilter(
+                        filter: ImageFilter.blur(
+                          sigmaX: 3,
+                          sigmaY: 3,
+                        ),
 
-                      /// Filter effect field
-                      child: TextButton(
-                        style: TextButton.styleFrom(
-                          foregroundColor: const Color(0xcdffffff),
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 16, vertical: 24),
-                          textStyle: const TextStyle(
-                            letterSpacing: 3,
-                            fontSize: 24,
-                            fontWeight: FontWeight.w900,
+                        /// Filter effect field
+                        child: TextButton(
+                          style: TextButton.styleFrom(
+                            foregroundColor: const Color(0xcdffffff),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 24),
+                            textStyle: const TextStyle(
+                              letterSpacing: 3,
+                              fontSize: 24,
+                              fontWeight: FontWeight.w900,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(4),
+                            ),
                           ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(4),
+                          onPressed: () {
+                            widget.onConfirm!();
+                          },
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            mainAxisSize: MainAxisSize.max,
+                            children: [
+                              Text(widget.onConfirmButtonText ?? "CONFIRM")
+                            ],
                           ),
-                        ),
-                        onPressed: () {
-                          widget.onConfirm!();
-                        },
-                        child: const Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          mainAxisSize: MainAxisSize.max,
-                          children: [Text("CONFIRM")],
                         ),
                       ),
                     ),
                   ),
-                ),
               ],
             ),
             const LoadingBackdrop()
