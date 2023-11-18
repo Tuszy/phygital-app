@@ -9,7 +9,7 @@ import 'package:phygital/model/lsp4/lsp4_image.dart';
 import 'package:phygital/model/lsp4/lsp4_link.dart';
 import 'package:phygital/model/lsp4/lsp4_metadata.dart';
 import 'package:phygital/model/lsp4/lsp4_verification.dart';
-import 'package:phygital/model/universal_profile.dart';
+import 'package:phygital/model/lsp0/universal_profile.dart';
 import 'package:phygital/service/blockchain/lukso_client.dart';
 import 'package:provider/provider.dart';
 import 'package:web3dart/web3dart.dart';

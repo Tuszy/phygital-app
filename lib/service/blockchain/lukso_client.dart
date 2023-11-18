@@ -12,7 +12,7 @@ import 'package:phygital/util/lsp2_utils.dart';
 import 'package:web3dart/web3dart.dart';
 
 import '../../model/phygital.dart';
-import '../../model/universal_profile.dart';
+import '../../model/lsp0/universal_profile.dart';
 import '../nfc.dart';
 import 'contracts/PhygitalAsset.g.dart';
 

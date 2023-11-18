@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:phygital/model/lsp_image.dart';
+import 'package:phygital/model/lsp0/lsp_image.dart';
 
 class ImagePreview extends StatefulWidget {
   const ImagePreview(

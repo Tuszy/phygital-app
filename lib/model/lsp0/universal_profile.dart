@@ -1,5 +1,5 @@
 import 'package:web3dart/credentials.dart';
-import 'lsp4/lsp4_link.dart';
+import '../lsp4/lsp4_link.dart';
 import 'lsp_image.dart';
 
 class UniversalProfile {

@@ -1,6 +1,6 @@
 import 'package:ndef/utilities.dart';
 import 'package:phygital/model/image.dart';
-import 'package:phygital/model/lsp_image.dart';
+import 'package:phygital/model/lsp0/lsp_image.dart';
 
 class LSP3Image extends LSPImage{
   LSP3Image(

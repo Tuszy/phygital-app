@@ -1,7 +1,7 @@
 import 'package:ndef/utilities.dart';
 import 'package:phygital/model/image.dart';
 import 'package:phygital/model/lsp4/lsp4_verification.dart';
-import 'package:phygital/model/lsp_image.dart';
+import 'package:phygital/model/lsp0/lsp_image.dart';
 
 class LSP4Image extends LSPImage {
   LSP4Image(
