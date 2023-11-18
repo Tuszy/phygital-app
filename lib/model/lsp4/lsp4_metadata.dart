@@ -27,6 +27,8 @@ class LSP4Metadata {
   List<LSP4Asset>? assets;
   List<LSP4Attribute>? attributes;
 
+  LSP4Image? get image => images.elementAtOrNull(0)?.elementAtOrNull(0);
+
   Future<String?> uploadToIpfs(
       {required String name,
       required String symbol,
