@@ -54,6 +54,7 @@ class LSP2Utils {
     }
     Uint8List jsonHash = lsp2JsonUrl.sublist(4, 36);
     String url = utf8.decode(lsp2JsonUrl.sublist(36));
+
     if (url.startsWith("ipfs://")) {
       url = "${IpfsClient.gatewayUrl}${url.substring(7)}";
     }
@@ -67,5 +68,24 @@ class LSP2Utils {
     }
 
     return jsonStringified;
+  }
+
+  Future<String> fetchJson(String url) async {
+    if (url.startsWith("ipfs://")) {
+      url = "${IpfsClient.gatewayUrl}${url.substring(7)}";
+    }
+
+    Response response = await _httpClient.get(Uri.parse(url));
+    return utf8.decode(response.bodyBytes);
+  }
+
+  Uint8List getArrayIndexKey(Uint8List arrayKey, int index) {
+    return Uint8List.fromList(
+      arrayKey.sublist(0, 16) +
+          Uint8List.fromList(Uint8List.fromList([index])
+              .toHexString()
+              .padLeft(32, '0')
+              .toBytes()),
+    );
   }
 }

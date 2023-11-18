@@ -58,4 +58,44 @@ class LSP4Metadata {
       }
     };
   }
+
+  factory LSP4Metadata.fromJson(final Map<String, dynamic> rawData) {
+    Map<String, dynamic> data = rawData["LSP4Metadata"];
+    String description = data["description"] ?? "";
+    List<LSP4Link> links = data.containsKey("links")
+        ? (data["links"] as List<dynamic>)
+            .map((e) => LSP4Link.fromJson(e))
+            .toList()
+        : [];
+    List<List<LSP4Image>> images = data.containsKey("images")
+        ? (data["images"] as List<dynamic>)
+            .map((e) =>
+                (e as List<dynamic>).map((e) => LSP4Image.fromJson(e)).toList())
+            .toList()
+        : [];
+    List<LSP4Image> icon = data.containsKey("icon")
+        ? (data["icon"] as List<dynamic>)
+            .map((e) => LSP4Image.fromJson(e))
+            .toList()
+        : [];
+    List<LSP4Asset>? assets = data.containsKey("assets")
+        ? (data["assets"] as List<dynamic>)
+            .map((e) => LSP4Asset.fromJson(e))
+            .toList()
+        : null;
+    List<LSP4Attribute>? attributes = data.containsKey("attributes")
+        ? (data["attributes"] as List<dynamic>)
+            .map((e) => LSP4Attribute.fromJson(e))
+            .toList()
+        : null;
+
+    return LSP4Metadata(
+      description: description,
+      links: links,
+      images: images,
+      icon: icon,
+      assets: assets,
+      attributes: attributes,
+    );
+  }
 }

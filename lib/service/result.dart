@@ -8,6 +8,7 @@ enum Result {
   invalidReceivingUniversalProfileAddress,
   invalidPhygitalAssetContractAddress,
   invalidPhygitalCollectionData,
+  invalidPhygitalData,
 
   necessaryPermissionsNotSet,
 
@@ -52,6 +53,7 @@ String getMessageForResult(Result result){
     case Result.invalidReceivingUniversalProfileAddress: return "Invalid receiving Universal Profile.";
     case Result.invalidPhygitalAssetContractAddress: return "Invalid Phygital collection.\n(Dev: Please check the contract address.)";
     case Result.invalidPhygitalCollectionData: return "Invalid Phygital collection data.";
+    case Result.invalidPhygitalData: return "Invalid Phygital data.";
 
     case Result.necessaryPermissionsNotSet: return "Please set the necessary permissions on the Universal profile.";
 
@@ -75,10 +77,10 @@ String getMessageForResult(Result result){
 
     case Result.createSucceeded: return "Successfully created the Phygital collection.";
     case Result.createFailed: return "Failed to create the Phygital collection.\nTry again.";
-    case Result.collectionMustNotBeEmpty: return "The collection must not be empty.";
-    case Result.nameMustNotBeEmpty: return "The name must not be empty.";
-    case Result.symbolMustNotBeEmpty: return "The symbol must not be empty.";
-    case Result.invalidBaseUri: return "Invalid base uri";
+    case Result.collectionMustNotBeEmpty: return "Invalid Phygital data. The collection must not be empty.";
+    case Result.nameMustNotBeEmpty: return "Invalid Phygital data. The name must not be empty.";
+    case Result.symbolMustNotBeEmpty: return "Invalid Phygital data. The symbol must not be empty.";
+    case Result.invalidBaseUri: return "Invalid Phygital base uri";
     case Result.uploadingLSP4MetadataFailed: return "Failed to upload LSP4 Metadata";
 
     case Result.notInitialized: return "Lukso Client not initialized.\nRestart the app.";

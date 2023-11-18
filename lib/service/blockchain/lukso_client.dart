@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart';
 import 'package:ndef/utilities.dart';
 import 'package:phygital/model/lsp4/lsp4_metadata.dart';
+import 'package:phygital/model/phygital_with_data.dart';
 import 'dart:convert';
 import 'package:phygital/service/backend_client.dart';
 import 'package:phygital/service/blockchain/contracts/LSP0ERC725Account.g.dart';
@@ -29,6 +30,23 @@ class LuksoClient extends ChangeNotifier {
   static final universalProfileDataKey =
       "5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5"
           .toBytes();
+  static final phygitalAssetMetadataKey =
+      "9afb95cacc9f95858ec44aa8c3b685511002e30ae54415823f406128b85b238e"
+          .toBytes();
+  static final phygitalAssetBaseUriKey =
+      "1a7628600c3bac7101f53697f48df381ddc36b9015e7d7c9c5633d1252aa2843"
+          .toBytes();
+  static final phygitalAssetNameKey =
+      "deba1e292f8ba88238e10ab3c7f88bd4be4fac56cad5194b6ecceaf653468af1"
+          .toBytes();
+  static final phygitalAssetSymbolKey =
+      "2f0a68ab07768e01943a599e73362a0e17a63a72e94dd2e384d2c1d4db932756"
+          .toBytes();
+  static final phygitalAssetCreatorsArrayKey =
+      "114bd03b3a46d48759680d81ebb2b414fda7d030a7105a851867accf1c2352e7"
+          .toBytes();
+  static final phygitalAssetCreatorsMapPrefixKey =
+      "6de85eaf5d982b4e5da00000".toBytes();
 
   static final controllerKey =
       EthereumAddress("Ac11803507C05A21daAF9D354F7100B1dC9CD590".toBytes());
@@ -410,5 +428,74 @@ class LuksoClient extends ChangeNotifier {
     Map<String, dynamic> universalProfileData = jsonDecode(json);
     return UniversalProfile.fromJson(
         universalProfileAddress, universalProfileData);
+  }
+
+  Future<(Result, PhygitalWithData?)> fetchPhygitalData(
+      Phygital phygital) async {
+    Result validationResult =
+        await validatePhygitalContract(phygital.contractAddress);
+    if (validationResult != Result.success) return (validationResult, null);
+
+    PhygitalAsset contract =
+        PhygitalAsset(address: phygital.contractAddress!, client: _web3client!);
+    List<Uint8List> data = await contract.getDataBatch([
+      phygitalAssetMetadataKey,
+      phygitalAssetBaseUriKey,
+      phygitalAssetNameKey,
+      phygitalAssetSymbolKey,
+      phygitalAssetCreatorsArrayKey
+    ]);
+
+    Uint8List metadataJsonUrl = data[0];
+    if (metadataJsonUrl.isEmpty) {
+      return (Result.invalidPhygitalCollectionData, null);
+    }
+
+    String baseUri = utf8.decode(data[1].sublist(4));
+    if (baseUri.isEmpty) return (Result.invalidBaseUri, null);
+
+    String name = utf8.decode(data[2]);
+    if (name.isEmpty) return (Result.nameMustNotBeEmpty, null);
+
+    String symbol = utf8.decode(data[3]);
+    if (symbol.isEmpty) return (Result.symbolMustNotBeEmpty, null);
+
+    int creatorsLength =
+        ByteUtils.bytesToBigInt(data[4], endianness: Endianness.Little).toInt();
+
+    List<Uint8List> creatorsIndexKeys = [];
+    for (int i = 0; i < creatorsLength; i++) {
+      creatorsIndexKeys.add(
+        LSP2Utils().getArrayIndexKey(
+          phygitalAssetCreatorsArrayKey,
+          i,
+        ),
+      );
+    }
+
+    List<Uint8List> creatorsData = creatorsIndexKeys.isNotEmpty
+        ? await contract.getDataBatch(creatorsIndexKeys)
+        : [];
+    List<EthereumAddress> creators = creatorsData
+        .map((creatorAddress) => EthereumAddress(creatorAddress))
+        .toList();
+
+    String json =
+        await LSP2Utils().fetchJson("$baseUri${phygital.id.toHexString()}");
+    if (json.isEmpty) return (Result.invalidPhygitalData, null);
+
+    Map<String, dynamic> rawData = jsonDecode(json);
+    return (
+      Result.success,
+      PhygitalWithData(
+        address: phygital.address,
+        contractAddress: phygital.contractAddress!,
+        name: name,
+        symbol: symbol,
+        baseUri: baseUri,
+        metadata: LSP4Metadata.fromJson(rawData),
+        creators: creators,
+      ),
+    );
   }
 }
