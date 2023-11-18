@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:phygital/component/image_upload.dart';
+import 'package:phygital/service/global_state.dart';
 import 'package:provider/provider.dart';
 import 'page/homepage.dart';
 import 'service/nfc.dart';
@@ -8,6 +9,7 @@ void main() {
   runApp(MultiProvider(
     providers: [
       ChangeNotifierProvider<NFC>(create: (_) => NFC()),
+      ChangeNotifierProvider<GlobalState>(create: (_) => GlobalState()),
     ],
     child: const App(),
   ));

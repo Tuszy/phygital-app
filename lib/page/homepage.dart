@@ -6,6 +6,7 @@ import 'package:phygital/service/custom_dialog.dart';
 import 'package:phygital/component/image_preview.dart';
 import 'package:phygital/layout/standard_layout.dart';
 import 'package:phygital/model/lsp0/universal_profile.dart';
+import 'package:phygital/service/global_state.dart';
 import 'package:phygital/service/qr_code.dart';
 import 'package:provider/provider.dart';
 import 'package:web3dart/credentials.dart';
@@ -29,13 +30,14 @@ class _HomepageState extends State<Homepage> {
   @override
   void initState() {
     super.initState();
+    GlobalState().init();
     NFC().init();
   }
 
   void readPhygital() async {
     try {
       Phygital? phygital = await NFC().scan();
-      if(phygital == null) return;
+      if (phygital == null) return;
       if (phygital.contractAddress == null) {
         showInfoDialog(
           title: "Unassigned Phygital",
@@ -44,8 +46,9 @@ class _HomepageState extends State<Homepage> {
         return;
       }
 
-      (Result, PhygitalWithData?) phygitalWithData = await LuksoClient().fetchPhygitalData(phygital);
-      if(Result.success != phygitalWithData.$1){
+      (Result, PhygitalWithData?) phygitalWithData =
+          await LuksoClient().fetchPhygitalData(phygital);
+      if (Result.success != phygitalWithData.$1) {
         showInfoDialog(
           title: "Read Result",
           text: getMessageForResult(phygitalWithData.$1),
@@ -54,8 +57,6 @@ class _HomepageState extends State<Homepage> {
       }
 
       // TODO OPEN PHYGITAL PAGE
-
-
     } catch (e) {
       showInfoDialog(
         title: "Error",
@@ -106,7 +107,7 @@ class _HomepageState extends State<Homepage> {
 
   @override
   Widget build(BuildContext context) {
-    NFC nfc = Provider.of<NFC>(context);
+    GlobalState globalState = Provider.of<GlobalState>(context);
 
     return StandardLayout(
       child: Center(
@@ -125,18 +126,19 @@ class _HomepageState extends State<Homepage> {
                 height: 150,
               ),
             Expanded(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Button(
-                    text: "Read Phygital",
-                    onPressed: readPhygital,
-                  ),
-                  Button(
-                    text: "Scan QR Code",
-                    onPressed: scanQRCode,
-                  ),
-                  /*Button(
+              child: globalState.initialized
+                  ? Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Button(
+                          text: "Read Phygital",
+                          onPressed: readPhygital,
+                        ),
+                        Button(
+                          text: "Scan QR Code",
+                          onPressed: scanQRCode,
+                        ),
+                        /*Button(
                     text: "Show QR Code",
                     onPressed: showQRCode,
                   ),
@@ -165,8 +167,16 @@ class _HomepageState extends State<Homepage> {
                       text: "Create",
                       onPressed: create,
                     ),*/
-                ],
-              ),
+                      ],
+                    )
+                  : Center(
+                      child: Transform.scale(
+                        scale: 2,
+                        child: const CircularProgressIndicator(
+                          valueColor: AlwaysStoppedAnimation(Color(0x7700ffff)),
+                        ),
+                      ),
+                    ),
             ),
           ],
         ),
