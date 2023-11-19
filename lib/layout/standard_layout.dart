@@ -2,9 +2,12 @@ import 'dart:ui';
 
 import 'package:animated_background/animated_background.dart';
 import 'package:flutter/material.dart';
+import 'package:phygital/service/nfc.dart';
+import 'package:provider/provider.dart';
 
 import '../component/loading_backdrop.dart';
 import '../model/layout_button_data.dart';
+import '../service/global_state.dart';
 
 class StandardLayout extends StatefulWidget {
   const StandardLayout({
@@ -26,10 +29,14 @@ class _StandardLayoutState extends State<StandardLayout>
     with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
+    NFC nfc = Provider.of<NFC>(context);
+    GlobalState globalState = Provider.of<GlobalState>(context);
+
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: widget.title != null
           ? AppBar(
+              automaticallyImplyLeading: !nfc.isActive && globalState.loadingWithText == null,
               iconTheme: const IconThemeData(
                 color: Colors.white,
               ),
@@ -120,10 +127,8 @@ class _StandardLayoutState extends State<StandardLayout>
                     child: ClipRRect(
                       child: BackdropFilter(
                         filter: ImageFilter.blur(
-                          sigmaX: widget.layoutButtonData!.disabled
-                              ? 10 : 3,
-                          sigmaY: widget.layoutButtonData!.disabled
-                              ? 10 : 3,
+                          sigmaX: widget.layoutButtonData!.disabled ? 10 : 3,
+                          sigmaY: widget.layoutButtonData!.disabled ? 10 : 3,
                         ),
 
                         /// Filter effect field

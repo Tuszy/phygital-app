@@ -45,8 +45,8 @@ class Phygital {
     try {
       GlobalState().loadingWithText = "Minting";
       Result result = await LuksoClient().mint(
-        phygitalTag: phygital,
-        universalProfileAddress: GlobalState().universalProfile!.address,
+        phygitalTag: tag,
+        universalProfileAddress: universalProfile.address,
       );
 
       if (Result.mintSucceeded == result) {
@@ -57,7 +57,7 @@ class Phygital {
       return result;
     } catch (e) {
       if (kDebugMode) {
-        print("Minting ${phygital.id} failed ($e)");
+        print("Minting ${tag.id} failed ($e)");
       }
       GlobalState().loadingWithText = null;
       return Result.mintFailed;
@@ -75,8 +75,8 @@ class Phygital {
     try {
       GlobalState().loadingWithText = "Verifying Ownership";
       Result result = await LuksoClient().verifyOwnershipAfterTransfer(
-        phygitalTag: phygital,
-        universalProfileAddress: GlobalState().universalProfile!.address,
+        phygitalTag: tag,
+        universalProfileAddress: universalProfile.address,
       );
 
       if (Result.ownershipVerificationSucceeded == result) {
@@ -86,10 +86,41 @@ class Phygital {
       return result;
     } catch (e) {
       if (kDebugMode) {
-        print("Ownership verification of ${phygital.id} failed ($e)");
+        print("Ownership verification of ${tag.id} failed ($e)");
       }
       GlobalState().loadingWithText = null;
       return Result.ownershipVerificationFailed;
+    }
+  }
+
+  Future<Result> transfer(UniversalProfile toUniversalProfile) async {
+    UniversalProfile? universalProfile = GlobalState().universalProfile;
+    if (universalProfile == null) return Result.ownershipVerificationFailed;
+
+    if (owner == null) return Result.notMintedYet;
+    if (owner!.address.hexEip55 != universalProfile.address.hexEip55) return Result.invalidOwnership;
+    if (toUniversalProfile.address.hexEip55 == universalProfile.address.hexEip55) return Result.mustNotTransferToYourself;
+    if (!verifiedOwnership) return Result.unverifiedOwnership;
+
+    try {
+      GlobalState().loadingWithText = "Transferring Ownership";
+      Result result = await LuksoClient().transfer(
+        phygitalTag: tag,
+        universalProfileAddress: universalProfile.address,
+        toUniversalProfileAddress: toUniversalProfile.address,
+      );
+      if (Result.transferSucceeded == result) {
+        owner = toUniversalProfile;
+        verifiedOwnership = false;
+      }
+      GlobalState().loadingWithText = null;
+      return result;
+    } catch (e) {
+      if (kDebugMode) {
+        print("Transfer of ${tag.id} to ${toUniversalProfile.address.hexEip55} failed ($e)");
+      }
+      GlobalState().loadingWithText = null;
+      return Result.transferFailed;
     }
   }
 
@@ -101,7 +132,7 @@ class Phygital {
     try {
       GlobalState().loadingWithText = "Assigning collection";
       EthereumAddress? setContractAddress = await NFC().setContractAddress(
-        phygitalTag: phygital,
+        phygitalTag: tag,
         contractAddress: newContractAddress,
       );
       if(setContractAddress != null) {
@@ -113,14 +144,14 @@ class Phygital {
       return Result.assigningCollectionSucceeded;
     } catch (e) {
       if (kDebugMode) {
-        print("Setting contract address ${newContractAddress.hexEip55} to ${phygital.id} failed ($e)");
+        print("Setting contract address ${newContractAddress.hexEip55} to ${tag.id} failed ($e)");
       }
       GlobalState().loadingWithText = null;
       return Result.assigningCollectionFailed;
     }
   }
 
-  PhygitalTag get phygital => PhygitalTag(
+  PhygitalTag get tag => PhygitalTag(
         address: address,
         tagId: tagId,
         contractAddress: contractAddress,

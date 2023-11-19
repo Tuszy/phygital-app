@@ -57,7 +57,7 @@ class _HomepageState extends State<Homepage> {
       );
     } catch (e) {
       showInfoDialog(
-        title: "Scan Result",
+        title: "Result",
         text: e.toString(),
       );
     }
@@ -68,6 +68,7 @@ class _HomepageState extends State<Homepage> {
     Navigator.push(
       context,
       MaterialPageRoute(
+        settings: const RouteSettings(name: "menu"),
         builder: (context) => const MenuPage(),
       ),
     );
@@ -91,7 +92,7 @@ class _HomepageState extends State<Homepage> {
           "Missing permissions.\nSet them on: $frontendUrl", frontendUrl);
     } else if (Result.success != result.$1) {
       showInfoDialog(
-        title: "Scan Result",
+        title: "Result",
         text: getMessageForResult(result.$1),
       );
     }
@@ -157,7 +158,6 @@ class _HomepageState extends State<Homepage> {
                       children: [
                         if (universalProfile == null)
                           Button(
-                            disabled: !nfc.isAvailable,
                             text: "Scan Phygital",
                             onPressed: read,
                           ),
@@ -168,7 +168,6 @@ class _HomepageState extends State<Homepage> {
                           ),
                         if (universalProfile != null)
                           Button(
-                            disabled: !nfc.isAvailable,
                             text: "Menu",
                             onPressed: openMenu,
                           ),

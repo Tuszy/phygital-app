@@ -28,6 +28,7 @@ enum Result {
   alreadyVerifiedOwnership,
 
   transferSucceeded,
+  mustNotTransferToYourself,
   transferFailed,
 
   createSucceeded,
@@ -76,6 +77,7 @@ String getMessageForResult(Result result){
     case Result.alreadyVerifiedOwnership: return "Phygital ownership is already verified.";
 
     case Result.transferSucceeded: return "Successfully transferred the Phygital.";
+    case Result.mustNotTransferToYourself: return "You are already the owner of the Phygital.";
     case Result.transferFailed: return "Failed to transfer the Phygital.\nTry again.";
 
     case Result.createSucceeded: return "Successfully created the Phygital collection.";
