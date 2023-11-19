@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:ndef/utilities.dart';
 import 'package:phygital/model/layout_button_data.dart';
-import 'package:phygital/page/phygital/phygital_page.dart';
-import 'package:phygital/page/universal-profile/universal_profile_page.dart';
+import 'package:phygital/page/phygital_page.dart';
+import 'package:phygital/page/universal_profile_page.dart';
 import 'package:phygital/service/custom_dialog.dart';
 import 'package:phygital/layout/standard_layout.dart';
 import 'package:phygital/service/blockchain/lukso_client.dart';
@@ -274,7 +274,7 @@ class _MenuPageState extends State<MenuPage> {
 
   Future<void> setContractAddress() async {
     EthereumAddress newContractAddress =
-        EthereumAddress("61b882aa41B88DD6e9b196aF55E0A48889f23cF5".toBytes());
+        EthereumAddress("aa4EC04b31e6338CC90cEbd0F45202F2E335137b".toBytes());
     scan(
       onSuccess: (Phygital phygital) {
         Navigator.push(
