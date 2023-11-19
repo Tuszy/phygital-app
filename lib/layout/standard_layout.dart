@@ -4,19 +4,19 @@ import 'package:animated_background/animated_background.dart';
 import 'package:flutter/material.dart';
 
 import '../component/loading_backdrop.dart';
+import '../model/layout_button_data.dart';
 
 class StandardLayout extends StatefulWidget {
-  const StandardLayout(
-      {super.key,
-      required this.child,
-      this.title,
-      this.onConfirm,
-      this.onConfirmButtonText});
+  const StandardLayout({
+    super.key,
+    required this.child,
+    this.title,
+    this.layoutButtonData,
+  });
 
   final String? title;
   final Widget child;
-  final VoidCallback? onConfirm;
-  final String? onConfirmButtonText;
+  final LayoutButtonData? layoutButtonData;
 
   @override
   State<StandardLayout> createState() => _StandardLayoutState();
@@ -97,7 +97,7 @@ class _StandardLayoutState extends State<StandardLayout>
                     },
                   ),
                 ),
-                if (widget.onConfirm != null)
+                if (widget.layoutButtonData != null)
                   Container(
                     decoration: const BoxDecoration(
                       //color: Color(0x8800ffff),
@@ -135,14 +135,12 @@ class _StandardLayoutState extends State<StandardLayout>
                               borderRadius: BorderRadius.circular(4),
                             ),
                           ),
-                          onPressed: () {
-                            widget.onConfirm!();
-                          },
+                          onPressed: widget.layoutButtonData!.onClick,
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             mainAxisSize: MainAxisSize.max,
                             children: [
-                              Text(widget.onConfirmButtonText ?? "CONFIRM")
+                              Text(widget.layoutButtonData!.text)
                             ],
                           ),
                         ),

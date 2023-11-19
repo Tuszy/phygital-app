@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:ndef/utilities.dart';
+import 'package:phygital/model/layout_button_data.dart';
 import 'package:phygital/page/phygital/phygital_data_page.dart';
 import 'package:phygital/service/custom_dialog.dart';
 import 'package:phygital/layout/standard_layout.dart';
@@ -39,9 +40,10 @@ class _MenuPageState extends State<MenuPage> {
       required Function(PhygitalWithData) onSuccess}) async {
     try {
       Phygital phygital = await NFC().read(mustHaveContractAddress: true);
-
+      GlobalState().loadingWithText = "Fetching Phygital Data...";
       (Result, PhygitalWithData?) result =
           await LuksoClient().fetchPhygitalData(phygital: phygital);
+      GlobalState().loadingWithText = null;
       if (Result.success != result.$1) {
         throw getMessageForResult(result.$1);
       } else if (result.$2 == null) {
@@ -50,8 +52,9 @@ class _MenuPageState extends State<MenuPage> {
 
       if (!mounted) return;
 
-      onSuccess(result.$2!);
+      await onSuccess(result.$2!);
     } catch (e) {
+      GlobalState().loadingWithText = null;
       showInfoDialog(
         title: "Scan Result",
         text: e.toString(),
@@ -75,34 +78,39 @@ class _MenuPageState extends State<MenuPage> {
   }
 
   Future<void> mint() async {
-    if(GlobalState().universalProfile == null) return;
+    if (GlobalState().universalProfile == null) return;
 
     scan(
-      onSuccess: (PhygitalWithData? phygitalWithData) {
+      onSuccess: (PhygitalWithData phygitalWithData) {
         Navigator.push(
           context,
           MaterialPageRoute(
             builder: (context) => PhygitalDataPage(
-              onConfirmButtonText: "MINT",
-              onConfirm: () async {
-                try {
-                  Result result = await LuksoClient().mint(
-                    phygital: phygitalWithData.phygital,
-                    universalProfileAddress:
-                        GlobalState().universalProfile!.address,
-                  );
-                  showInfoDialog(
-                    title: "Minting Result",
-                    text: getMessageForResult(result),
-                  );
-                } catch (e) {
-                  showInfoDialog(
-                    title: "Error",
-                    text: e.toString(),
-                  );
-                }
-              },
-              phygitalWithData: phygitalWithData!,
+              layoutButtonData: LayoutButtonData(
+                text: "MINT",
+                onClick: () async {
+                  try {
+                    GlobalState().loadingWithText = "Minting...";
+                    Result result = await LuksoClient().mint(
+                      phygital: phygitalWithData.phygital,
+                      universalProfileAddress:
+                          GlobalState().universalProfile!.address,
+                    );
+                    GlobalState().loadingWithText = null;
+                    await showInfoDialog(
+                      title: "Minting Result",
+                      text: getMessageForResult(result),
+                    );
+                  } catch (e) {
+                    GlobalState().loadingWithText = null;
+                    showInfoDialog(
+                      title: "Error",
+                      text: e.toString(),
+                    );
+                  }
+                },
+              ),
+              phygitalWithData: phygitalWithData,
             ),
           ),
         );
@@ -117,32 +125,37 @@ class _MenuPageState extends State<MenuPage> {
   Future<void> create() async {}
 
   Future<void> setContractAddress() async {
-    EthereumAddress newContractAddress = EthereumAddress("61b882aa41B88DD6e9b196aF55E0A48889f23cF5".toBytes());
+    EthereumAddress newContractAddress =
+        EthereumAddress("61b882aa41B88DD6e9b196aF55E0A48889f23cF5".toBytes());
     scan(
-      onSuccess: (PhygitalWithData? phygitalWithData) {
+      onSuccess: (PhygitalWithData phygitalWithData) {
         Navigator.push(
           context,
           MaterialPageRoute(
             builder: (context) => PhygitalDataPage(
-              onConfirmButtonText: "SET CONTRACT",
-              onConfirm: () async {
-                try {
-                  await NFC().setContractAddress(
-                    phygital: phygitalWithData.phygital,
-                    contractAddress: newContractAddress
-                  );
-                  showInfoDialog(
-                    title: "Result",
-                    text: newContractAddress.hexEip55,
-                  );
-                } catch (e) {
-                  showInfoDialog(
-                    title: "Error",
-                    text: e.toString(),
-                  );
-                }
-              },
-              phygitalWithData: phygitalWithData!,
+              layoutButtonData: LayoutButtonData(
+                text: "Set Contract",
+                onClick: () async {
+                  GlobalState().loadingWithText = "Setting Contract Address...";
+                  try {
+                    await NFC().setContractAddress(
+                        phygital: phygitalWithData.phygital,
+                        contractAddress: newContractAddress);
+                    GlobalState().loadingWithText = null;
+                    showInfoDialog(
+                      title: "Result",
+                      text: newContractAddress.hexEip55,
+                    );
+                  } catch (e) {
+                    GlobalState().loadingWithText = null;
+                    showInfoDialog(
+                      title: "Error",
+                      text: e.toString(),
+                    );
+                  }
+                },
+              ),
+              phygitalWithData: phygitalWithData,
             ),
           ),
         );
