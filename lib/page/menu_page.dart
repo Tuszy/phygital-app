@@ -87,27 +87,24 @@ class _MenuPageState extends State<MenuPage> {
           MaterialPageRoute(
             builder: (context) => PhygitalDataPage(
               layoutButtonData: LayoutButtonData(
-                text: "MINT",
+                text: phygitalWithData.owner != null ? "ALREADY MINTED" : "MINT",
+                disabled: phygitalWithData.owner != null,
                 onClick: () async {
-                  try {
-                    GlobalState().loadingWithText = "Minting...";
-                    Result result = await LuksoClient().mint(
-                      phygital: phygitalWithData.phygital,
-                      universalProfileAddress:
-                          GlobalState().universalProfile!.address,
-                    );
-                    GlobalState().loadingWithText = null;
-                    await showInfoDialog(
-                      title: "Minting Result",
-                      text: getMessageForResult(result),
-                    );
-                  } catch (e) {
-                    GlobalState().loadingWithText = null;
-                    showInfoDialog(
-                      title: "Error",
-                      text: e.toString(),
-                    );
-                  }
+                  Result result = await phygitalWithData.mint();
+                  await showInfoDialog(
+                    title: "Result",
+                    text: getMessageForResult(result),
+                  );
+                  if(Result.mintSucceeded != result) return;
+                  if(!mounted) return;
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => PhygitalDataPage(
+                        phygitalWithData: phygitalWithData,
+                      ),
+                    ),
+                  );
                 },
               ),
               phygitalWithData: phygitalWithData,
@@ -134,25 +131,23 @@ class _MenuPageState extends State<MenuPage> {
           MaterialPageRoute(
             builder: (context) => PhygitalDataPage(
               layoutButtonData: LayoutButtonData(
-                text: "Set Contract",
+                text: "Assign Collection",
                 onClick: () async {
-                  GlobalState().loadingWithText = "Setting Contract Address...";
-                  try {
-                    await NFC().setContractAddress(
-                        phygital: phygitalWithData.phygital,
-                        contractAddress: newContractAddress);
-                    GlobalState().loadingWithText = null;
-                    showInfoDialog(
-                      title: "Result",
-                      text: newContractAddress.hexEip55,
-                    );
-                  } catch (e) {
-                    GlobalState().loadingWithText = null;
-                    showInfoDialog(
-                      title: "Error",
-                      text: e.toString(),
-                    );
-                  }
+                  Result result = await phygitalWithData.setContractAddress(newContractAddress);
+                  await showInfoDialog(
+                    title: "Result",
+                    text: getMessageForResult(result),
+                  );
+                  if(Result.assigningCollectionSucceeded != result) return;
+                  if(!mounted) return;
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => PhygitalDataPage(
+                        phygitalWithData: phygitalWithData,
+                      ),
+                    ),
+                  );
                 },
               ),
               phygitalWithData: phygitalWithData,
@@ -201,7 +196,7 @@ class _MenuPageState extends State<MenuPage> {
           ),
           Button(
             disabled: !nfc.isAvailable,
-            text: "Set Contract Address",
+            text: "Assign Collection",
             onPressed: setContractAddress,
           ),
         ],
