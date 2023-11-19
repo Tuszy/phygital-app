@@ -3,6 +3,7 @@ import 'package:phygital/component/universal_profile_light_preview.dart';
 import 'package:phygital/model/phygital/phygital.dart';
 import 'package:phygital/page/menu_page.dart';
 import 'package:phygital/page/phygital/phygital_page.dart';
+import 'package:phygital/page/universal-profile/universal_profile_page.dart';
 import 'package:phygital/service/blockchain/lukso_client.dart';
 import 'package:phygital/service/custom_dialog.dart';
 import 'package:phygital/layout/standard_layout.dart';
@@ -116,6 +117,18 @@ class _HomepageState extends State<Homepage> {
         context: context, title: title, text: text, onPressed: () {});
   }
 
+  void showLoggedInUniversalProfile() {
+    UniversalProfile? universalProfile = GlobalState().universalProfile;
+    if (universalProfile == null) return;
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) =>
+            UniversalProfilePage(universalProfile: universalProfile),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     NFC nfc = Provider.of<NFC>(context);
@@ -131,7 +144,12 @@ class _HomepageState extends State<Homepage> {
           children: <Widget>[
             const LogoWidget(),
             if (universalProfile != null)
-              UniversalProfileLightPreview(universalProfile: universalProfile),
+              GestureDetector(
+                onTap: showLoggedInUniversalProfile,
+                child: UniversalProfileLightPreview(
+                  universalProfile: universalProfile,
+                ),
+              ),
             Expanded(
               child: globalState.initialized
                   ? Column(
