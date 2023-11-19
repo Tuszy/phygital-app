@@ -13,8 +13,8 @@ import '../service/global_state.dart';
 import '../service/nfc.dart';
 import '../service/result.dart';
 
-class PhygitalWithData {
-  PhygitalWithData({
+class Phygital {
+  Phygital({
     required this.tagId,
     required this.address,
     required this.contractAddress,

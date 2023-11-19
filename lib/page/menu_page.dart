@@ -10,7 +10,7 @@ import 'package:provider/provider.dart';
 import 'package:web3dart/credentials.dart';
 
 import '../component/button.dart';
-import '../model/phygital_with_data.dart';
+import '../model/phygital.dart';
 import '../service/result.dart';
 import '../service/nfc.dart';
 import '../model/phygital_tag.dart';
@@ -37,11 +37,11 @@ class _MenuPageState extends State<MenuPage> {
 
   void scan(
       {bool mustHaveValidPhygitalData = true,
-      required Function(PhygitalWithData) onSuccess}) async {
+      required Function(Phygital) onSuccess}) async {
     try {
       PhygitalTag phygitalTag = await NFC().read(mustHaveContractAddress: true);
       GlobalState().loadingWithText = "Fetching Phygital Data...";
-      (Result, PhygitalWithData?) result =
+      (Result, Phygital?) result =
           await LuksoClient().fetchPhygitalData(phygitalTag: phygitalTag);
       GlobalState().loadingWithText = null;
       if (Result.success != result.$1) {
@@ -64,12 +64,12 @@ class _MenuPageState extends State<MenuPage> {
 
   void read() async {
     scan(
-      onSuccess: (PhygitalWithData? phygitalWithData) {
+      onSuccess: (Phygital? phygital) {
         Navigator.push(
           context,
           MaterialPageRoute(
             builder: (context) => PhygitalPage(
-              phygitalWithData: phygitalWithData!,
+              phygital: phygital!,
             ),
           ),
         );
@@ -81,17 +81,17 @@ class _MenuPageState extends State<MenuPage> {
     if (GlobalState().universalProfile == null) return;
 
     scan(
-      onSuccess: (PhygitalWithData phygitalWithData) {
+      onSuccess: (Phygital phygital) {
         Navigator.push(
           context,
           MaterialPageRoute(
             builder: (context) => PhygitalPage(
               layoutButtonData: LayoutButtonData(
                 text:
-                    phygitalWithData.owner != null ? "ALREADY MINTED" : "MINT",
-                disabled: phygitalWithData.owner != null,
+                    phygital.owner != null ? "ALREADY MINTED" : "MINT",
+                disabled: phygital.owner != null,
                 onClick: () async {
-                  Result result = await phygitalWithData.mint();
+                  Result result = await phygital.mint();
                   await showInfoDialog(
                     title: "Result",
                     text: getMessageForResult(result),
@@ -102,13 +102,13 @@ class _MenuPageState extends State<MenuPage> {
                     context,
                     MaterialPageRoute(
                       builder: (context) => PhygitalPage(
-                        phygitalWithData: phygitalWithData,
+                        phygital: phygital,
                       ),
                     ),
                   );
                 },
               ),
-              phygitalWithData: phygitalWithData,
+              phygital: phygital,
             ),
           ),
         );
@@ -120,20 +120,20 @@ class _MenuPageState extends State<MenuPage> {
     if (GlobalState().universalProfile == null) return;
 
     scan(
-      onSuccess: (PhygitalWithData phygitalWithData) {
+      onSuccess: (Phygital phygital) {
         Navigator.push(
           context,
           MaterialPageRoute(
             builder: (context) => PhygitalPage(
               layoutButtonData: LayoutButtonData(
-                text: phygitalWithData.owner == null
+                text: phygital.owner == null
                     ? "NOT MINTED YET"
-                    : phygitalWithData.verifiedOwnership
+                    : phygital.verifiedOwnership
                         ? "ALREADY VERIFIED"
                         : "VERIFY OWNERSHIP",
-                disabled: phygitalWithData.owner == null || phygitalWithData.verifiedOwnership,
+                disabled: phygital.owner == null || phygital.verifiedOwnership,
                 onClick: () async {
-                  Result result = await phygitalWithData.verifyOwnership();
+                  Result result = await phygital.verifyOwnership();
                   await showInfoDialog(
                     title: "Result",
                     text: getMessageForResult(result),
@@ -144,13 +144,13 @@ class _MenuPageState extends State<MenuPage> {
                     context,
                     MaterialPageRoute(
                       builder: (context) => PhygitalPage(
-                        phygitalWithData: phygitalWithData,
+                        phygital: phygital,
                       ),
                     ),
                   );
                 },
               ),
-              phygitalWithData: phygitalWithData,
+              phygital: phygital,
             ),
           ),
         );
@@ -166,7 +166,7 @@ class _MenuPageState extends State<MenuPage> {
     EthereumAddress newContractAddress =
         EthereumAddress("61b882aa41B88DD6e9b196aF55E0A48889f23cF5".toBytes());
     scan(
-      onSuccess: (PhygitalWithData phygitalWithData) {
+      onSuccess: (Phygital phygital) {
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -174,7 +174,7 @@ class _MenuPageState extends State<MenuPage> {
               layoutButtonData: LayoutButtonData(
                 text: "Assign Collection",
                 onClick: () async {
-                  Result result = await phygitalWithData
+                  Result result = await phygital
                       .setContractAddress(newContractAddress);
                   await showInfoDialog(
                     title: "Result",
@@ -186,13 +186,13 @@ class _MenuPageState extends State<MenuPage> {
                     context,
                     MaterialPageRoute(
                       builder: (context) => PhygitalPage(
-                        phygitalWithData: phygitalWithData,
+                        phygital: phygital,
                       ),
                     ),
                   );
                 },
               ),
-              phygitalWithData: phygitalWithData,
+              phygital: phygital,
             ),
           ),
         );

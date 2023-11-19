@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:phygital/component/universal_profile_preview.dart';
-import 'package:phygital/model/phygital_with_data.dart';
+import 'package:phygital/model/phygital.dart';
 import 'package:phygital/page/menu_page.dart';
 import 'package:phygital/page/phygital/phygital_page.dart';
 import 'package:phygital/service/blockchain/lukso_client.dart';
@@ -38,7 +38,7 @@ class _HomepageState extends State<Homepage> {
     try {
       PhygitalTag phygitalTag = await NFC().read(mustHaveContractAddress: true);
 
-      (Result, PhygitalWithData?) result =
+      (Result, Phygital?) result =
           await LuksoClient().fetchPhygitalData(phygitalTag: phygitalTag);
       if (Result.success != result.$1) {
         throw getMessageForResult(result.$1);
@@ -51,7 +51,7 @@ class _HomepageState extends State<Homepage> {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => PhygitalPage(phygitalWithData: result.$2!),
+          builder: (context) => PhygitalPage(phygital: result.$2!),
         ),
       );
     } catch (e) {

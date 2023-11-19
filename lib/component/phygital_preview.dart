@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:ndef/utilities.dart';
 import 'package:phygital/component/image_preview.dart';
 import 'package:phygital/component/phygital_preview_section.dart';
-import 'package:phygital/model/phygital_with_data.dart';
+import 'package:phygital/model/phygital.dart';
 
 class PhygitalPreview extends StatelessWidget {
-  const PhygitalPreview({super.key, required this.phygitalWithData});
+  const PhygitalPreview({super.key, required this.phygital});
 
-  final PhygitalWithData phygitalWithData;
+  final Phygital phygital;
 
   @override
   Widget build(BuildContext context) {
@@ -32,21 +32,21 @@ class PhygitalPreview extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            phygitalWithData.name,
+            phygital.name,
             style: const TextStyle(
               color: Colors.white,
               fontSize: 28,
               fontWeight: FontWeight.w800,
             ),
           ),
-          if (phygitalWithData.metadata.image != null)
+          if (phygital.metadata.image != null)
             ImagePreview(
-              image: phygitalWithData.metadata.image!,
+              image: phygital.metadata.image!,
               width: 200,
               height: 200,
             ),
           Text(
-            "\$${phygitalWithData.symbol}",
+            "\$${phygital.symbol}",
             style: const TextStyle(
               color: Colors.white,
               fontSize: 22,
@@ -55,23 +55,23 @@ class PhygitalPreview extends StatelessWidget {
           ),
           PhygitalPreviewSection(
             label: "Contract Address",
-            text: phygitalWithData.contractAddress.hexEip55,
+            text: phygital.contractAddress.hexEip55,
           ),
           PhygitalPreviewSection(
             label: "Phygital ID",
-            text: phygitalWithData.id.toHexString(),
+            text: phygital.id.toHexString(),
           ),
           PhygitalPreviewSection(
             label: "Owner",
-            trailingLabel: phygitalWithData.owner != null ? "${phygitalWithData.verifiedOwnership ? "VERIFIED" : "UNVERIFIED"} OWNERSHIP" :null,
-            text: phygitalWithData.owner == null
+            trailingLabel: phygital.owner != null ? "${phygital.verifiedOwnership ? "VERIFIED" : "UNVERIFIED"} OWNERSHIP" :null,
+            text: phygital.owner == null
                 ? "NOT MINTED YET"
-                : phygitalWithData.owner!.formattedName,
+                : phygital.owner!.formattedName,
           ),
-          if (phygitalWithData.creators.isNotEmpty)
+          if (phygital.creators.isNotEmpty)
             PhygitalPreviewSection(
               label: "Creators",
-              text: phygitalWithData.creators
+              text: phygital.creators
                   .map((creator) => "- ${creator.formattedName}")
                   .join("\n"),
             )

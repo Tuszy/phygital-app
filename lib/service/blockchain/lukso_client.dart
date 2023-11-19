@@ -3,7 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart';
 import 'package:ndef/utilities.dart';
 import 'package:phygital/model/lsp4/lsp4_metadata.dart';
-import 'package:phygital/model/phygital_with_data.dart';
+import 'package:phygital/model/phygital.dart';
 import 'dart:convert';
 import 'package:phygital/service/backend_client.dart';
 import 'package:phygital/service/blockchain/contracts/LSP0ERC725Account.g.dart';
@@ -482,7 +482,7 @@ class LuksoClient extends ChangeNotifier {
         universalProfileAddress, universalProfileData);
   }
 
-  Future<(Result, PhygitalWithData?)> fetchPhygitalData({
+  Future<(Result, Phygital?)> fetchPhygitalData({
     required PhygitalTag phygitalTag,
   }) async {
     Result validationResult =
@@ -561,7 +561,7 @@ class LuksoClient extends ChangeNotifier {
     Map<String, dynamic> rawData = jsonDecode(json);
     return (
       Result.success,
-      PhygitalWithData(
+      Phygital(
         tagId: phygitalTag.tagId,
         address: phygitalTag.address,
         contractAddress: phygitalTag.contractAddress!,
