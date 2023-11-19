@@ -16,7 +16,7 @@ class LoadingBackdrop extends StatelessWidget {
     NFC nfc = Provider.of<NFC>(context);
     GlobalState globalState = Provider.of<GlobalState>(context);
 
-    bool active = nfc.isActive || globalState.loading;
+    bool active = nfc.isActive || globalState.loadingWithText != null;
 
     return Positioned.fill(
       child: AnimatedOpacity(
@@ -32,17 +32,52 @@ class LoadingBackdrop extends StatelessWidget {
             child: Container(
               color: const Color(0x66000000),
               child: Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Transform.scale(
-                      scale: 2,
-                      child: const CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation(Colors.cyan),
-                      ),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: const Color(0x66009999),
+                    borderRadius: BorderRadius.circular(32),
+                    border: Border.all(
+                      color: Colors.white38,
+                      width: 2,
                     ),
-                  ],
+                    boxShadow: const [
+                      BoxShadow(
+                        color: Color(0xcc009999),
+                        spreadRadius: 2,
+                        blurRadius: 8,
+                      ),
+                    ],
+                  ),
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 24, horizontal: 32),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        margin: const EdgeInsets.symmetric(vertical: 16),
+                        width: 64,
+                        height: 64,
+                        child: const CircularProgressIndicator(
+                          strokeWidth: 6,
+                          valueColor: AlwaysStoppedAnimation(Colors.white54),
+                        ),
+                      ),
+                      ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 250),
+                        child: Text(
+                          nfc.isActive
+                              ? "NFC is active."
+                              : globalState.loadingWithText ?? "Loading...",
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w800,
+                            fontSize: 24,
+                            color: Colors.white60,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),

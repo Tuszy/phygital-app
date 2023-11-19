@@ -56,12 +56,12 @@ class GlobalState extends ChangeNotifier {
     notifyListeners();
   }
 
-  bool _loading = false;
+  String? _loadingWithText = null;
 
-  bool get loading => _loading;
+  String? get loadingWithText => _loadingWithText;
 
-  set loading(bool newValue) {
-    _loading = newValue;
+  set loadingWithText(String? newValue) {
+    _loadingWithText = newValue;
     notifyListeners();
   }
 }

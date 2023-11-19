@@ -81,7 +81,7 @@ class _HomepageState extends State<Homepage> {
 
     if (!mounted || scannedCode == null) return;
 
-    GlobalState().loading = true;
+    GlobalState().loadingWithText = "Login...";
     (Result, UniversalProfile?)? result = await QRCode().getUniversalProfile(
       scannedCode: scannedCode,
       validatePermissions: true,
@@ -97,7 +97,7 @@ class _HomepageState extends State<Homepage> {
     }
 
     GlobalState().universalProfile = result.$2;
-    GlobalState().loading = false;
+    GlobalState().loadingWithText = null;
   }
 
   void logout() => GlobalState().universalProfile = null;
