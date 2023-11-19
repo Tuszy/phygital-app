@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-class PhygitalPreviewSection extends StatelessWidget {
-  const PhygitalPreviewSection({
+class PreviewSection extends StatelessWidget {
+  const PreviewSection({
     super.key,
     required this.label,
     required this.text,

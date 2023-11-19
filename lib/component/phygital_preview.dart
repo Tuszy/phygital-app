@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:ndef/utilities.dart';
 import 'package:phygital/component/image_preview.dart';
-import 'package:phygital/component/phygital_preview_section.dart';
+import 'package:phygital/component/preview_section.dart';
 import 'package:phygital/model/phygital/phygital.dart';
 
 class PhygitalPreview extends StatelessWidget {
@@ -53,15 +53,15 @@ class PhygitalPreview extends StatelessWidget {
               fontWeight: FontWeight.w800,
             ),
           ),
-          PhygitalPreviewSection(
+          PreviewSection(
             label: "Contract Address",
             text: phygital.contractAddress.hexEip55,
           ),
-          PhygitalPreviewSection(
+          PreviewSection(
             label: "Phygital ID",
             text: phygital.id.toHexString(),
           ),
-          PhygitalPreviewSection(
+          PreviewSection(
             label: "Owner",
             trailingLabel: phygital.owner != null ? "${phygital.verifiedOwnership ? "VERIFIED" : "UNVERIFIED"} OWNERSHIP" :null,
             text: phygital.owner == null
@@ -69,7 +69,7 @@ class PhygitalPreview extends StatelessWidget {
                 : phygital.owner!.formattedName,
           ),
           if (phygital.creators.isNotEmpty)
-            PhygitalPreviewSection(
+            PreviewSection(
               label: "Creators",
               text: phygital.creators
                   .map((creator) => "- ${creator.formattedName}")
