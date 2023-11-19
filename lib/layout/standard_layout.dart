@@ -99,15 +99,19 @@ class _StandardLayoutState extends State<StandardLayout>
                 ),
                 if (widget.layoutButtonData != null)
                   Container(
-                    decoration: const BoxDecoration(
+                    decoration: BoxDecoration(
                       //color: Color(0x8800ffff),
-                      border: Border(
+                      border: const Border(
                         top: BorderSide(width: 2, color: Colors.white38),
                       ),
-                      color: Color(0x7700ff00),
+                      color: widget.layoutButtonData!.disabled
+                          ? const Color(0x88555555)
+                          : widget.layoutButtonData!.color,
                       boxShadow: [
                         BoxShadow(
-                          color: Color(0x7700ff00),
+                          color: widget.layoutButtonData!.disabled
+                              ? const Color(0x88555555)
+                              : widget.layoutButtonData!.color,
                           spreadRadius: 5,
                           blurRadius: 8,
                         ),
@@ -116,32 +120,37 @@ class _StandardLayoutState extends State<StandardLayout>
                     child: ClipRRect(
                       child: BackdropFilter(
                         filter: ImageFilter.blur(
-                          sigmaX: 3,
-                          sigmaY: 3,
+                          sigmaX: widget.layoutButtonData!.disabled
+                              ? 10 : 3,
+                          sigmaY: widget.layoutButtonData!.disabled
+                              ? 10 : 3,
                         ),
 
                         /// Filter effect field
-                        child: TextButton(
-                          style: TextButton.styleFrom(
-                            foregroundColor: const Color(0xcdffffff),
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 16, vertical: 24),
-                            textStyle: const TextStyle(
-                              letterSpacing: 3,
-                              fontSize: 24,
-                              fontWeight: FontWeight.w900,
+                        child: IgnorePointer(
+                          ignoring: widget.layoutButtonData!.disabled,
+                          child: TextButton(
+                            style: TextButton.styleFrom(
+                              foregroundColor: widget.layoutButtonData!.disabled
+                                  ? const Color(0xaa999999)
+                                  : const Color(0xcdffffff),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 16, vertical: 24),
+                              textStyle: const TextStyle(
+                                letterSpacing: 3,
+                                fontSize: 24,
+                                fontWeight: FontWeight.w900,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(4),
+                              ),
                             ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(4),
+                            onPressed: widget.layoutButtonData!.onClick,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              mainAxisSize: MainAxisSize.max,
+                              children: [Text(widget.layoutButtonData!.text)],
                             ),
-                          ),
-                          onPressed: widget.layoutButtonData!.onClick,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            mainAxisSize: MainAxisSize.max,
-                            children: [
-                              Text(widget.layoutButtonData!.text)
-                            ],
                           ),
                         ),
                       ),
