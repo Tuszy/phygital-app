@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
 
 class PhygitalPreviewSection extends StatelessWidget {
-  const PhygitalPreviewSection(
-      {super.key, required this.label, required this.text});
+  const PhygitalPreviewSection({
+    super.key,
+    required this.label,
+    required this.text,
+    this.trailingLabel,
+  });
 
   final String label;
   final String text;
+  final String? trailingLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -26,13 +31,31 @@ class PhygitalPreviewSection extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  label,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.w800,
-                  ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        label,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ),
+                    if (trailingLabel != null)
+                      Text(
+                        trailingLabel!,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          height: 2,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      )
+                  ],
                 ),
                 const SizedBox(
                   height: 4,

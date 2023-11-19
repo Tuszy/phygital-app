@@ -63,8 +63,9 @@ class PhygitalPreview extends StatelessWidget {
           ),
           PhygitalPreviewSection(
             label: "Owner",
+            trailingLabel: phygitalWithData.owner != null ? "${phygitalWithData.verifiedOwnership ? "VERIFIED" : "UNVERIFIED"} OWNERSHIP" :null,
             text: phygitalWithData.owner == null
-                ? "Not minted yet."
+                ? "NOT MINTED YET"
                 : phygitalWithData.owner!.formattedName,
           ),
           if (phygitalWithData.creators.isNotEmpty)

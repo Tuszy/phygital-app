@@ -123,9 +123,6 @@ class LuksoClient extends ChangeNotifier {
           await contract.getData(phygitalAssetCollectionUriKey);
       if (lsp2JsonUrl.isEmpty) return false;
       List<EthereumAddress> collection = await _fetchCollection(lsp2JsonUrl);
-      if (kDebugMode) {
-        print("Phygital collection: $collection");
-      }
       return collection.contains(phygital.address);
     } catch (e) {
       if (kDebugMode) {
@@ -259,7 +256,6 @@ class LuksoClient extends ChangeNotifier {
         PhygitalAsset contract = PhygitalAsset(
             address: phygital.contractAddress!, client: _web3client!);
         bool verificationStatus = await contract.verifiedOwnership(phygital.id);
-        print("VERIFICATION STATUS $verificationStatus");
         if (expectedVerificationStatus == verificationStatus) {
           return Result.success;
         }
@@ -505,6 +501,8 @@ class LuksoClient extends ChangeNotifier {
     } catch (e) {
       /*Not minted yet*/
     }
+    bool verifiedOwnership =
+        owner == null ? false : await contract.verifiedOwnership(phygital.id);
 
     List<Uint8List> data = await contract.getDataBatch([
       phygitalAssetMetadataKey,
@@ -568,6 +566,7 @@ class LuksoClient extends ChangeNotifier {
         address: phygital.address,
         contractAddress: phygital.contractAddress!,
         owner: owner,
+        verifiedOwnership: verifiedOwnership,
         name: name,
         symbol: symbol,
         baseUri: baseUri,
