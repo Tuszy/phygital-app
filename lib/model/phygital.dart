@@ -45,7 +45,7 @@ class Phygital {
     if (owner != null) return Result.alreadyMinted;
 
     try {
-      GlobalState().loadingWithText = "Minting...";
+      GlobalState().loadingWithText = "Minting";
       Result result = await LuksoClient().mint(
         phygitalTag: phygital,
         universalProfileAddress: GlobalState().universalProfile!.address,
@@ -75,7 +75,7 @@ class Phygital {
     if (verifiedOwnership) return Result.alreadyVerifiedOwnership;
 
     try {
-      GlobalState().loadingWithText = "Verifying Ownership...";
+      GlobalState().loadingWithText = "Verifying Ownership";
       Result result = await LuksoClient().verifyOwnershipAfterTransfer(
         phygitalTag: phygital,
         universalProfileAddress: GlobalState().universalProfile!.address,
@@ -101,7 +101,7 @@ class Phygital {
     if (Result.success != validationResult) return validationResult;
 
     try {
-      GlobalState().loadingWithText = "Assigning collection...";
+      GlobalState().loadingWithText = "Assigning collection";
       EthereumAddress? setContractAddress = await NFC().setContractAddress(
         phygitalTag: phygital,
         contractAddress: newContractAddress,

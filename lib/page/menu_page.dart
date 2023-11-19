@@ -40,7 +40,7 @@ class _MenuPageState extends State<MenuPage> {
       required Function(Phygital) onSuccess}) async {
     try {
       PhygitalTag phygitalTag = await NFC().read(mustHaveContractAddress: true);
-      GlobalState().loadingWithText = "Fetching Phygital Data...";
+      GlobalState().loadingWithText = "Fetching Phygital Data";
       (Result, Phygital?) result =
           await LuksoClient().fetchPhygitalData(phygitalTag: phygitalTag);
       GlobalState().loadingWithText = null;
