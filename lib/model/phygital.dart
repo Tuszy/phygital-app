@@ -51,7 +51,7 @@ class Phygital {
         universalProfileAddress: GlobalState().universalProfile!.address,
       );
 
-      if (Result.success == result) {
+      if (Result.mintSucceeded == result) {
         owner = universalProfile;
         verifiedOwnership = true;
       }
@@ -81,7 +81,7 @@ class Phygital {
         universalProfileAddress: GlobalState().universalProfile!.address,
       );
 
-      if (Result.success == result) {
+      if (Result.ownershipVerificationSucceeded == result) {
         verifiedOwnership = true;
       }
       GlobalState().loadingWithText = null;
