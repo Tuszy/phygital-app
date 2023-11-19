@@ -15,7 +15,7 @@ import '../component/button.dart';
 import '../service/result.dart';
 import '../service/nfc.dart';
 import '../component/logo.dart';
-import '../model/phygital.dart';
+import '../model/phygital_tag.dart';
 
 class Homepage extends StatefulWidget {
   const Homepage({super.key});
@@ -36,10 +36,10 @@ class _HomepageState extends State<Homepage> {
 
   void read() async {
     try {
-      Phygital phygital = await NFC().read(mustHaveContractAddress: true);
+      PhygitalTag phygitalTag = await NFC().read(mustHaveContractAddress: true);
 
       (Result, PhygitalWithData?) result =
-          await LuksoClient().fetchPhygitalData(phygital: phygital);
+          await LuksoClient().fetchPhygitalData(phygitalTag: phygitalTag);
       if (Result.success != result.$1) {
         throw getMessageForResult(result.$1);
       } else if (result.$2 == null) {

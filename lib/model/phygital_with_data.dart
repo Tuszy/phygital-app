@@ -4,7 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:ndef/utilities.dart';
 import 'package:phygital/model/lsp0/universal_profile.dart';
 import 'package:phygital/model/lsp4/lsp4_metadata.dart';
-import 'package:phygital/model/phygital.dart';
+import 'package:phygital/model/phygital_tag.dart';
 import 'package:pointycastle/api.dart';
 import 'package:web3dart/credentials.dart';
 
@@ -47,7 +47,7 @@ class PhygitalWithData {
     try {
       GlobalState().loadingWithText = "Minting...";
       Result result = await LuksoClient().mint(
-        phygital: phygital,
+        phygitalTag: phygital,
         universalProfileAddress: GlobalState().universalProfile!.address,
       );
 
@@ -77,7 +77,7 @@ class PhygitalWithData {
     try {
       GlobalState().loadingWithText = "Verifying Ownership...";
       Result result = await LuksoClient().verifyOwnershipAfterTransfer(
-        phygital: phygital,
+        phygitalTag: phygital,
         universalProfileAddress: GlobalState().universalProfile!.address,
       );
 
@@ -103,7 +103,7 @@ class PhygitalWithData {
     try {
       GlobalState().loadingWithText = "Assigning collection...";
       EthereumAddress? setContractAddress = await NFC().setContractAddress(
-        phygital: phygital,
+        phygitalTag: phygital,
         contractAddress: newContractAddress,
       );
       if(setContractAddress != null) {
@@ -122,7 +122,7 @@ class PhygitalWithData {
     }
   }
 
-  Phygital get phygital => Phygital(
+  PhygitalTag get phygital => PhygitalTag(
         address: address,
         tagId: tagId,
         contractAddress: contractAddress,

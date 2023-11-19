@@ -8,10 +8,10 @@ import 'package:ndef/utilities.dart';
 import 'package:pointycastle/api.dart';
 import 'package:web3dart/credentials.dart';
 
-import '../model/phygital.dart';
+import '../model/phygital_tag.dart';
 
 typedef NFCTagCommandFunction = Future<dynamic> Function(
-    NFCTag tag, Phygital phygital);
+    NFCTag tag, PhygitalTag phygitalTag);
 
 class NFC extends ChangeNotifier {
   NFC._sharedInstance();
@@ -66,7 +66,7 @@ class NFC extends ChangeNotifier {
   Future<dynamic> _startNFCCommunication({
     required String message,
     Duration? energyHarvestingDuration,
-    Phygital? expectedPhygital,
+    PhygitalTag? expectedPhygital,
     bool? mustHaveContractAddress,
     bool? mustNotHaveContractAddress,
     required NFCTagCommandFunction nfcTagCommandFunction,
@@ -84,7 +84,7 @@ class NFC extends ChangeNotifier {
       }
       await FlutterNfcKit.setIosAlertMessage(message);
 
-      Phygital? phygital = expectedPhygital ?? await _validate(tag);
+      PhygitalTag? phygital = expectedPhygital ?? await _validate(tag);
       if (phygital == null) {
         throw "This is not a valid Phygital";
       }
@@ -120,7 +120,7 @@ class NFC extends ChangeNotifier {
     }
   }
 
-  Future<Phygital?> _validate(NFCTag tag) async {
+  Future<PhygitalTag?> _validate(NFCTag tag) async {
     if (NFCTagType.iso15693 != tag.type ||
         "ISO 15693" != tag.standard ||
         !(tag.ndefAvailable ?? false)) return null;
@@ -157,7 +157,7 @@ class NFC extends ChangeNotifier {
                   .toBytes())
               : null;
 
-      return Phygital(
+      return PhygitalTag(
           tagId: tag.id, address: address, contractAddress: contractAddress);
     } catch (e) {
       if (kDebugMode) {
@@ -234,18 +234,18 @@ class NFC extends ChangeNotifier {
   }
 
   Future<String?> signUniversalProfileAddress({
-    required Phygital phygital,
+    required PhygitalTag phygitalTag,
     required EthereumAddress universalProfileAddress,
     required int nonce,
   }) async {
     if (nonce < 0) throw "Invalid nonce";
 
     return await _startNFCCommunication(
-      expectedPhygital: phygital,
+      expectedPhygital: phygitalTag,
       message:
           "Signing Universal Profile Address\n${universalProfileAddress.hexEip55}",
       energyHarvestingDuration: const Duration(seconds: 3),
-      nfcTagCommandFunction: (NFCTag tag, Phygital phygital) async {
+      nfcTagCommandFunction: (NFCTag tag, PhygitalTag phygitalTag) async {
         String errorMessage = "Failed to sign the universal profile address";
 
         bool isSent = false;
@@ -299,13 +299,13 @@ class NFC extends ChangeNotifier {
   }
 
   Future<EthereumAddress?> setContractAddress({
-    required Phygital phygital,
+    required PhygitalTag phygitalTag,
     required EthereumAddress contractAddress,
   }) async {
     return await _startNFCCommunication(
       message: "Setting Contract Address\n${contractAddress.hexEip55}",
       energyHarvestingDuration: const Duration(seconds: 3),
-      nfcTagCommandFunction: (NFCTag tag, Phygital? phygital) async {
+      nfcTagCommandFunction: (NFCTag tag, PhygitalTag? phygital) async {
         String errorMessage = "Failed to set the contract address";
         Uint8List contractAddressAsBytes =
             Uint8List.fromList(utf8.encode(contractAddress.hexEip55));
@@ -342,13 +342,13 @@ class NFC extends ChangeNotifier {
     );
   }
 
-  Future<Phygital> read(
+  Future<PhygitalTag> read(
       {bool? mustHaveContractAddress, bool? mustNotHaveContractAddress}) async {
     return await _startNFCCommunication(
       message: 'Reading Phygital',
       mustHaveContractAddress: mustHaveContractAddress,
       mustNotHaveContractAddress: mustNotHaveContractAddress,
-      nfcTagCommandFunction: (NFCTag tag, Phygital phygital) async => phygital,
+      nfcTagCommandFunction: (NFCTag tag, PhygitalTag phygitalTag) async => phygitalTag,
     );
   }
 }

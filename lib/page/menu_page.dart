@@ -13,7 +13,7 @@ import '../component/button.dart';
 import '../model/phygital_with_data.dart';
 import '../service/result.dart';
 import '../service/nfc.dart';
-import '../model/phygital.dart';
+import '../model/phygital_tag.dart';
 
 class MenuPage extends StatefulWidget {
   const MenuPage({super.key});
@@ -39,10 +39,10 @@ class _MenuPageState extends State<MenuPage> {
       {bool mustHaveValidPhygitalData = true,
       required Function(PhygitalWithData) onSuccess}) async {
     try {
-      Phygital phygital = await NFC().read(mustHaveContractAddress: true);
+      PhygitalTag phygitalTag = await NFC().read(mustHaveContractAddress: true);
       GlobalState().loadingWithText = "Fetching Phygital Data...";
       (Result, PhygitalWithData?) result =
-          await LuksoClient().fetchPhygitalData(phygital: phygital);
+          await LuksoClient().fetchPhygitalData(phygitalTag: phygitalTag);
       GlobalState().loadingWithText = null;
       if (Result.success != result.$1) {
         throw getMessageForResult(result.$1);

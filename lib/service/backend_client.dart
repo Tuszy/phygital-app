@@ -7,7 +7,7 @@ import 'dart:convert';
 import 'package:web3dart/web3dart.dart';
 
 import '../model/lsp4/lsp4_metadata.dart';
-import '../model/phygital.dart';
+import '../model/phygital_tag.dart';
 import 'result.dart';
 
 class BackendClient extends ChangeNotifier {
@@ -32,14 +32,15 @@ class BackendClient extends ChangeNotifier {
 
   final Client _httpClient = Client();
 
-  Future<Result> mint(
-      {required EthereumAddress universalProfileAddress,
-      required String phygitalSignature,
-      required Phygital phygital}) async {
+  Future<Result> mint({
+    required EthereumAddress universalProfileAddress,
+    required String phygitalSignature,
+    required PhygitalTag phygitalTag,
+  }) async {
     var data = {
       "universal_profile_address": universalProfileAddress.hexEip55,
-      "phygital_asset_contract_address": phygital.contractAddress!.hexEip55,
-      "phygital_address": phygital.address.hexEip55,
+      "phygital_asset_contract_address": phygitalTag.contractAddress!.hexEip55,
+      "phygital_address": phygitalTag.address.hexEip55,
       "phygital_signature": "0x$phygitalSignature"
     };
     Response response = await _httpClient.post(mintEndpoint,
@@ -64,14 +65,15 @@ class BackendClient extends ChangeNotifier {
     return Result.mintFailed;
   }
 
-  Future<Result> verifyOwnershipAfterTransfer(
-      {required EthereumAddress universalProfileAddress,
-      required String phygitalSignature,
-      required Phygital phygital}) async {
+  Future<Result> verifyOwnershipAfterTransfer({
+    required EthereumAddress universalProfileAddress,
+    required String phygitalSignature,
+    required PhygitalTag phygitalTag,
+  }) async {
     var data = {
       "universal_profile_address": universalProfileAddress.hexEip55,
-      "phygital_asset_contract_address": phygital.contractAddress!.hexEip55,
-      "phygital_address": phygital.address.hexEip55,
+      "phygital_asset_contract_address": phygitalTag.contractAddress!.hexEip55,
+      "phygital_address": phygitalTag.address.hexEip55,
       "phygital_signature": "0x$phygitalSignature"
     };
     Response response = await _httpClient.post(
@@ -98,16 +100,17 @@ class BackendClient extends ChangeNotifier {
     return Result.ownershipVerificationFailed;
   }
 
-  Future<Result> transfer(
-      {required EthereumAddress universalProfileAddress,
-      required EthereumAddress toUniversalProfileAddress,
-      required String phygitalSignature,
-      required Phygital phygital}) async {
+  Future<Result> transfer({
+    required EthereumAddress universalProfileAddress,
+    required EthereumAddress toUniversalProfileAddress,
+    required String phygitalSignature,
+    required PhygitalTag phygitalTag,
+  }) async {
     var data = {
       "universal_profile_address": universalProfileAddress.hexEip55,
       "to_universal_profile_address": toUniversalProfileAddress.hexEip55,
-      "phygital_asset_contract_address": phygital.contractAddress!.hexEip55,
-      "phygital_address": phygital.address.hexEip55,
+      "phygital_asset_contract_address": phygitalTag.contractAddress!.hexEip55,
+      "phygital_address": phygitalTag.address.hexEip55,
       "phygital_signature": "0x$phygitalSignature"
     };
     Response response = await _httpClient.post(transferEndpoint,
@@ -136,7 +139,7 @@ class BackendClient extends ChangeNotifier {
       {required EthereumAddress universalProfileAddress,
       required String name,
       required String symbol,
-      required List<Phygital> phygitalCollection,
+      required List<PhygitalTag> phygitalCollection,
       required LSP4Metadata metadata,
       required String baseUri}) async {
     String? metadataLsp2JsonUrl = await metadata.uploadToIpfs(
@@ -152,7 +155,7 @@ class BackendClient extends ChangeNotifier {
       "name": name,
       "symbol": symbol,
       "phygital_collection": phygitalCollection
-          .map((Phygital phygital) => phygital.address.hexEip55)
+          .map((PhygitalTag phygitalTag) => phygitalTag.address.hexEip55)
           .toList(),
       "metadata": metadataLsp2JsonUrl,
       "base_uri": baseUri

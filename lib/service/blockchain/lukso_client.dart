@@ -12,7 +12,7 @@ import 'package:phygital/service/ipfs_client.dart';
 import 'package:phygital/util/lsp2_utils.dart';
 import 'package:web3dart/web3dart.dart';
 
-import '../../model/phygital.dart';
+import '../../model/phygital_tag.dart';
 import '../../model/lsp0/universal_profile.dart';
 import '../nfc.dart';
 import 'contracts/PhygitalAsset.g.dart';
@@ -97,37 +97,37 @@ class LuksoClient extends ChangeNotifier {
     return formattedCollection;
   }
 
-  Future<BigInt?> _getNonceOfPhygital(Phygital phygital) async {
-    if (!_initialized || phygital.contractAddress == null) return null;
+  Future<BigInt?> _getNonceOfPhygital(PhygitalTag phygitalTag) async {
+    if (!_initialized || phygitalTag.contractAddress == null) return null;
 
     try {
       PhygitalAsset contract = PhygitalAsset(
-          address: phygital.contractAddress!, client: _web3client!);
-      return await contract.nonce(phygital.id);
+          address: phygitalTag.contractAddress!, client: _web3client!);
+      return await contract.nonce(phygitalTag.id);
     } catch (e) {
       if (kDebugMode) {
         print(
-            "Failed to get nonce for the phygital ${phygital.address.hexEip55} ($e)");
+            "Failed to get nonce for the phygital ${phygitalTag.address.hexEip55} ($e)");
       }
       return null;
     }
   }
 
-  Future<bool> _isPhygitalInCollection(Phygital phygital) async {
-    if (!_initialized || phygital.contractAddress == null) return false;
+  Future<bool> _isPhygitalInCollection(PhygitalTag phygitalTag) async {
+    if (!_initialized || phygitalTag.contractAddress == null) return false;
 
     try {
       PhygitalAsset contract = PhygitalAsset(
-          address: phygital.contractAddress!, client: _web3client!);
+          address: phygitalTag.contractAddress!, client: _web3client!);
       Uint8List lsp2JsonUrl =
           await contract.getData(phygitalAssetCollectionUriKey);
       if (lsp2JsonUrl.isEmpty) return false;
       List<EthereumAddress> collection = await _fetchCollection(lsp2JsonUrl);
-      return collection.contains(phygital.address);
+      return collection.contains(phygitalTag.address);
     } catch (e) {
       if (kDebugMode) {
         print(
-            "Failed to check if the phygital ${phygital.address.hexEip55} is part of the collection ${phygital.contractAddress!.hexEip55} ($e)");
+            "Failed to check if the phygital ${phygitalTag.address.hexEip55} is part of the collection ${phygitalTag.contractAddress!.hexEip55} ($e)");
       }
       return false;
     }
@@ -211,28 +211,28 @@ class LuksoClient extends ChangeNotifier {
   }
 
   Future<Result> validatePhygitalOwnership({
-    required Phygital phygital,
+    required PhygitalTag phygitalTag,
     required EthereumAddress universalProfileAddress,
   }) async {
     if (!_initialized) return Result.notInitialized;
     Result phygitalContractValidationResult =
-        await validatePhygitalContract(phygital.contractAddress);
+        await validatePhygitalContract(phygitalTag.contractAddress);
     if (Result.success != phygitalContractValidationResult) {
       return phygitalContractValidationResult;
     }
 
-    if (phygital.contractAddress != null) {
+    if (phygitalTag.contractAddress != null) {
       try {
         PhygitalAsset contract = PhygitalAsset(
-            address: phygital.contractAddress!, client: _web3client!);
-        EthereumAddress address = await contract.tokenOwnerOf(phygital.id);
+            address: phygitalTag.contractAddress!, client: _web3client!);
+        EthereumAddress address = await contract.tokenOwnerOf(phygitalTag.id);
         if (address == universalProfileAddress) {
           return Result.success;
         }
       } catch (e) {
         if (kDebugMode) {
           print(
-              "Failed to check if the universal profile ${universalProfileAddress.hexEip55} is the owner of ${phygital.id} ($e)");
+              "Failed to check if the universal profile ${universalProfileAddress.hexEip55} is the owner of ${phygitalTag.id} ($e)");
         }
       }
     }
@@ -241,28 +241,28 @@ class LuksoClient extends ChangeNotifier {
   }
 
   Future<Result> validatePhygitalOwnershipExpectedVerificationStatus({
-    required Phygital phygital,
+    required PhygitalTag phygitalTag,
     required bool expectedVerificationStatus,
   }) async {
     if (!_initialized) return Result.notInitialized;
     Result phygitalContractValidationResult =
-        await validatePhygitalContract(phygital.contractAddress);
+        await validatePhygitalContract(phygitalTag.contractAddress);
     if (Result.success != phygitalContractValidationResult) {
       return phygitalContractValidationResult;
     }
 
-    if (phygital.contractAddress != null) {
+    if (phygitalTag.contractAddress != null) {
       try {
         PhygitalAsset contract = PhygitalAsset(
-            address: phygital.contractAddress!, client: _web3client!);
-        bool verificationStatus = await contract.verifiedOwnership(phygital.id);
+            address: phygitalTag.contractAddress!, client: _web3client!);
+        bool verificationStatus = await contract.verifiedOwnership(phygitalTag.id);
         if (expectedVerificationStatus == verificationStatus) {
           return Result.success;
         }
       } catch (e) {
         if (kDebugMode) {
           print(
-              "Failed to check if the the phygital ${phygital.id} is $expectedVerificationStatus ($e)");
+              "Failed to check if the the phygital ${phygitalTag.id} is $expectedVerificationStatus ($e)");
         }
       }
     }
@@ -273,15 +273,15 @@ class LuksoClient extends ChangeNotifier {
   }
 
   Future<Result> validatePhygitalContractAndUniversalProfilePermissions({
-    required Phygital phygital,
+    required PhygitalTag phygitalTag,
     required EthereumAddress universalProfileAddress,
   }) async {
     if (!_initialized) return Result.notInitialized;
 
-    if (phygital.contractAddress == null) return Result.notPartOfAnyCollection;
+    if (phygitalTag.contractAddress == null) return Result.notPartOfAnyCollection;
 
     Result phygitalContractValidationResult =
-        await validatePhygitalContract(phygital.contractAddress);
+        await validatePhygitalContract(phygitalTag.contractAddress);
     if (Result.success != phygitalContractValidationResult) {
       return phygitalContractValidationResult;
     }
@@ -298,26 +298,26 @@ class LuksoClient extends ChangeNotifier {
   }
 
   Future<Result> mint({
-    required Phygital phygital,
+    required PhygitalTag phygitalTag,
     required EthereumAddress universalProfileAddress,
   }) async {
     Result validationResult =
         await validatePhygitalContractAndUniversalProfilePermissions(
-      phygital: phygital,
+      phygitalTag: phygitalTag,
       universalProfileAddress: universalProfileAddress,
     );
     if (Result.success != validationResult) return validationResult;
 
-    BigInt? nonce = await _getNonceOfPhygital(phygital);
+    BigInt? nonce = await _getNonceOfPhygital(phygitalTag);
     if (nonce == null) return Result.mintFailed;
     if (nonce.compareTo(BigInt.from(0)) != 0) return Result.alreadyMinted;
 
-    if (!(await _isPhygitalInCollection(phygital))) {
+    if (!(await _isPhygitalInCollection(phygitalTag))) {
       return Result.notPartOfCollection;
     }
 
     String? phygitalSignature = await NFC().signUniversalProfileAddress(
-      phygital: phygital,
+      phygitalTag: phygitalTag,
       universalProfileAddress: universalProfileAddress,
       nonce: nonce.toInt(),
     );
@@ -326,27 +326,27 @@ class LuksoClient extends ChangeNotifier {
     return await BackendClient().mint(
       universalProfileAddress: universalProfileAddress,
       phygitalSignature: phygitalSignature,
-      phygital: phygital,
+      phygitalTag: phygitalTag,
     );
   }
 
   Future<Result> verifyOwnershipAfterTransfer({
-    required Phygital phygital,
+    required PhygitalTag phygitalTag,
     required EthereumAddress universalProfileAddress,
   }) async {
     Result validationResult =
         await validatePhygitalContractAndUniversalProfilePermissions(
-      phygital: phygital,
+      phygitalTag: phygitalTag,
       universalProfileAddress: universalProfileAddress,
     );
     if (Result.success != validationResult) return validationResult;
 
-    BigInt? nonce = await _getNonceOfPhygital(phygital);
+    BigInt? nonce = await _getNonceOfPhygital(phygitalTag);
     if (nonce == null) return Result.ownershipVerificationFailed;
     if (nonce.compareTo(BigInt.from(0)) == 0) return Result.notMintedYet;
 
     Result ownershipValidationResult = await validatePhygitalOwnership(
-      phygital: phygital,
+      phygitalTag: phygitalTag,
       universalProfileAddress: universalProfileAddress,
     );
     if (Result.success != ownershipValidationResult) {
@@ -355,7 +355,7 @@ class LuksoClient extends ChangeNotifier {
 
     Result ownershipVerificationStatusValidationResult =
         await validatePhygitalOwnershipExpectedVerificationStatus(
-      phygital: phygital,
+      phygitalTag: phygitalTag,
       expectedVerificationStatus: false,
     );
     if (Result.success != ownershipVerificationStatusValidationResult) {
@@ -363,7 +363,7 @@ class LuksoClient extends ChangeNotifier {
     }
 
     String? phygitalSignature = await NFC().signUniversalProfileAddress(
-      phygital: phygital,
+      phygitalTag: phygitalTag,
       universalProfileAddress: universalProfileAddress,
       nonce: nonce.toInt(),
     );
@@ -372,18 +372,18 @@ class LuksoClient extends ChangeNotifier {
     return await BackendClient().verifyOwnershipAfterTransfer(
       universalProfileAddress: universalProfileAddress,
       phygitalSignature: phygitalSignature,
-      phygital: phygital,
+      phygitalTag: phygitalTag,
     );
   }
 
   Future<Result> transfer({
-    required Phygital phygital,
+    required PhygitalTag phygitalTag,
     required EthereumAddress universalProfileAddress,
     required EthereumAddress toUniversalProfileAddress,
   }) async {
     Result validationResult =
         await validatePhygitalContractAndUniversalProfilePermissions(
-      phygital: phygital,
+      phygitalTag: phygitalTag,
       universalProfileAddress: universalProfileAddress,
     );
     if (Result.success != validationResult) return validationResult;
@@ -396,12 +396,12 @@ class LuksoClient extends ChangeNotifier {
       return Result.invalidReceivingUniversalProfileAddress;
     }
 
-    BigInt? nonce = await _getNonceOfPhygital(phygital);
+    BigInt? nonce = await _getNonceOfPhygital(phygitalTag);
     if (nonce == null) return Result.ownershipVerificationFailed;
     if (nonce.compareTo(BigInt.from(0)) == 0) return Result.notMintedYet;
 
     Result ownershipValidationResult = await validatePhygitalOwnership(
-      phygital: phygital,
+      phygitalTag: phygitalTag,
       universalProfileAddress: universalProfileAddress,
     );
     if (Result.success != ownershipValidationResult) {
@@ -410,7 +410,7 @@ class LuksoClient extends ChangeNotifier {
 
     Result ownershipVerificationStatusValidationResult =
         await validatePhygitalOwnershipExpectedVerificationStatus(
-      phygital: phygital,
+      phygitalTag: phygitalTag,
       expectedVerificationStatus: true,
     );
     if (Result.success != ownershipVerificationStatusValidationResult) {
@@ -418,7 +418,7 @@ class LuksoClient extends ChangeNotifier {
     }
 
     String? phygitalSignature = await NFC().signUniversalProfileAddress(
-      phygital: phygital,
+      phygitalTag: phygitalTag,
       universalProfileAddress: toUniversalProfileAddress,
       nonce: nonce.toInt(),
     );
@@ -428,7 +428,7 @@ class LuksoClient extends ChangeNotifier {
       toUniversalProfileAddress: toUniversalProfileAddress,
       universalProfileAddress: universalProfileAddress,
       phygitalSignature: phygitalSignature,
-      phygital: phygital,
+      phygitalTag: phygitalTag,
     );
   }
 
@@ -436,7 +436,7 @@ class LuksoClient extends ChangeNotifier {
     required EthereumAddress universalProfileAddress,
     required String name,
     required String symbol,
-    required List<Phygital> phygitalCollection,
+    required List<PhygitalTag> phygitalCollection,
     required LSP4Metadata metadata,
     required String baseUri,
   }) async {
@@ -483,18 +483,18 @@ class LuksoClient extends ChangeNotifier {
   }
 
   Future<(Result, PhygitalWithData?)> fetchPhygitalData({
-    required Phygital phygital,
+    required PhygitalTag phygitalTag,
   }) async {
     Result validationResult =
-        await validatePhygitalContract(phygital.contractAddress);
+        await validatePhygitalContract(phygitalTag.contractAddress);
     if (validationResult != Result.success) return (validationResult, null);
 
     PhygitalAsset contract =
-        PhygitalAsset(address: phygital.contractAddress!, client: _web3client!);
+        PhygitalAsset(address: phygitalTag.contractAddress!, client: _web3client!);
 
     UniversalProfile? owner;
     try {
-      EthereumAddress ownerAddress = await contract.tokenOwnerOf(phygital.id);
+      EthereumAddress ownerAddress = await contract.tokenOwnerOf(phygitalTag.id);
       owner = await fetchUniversalProfile(
         universalProfileAddress: ownerAddress,
       );
@@ -502,7 +502,7 @@ class LuksoClient extends ChangeNotifier {
       /*Not minted yet*/
     }
     bool verifiedOwnership =
-        owner == null ? false : await contract.verifiedOwnership(phygital.id);
+        owner == null ? false : await contract.verifiedOwnership(phygitalTag.id);
 
     List<Uint8List> data = await contract.getDataBatch([
       phygitalAssetMetadataKey,
@@ -556,15 +556,15 @@ class LuksoClient extends ChangeNotifier {
     }
 
     String json =
-        await LSP2Utils().fetchJson("$baseUri${phygital.id.toHexString()}");
+        await LSP2Utils().fetchJson("$baseUri${phygitalTag.id.toHexString()}");
     if (json.isEmpty) return (Result.invalidPhygitalData, null);
     Map<String, dynamic> rawData = jsonDecode(json);
     return (
       Result.success,
       PhygitalWithData(
-        tagId: phygital.tagId,
-        address: phygital.address,
-        contractAddress: phygital.contractAddress!,
+        tagId: phygitalTag.tagId,
+        address: phygitalTag.address,
+        contractAddress: phygitalTag.contractAddress!,
         owner: owner,
         verifiedOwnership: verifiedOwnership,
         name: name,
