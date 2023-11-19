@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:phygital/component/universal_profile_preview.dart';
+import 'package:phygital/component/universal_profile_light_preview.dart';
 import 'package:phygital/model/phygital/phygital.dart';
 import 'package:phygital/page/menu_page.dart';
 import 'package:phygital/page/phygital/phygital_page.dart';
@@ -131,7 +131,7 @@ class _HomepageState extends State<Homepage> {
           children: <Widget>[
             const LogoWidget(),
             if (universalProfile != null)
-              UniversalProfilePreview(universalProfile: universalProfile),
+              UniversalProfileLightPreview(universalProfile: universalProfile),
             Expanded(
               child: globalState.initialized
                   ? Column(

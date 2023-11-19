@@ -1,10 +1,9 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:phygital/component/image_preview.dart';
 import 'package:phygital/model/lsp0/universal_profile.dart';
 
-class UniversalProfilePreview extends StatelessWidget {
-  const UniversalProfilePreview({super.key, required this.universalProfile});
+class UniversalProfileLightPreview extends StatelessWidget {
+  const UniversalProfileLightPreview({super.key, required this.universalProfile});
 
   final UniversalProfile universalProfile;
 
