@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:phygital/component/universal_profile_preview.dart';
-import 'package:phygital/model/phygital.dart';
+import 'package:phygital/model/phygital/phygital.dart';
 import 'package:phygital/page/menu_page.dart';
 import 'package:phygital/page/phygital/phygital_page.dart';
 import 'package:phygital/service/blockchain/lukso_client.dart';
@@ -15,7 +15,7 @@ import '../component/button.dart';
 import '../service/result.dart';
 import '../service/nfc.dart';
 import '../component/logo.dart';
-import '../model/phygital_tag.dart';
+import '../model/phygital/phygital_tag.dart';
 
 class Homepage extends StatefulWidget {
   const Homepage({super.key});

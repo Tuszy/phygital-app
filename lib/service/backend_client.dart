@@ -7,7 +7,7 @@ import 'dart:convert';
 import 'package:web3dart/web3dart.dart';
 
 import '../model/lsp4/lsp4_metadata.dart';
-import '../model/phygital_tag.dart';
+import '../model/phygital/phygital_tag.dart';
 import 'result.dart';
 
 class BackendClient extends ChangeNotifier {

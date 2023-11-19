@@ -10,10 +10,10 @@ import 'package:provider/provider.dart';
 import 'package:web3dart/credentials.dart';
 
 import '../component/button.dart';
-import '../model/phygital.dart';
+import '../model/phygital/phygital.dart';
 import '../service/result.dart';
 import '../service/nfc.dart';
-import '../model/phygital_tag.dart';
+import '../model/phygital/phygital_tag.dart';
 
 class MenuPage extends StatefulWidget {
   const MenuPage({super.key});

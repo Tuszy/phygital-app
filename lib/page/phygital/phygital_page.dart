@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:phygital/component/phygital_preview.dart';
 import 'package:phygital/layout/standard_layout.dart';
 import 'package:phygital/model/layout_button_data.dart';
-import 'package:phygital/model/phygital.dart';
+import 'package:phygital/model/phygital/phygital.dart';
 
 class PhygitalPage extends StatelessWidget {
   const PhygitalPage({

@@ -1,17 +1,15 @@
-import 'dart:typed_data';
-
 import 'package:flutter/foundation.dart';
 import 'package:ndef/utilities.dart';
 import 'package:phygital/model/lsp0/universal_profile.dart';
 import 'package:phygital/model/lsp4/lsp4_metadata.dart';
-import 'package:phygital/model/phygital_tag.dart';
+import 'package:phygital/model/phygital/phygital_tag.dart';
 import 'package:pointycastle/api.dart';
 import 'package:web3dart/credentials.dart';
 
-import '../service/blockchain/lukso_client.dart';
-import '../service/global_state.dart';
-import '../service/nfc.dart';
-import '../service/result.dart';
+import '../../service/blockchain/lukso_client.dart';
+import '../../service/global_state.dart';
+import '../../service/nfc.dart';
+import '../../service/result.dart';
 
 class Phygital {
   Phygital({

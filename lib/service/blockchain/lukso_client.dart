@@ -3,7 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart';
 import 'package:ndef/utilities.dart';
 import 'package:phygital/model/lsp4/lsp4_metadata.dart';
-import 'package:phygital/model/phygital.dart';
+import 'package:phygital/model/phygital/phygital.dart';
 import 'dart:convert';
 import 'package:phygital/service/backend_client.dart';
 import 'package:phygital/service/blockchain/contracts/LSP0ERC725Account.g.dart';
@@ -12,7 +12,7 @@ import 'package:phygital/service/ipfs_client.dart';
 import 'package:phygital/util/lsp2_utils.dart';
 import 'package:web3dart/web3dart.dart';
 
-import '../../model/phygital_tag.dart';
+import '../../model/phygital/phygital_tag.dart';
 import '../../model/lsp0/universal_profile.dart';
 import '../nfc.dart';
 import 'contracts/PhygitalAsset.g.dart';

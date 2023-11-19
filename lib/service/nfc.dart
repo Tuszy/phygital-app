@@ -8,7 +8,7 @@ import 'package:ndef/utilities.dart';
 import 'package:pointycastle/api.dart';
 import 'package:web3dart/credentials.dart';
 
-import '../model/phygital_tag.dart';
+import '../model/phygital/phygital_tag.dart';
 
 typedef NFCTagCommandFunction = Future<dynamic> Function(
     NFCTag tag, PhygitalTag phygitalTag);

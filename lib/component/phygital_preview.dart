@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:ndef/utilities.dart';
 import 'package:phygital/component/image_preview.dart';
 import 'package:phygital/component/phygital_preview_section.dart';
-import 'package:phygital/model/phygital.dart';
+import 'package:phygital/model/phygital/phygital.dart';
 
 class PhygitalPreview extends StatelessWidget {
   const PhygitalPreview({super.key, required this.phygital});
