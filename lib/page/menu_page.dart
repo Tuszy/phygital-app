@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:ndef/utilities.dart';
 import 'package:phygital/model/layout_button_data.dart';
+import 'package:phygital/page/create_collection_page.dart';
 import 'package:phygital/page/phygital_page.dart';
 import 'package:phygital/page/universal_profile_page.dart';
 import 'package:phygital/service/custom_dialog.dart';
@@ -270,7 +271,14 @@ class _MenuPageState extends State<MenuPage> {
     );
   }
 
-  Future<void> create() async {}
+  Future<void> create() async {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => CreateCollectionPage(),
+      ),
+    );
+  }
 
   Future<void> setContractAddress() async {
     EthereumAddress newContractAddress =
@@ -312,8 +320,6 @@ class _MenuPageState extends State<MenuPage> {
 
   @override
   Widget build(BuildContext context) {
-    NFC nfc = Provider.of<NFC>(context);
-
     return StandardLayout(
       title: "Menu",
       child: Column(

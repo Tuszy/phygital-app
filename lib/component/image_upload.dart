@@ -50,7 +50,7 @@ class _ImageUploadState extends State<ImageUpload> {
   ];
 
   final TextStyle _textStyle = const TextStyle(
-      color: Colors.white60, fontSize: 24, fontWeight: FontWeight.w500);
+      color: Colors.white60, fontSize: 20, fontWeight: FontWeight.w500);
 
   Future<void> _onImageButtonPressed(ImageSource source,
       {required BuildContext context}) async {
@@ -123,14 +123,26 @@ class _ImageUploadState extends State<ImageUpload> {
           height: _height ?? widget.height,
           errorBuilder:
               (BuildContext context, Object error, StackTrace? stackTrace) {
-            return Text('Image type is not supported', style: _textStyle);
+            return Text(
+              'Image type is not supported',
+              style: _textStyle,
+              textAlign: TextAlign.center,
+            );
           },
         ),
       );
     } else if (_pickImageError != null) {
-      return Text('Pick image error: $_pickImageError', style: _textStyle);
+      return Text(
+        'Pick image error: $_pickImageError',
+        style: _textStyle,
+        textAlign: TextAlign.center,
+      );
     } else {
-      return Text('No image picked.', style: _textStyle);
+      return Text(
+        'No image picked.',
+        style: _textStyle,
+        textAlign: TextAlign.center,
+      );
     }
   }
 
@@ -193,8 +205,11 @@ class _ImageUploadState extends State<ImageUpload> {
                                   case ConnectionState.none:
                                   case ConnectionState.waiting:
                                   case ConnectionState.active:
-                                    return Text('No image picked.',
-                                        style: _textStyle);
+                                    return Text(
+                                      'No image picked.',
+                                      style: _textStyle,
+                                      textAlign: TextAlign.center,
+                                    );
                                   case ConnectionState.done:
                                     return _previewImage();
                                 }
