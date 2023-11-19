@@ -5,8 +5,8 @@ import 'package:phygital/layout/standard_layout.dart';
 import 'package:phygital/model/layout_button_data.dart';
 import 'package:phygital/model/phygital_with_data.dart';
 
-class PhygitalDataPage extends StatelessWidget {
-  const PhygitalDataPage({
+class PhygitalPage extends StatelessWidget {
+  const PhygitalPage({
     super.key,
     required this.phygitalWithData,
     this.layoutButtonData,
@@ -18,10 +18,14 @@ class PhygitalDataPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return StandardLayout(
-      title: "Phygital Data",
+      title: "Phygital",
       layoutButtonData: layoutButtonData,
       child: Column(
-        children: [PhygitalPreview(phygitalWithData: phygitalWithData)],
+        children: [
+          PhygitalPreview(
+            phygitalWithData: phygitalWithData,
+          )
+        ],
       ),
     );
   }

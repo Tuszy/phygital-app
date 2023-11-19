@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:ndef/utilities.dart';
 import 'package:phygital/model/layout_button_data.dart';
-import 'package:phygital/page/phygital/phygital_data_page.dart';
+import 'package:phygital/page/phygital/phygital_page.dart';
 import 'package:phygital/service/custom_dialog.dart';
 import 'package:phygital/layout/standard_layout.dart';
 import 'package:phygital/service/blockchain/lukso_client.dart';
@@ -68,7 +68,7 @@ class _MenuPageState extends State<MenuPage> {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => PhygitalDataPage(
+            builder: (context) => PhygitalPage(
               phygitalWithData: phygitalWithData!,
             ),
           ),
@@ -85,9 +85,10 @@ class _MenuPageState extends State<MenuPage> {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => PhygitalDataPage(
+            builder: (context) => PhygitalPage(
               layoutButtonData: LayoutButtonData(
-                text: phygitalWithData.owner != null ? "ALREADY MINTED" : "MINT",
+                text:
+                    phygitalWithData.owner != null ? "ALREADY MINTED" : "MINT",
                 disabled: phygitalWithData.owner != null,
                 onClick: () async {
                   Result result = await phygitalWithData.mint();
@@ -95,12 +96,12 @@ class _MenuPageState extends State<MenuPage> {
                     title: "Result",
                     text: getMessageForResult(result),
                   );
-                  if(Result.mintSucceeded != result) return;
-                  if(!mounted) return;
+                  if (Result.mintSucceeded != result) return;
+                  if (!mounted) return;
                   Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => PhygitalDataPage(
+                      builder: (context) => PhygitalPage(
                         phygitalWithData: phygitalWithData,
                       ),
                     ),
@@ -115,7 +116,47 @@ class _MenuPageState extends State<MenuPage> {
     );
   }
 
-  Future<void> verifyOwnershipAfterTransfer() async {}
+  Future<void> verifyOwnershipAfterTransfer() async {
+    if (GlobalState().universalProfile == null) return;
+
+    scan(
+      onSuccess: (PhygitalWithData phygitalWithData) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => PhygitalPage(
+              layoutButtonData: LayoutButtonData(
+                text: phygitalWithData.owner == null
+                    ? "NOT MINTED YET"
+                    : phygitalWithData.verifiedOwnership
+                        ? "ALREADY VERIFIED"
+                        : "VERIFY OWNERSHIP",
+                disabled: phygitalWithData.owner == null || phygitalWithData.verifiedOwnership,
+                onClick: () async {
+                  Result result = await phygitalWithData.verifyOwnership();
+                  await showInfoDialog(
+                    title: "Result",
+                    text: getMessageForResult(result),
+                  );
+                  if (Result.ownershipVerificationSucceeded != result) return;
+                  if (!mounted) return;
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => PhygitalPage(
+                        phygitalWithData: phygitalWithData,
+                      ),
+                    ),
+                  );
+                },
+              ),
+              phygitalWithData: phygitalWithData,
+            ),
+          ),
+        );
+      },
+    );
+  }
 
   Future<void> transfer() async {}
 
@@ -129,21 +170,22 @@ class _MenuPageState extends State<MenuPage> {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => PhygitalDataPage(
+            builder: (context) => PhygitalPage(
               layoutButtonData: LayoutButtonData(
                 text: "Assign Collection",
                 onClick: () async {
-                  Result result = await phygitalWithData.setContractAddress(newContractAddress);
+                  Result result = await phygitalWithData
+                      .setContractAddress(newContractAddress);
                   await showInfoDialog(
                     title: "Result",
                     text: getMessageForResult(result),
                   );
-                  if(Result.assigningCollectionSucceeded != result) return;
-                  if(!mounted) return;
+                  if (Result.assigningCollectionSucceeded != result) return;
+                  if (!mounted) return;
                   Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => PhygitalDataPage(
+                      builder: (context) => PhygitalPage(
                         phygitalWithData: phygitalWithData,
                       ),
                     ),

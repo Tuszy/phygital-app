@@ -39,9 +39,10 @@ class PhygitalWithData {
   final List<UniversalProfile> creators;
 
   Future<Result> mint() async {
-    if (owner != null) return Result.alreadyMinted;
     UniversalProfile? universalProfile = GlobalState().universalProfile;
     if (universalProfile == null) return Result.mintFailed;
+
+    if (owner != null) return Result.alreadyMinted;
 
     try {
       GlobalState().loadingWithText = "Minting...";
@@ -62,6 +63,35 @@ class PhygitalWithData {
       }
       GlobalState().loadingWithText = null;
       return Result.mintFailed;
+    }
+  }
+
+  Future<Result> verifyOwnership() async {
+    UniversalProfile? universalProfile = GlobalState().universalProfile;
+    if (universalProfile == null) return Result.ownershipVerificationFailed;
+
+    if (owner == null) return Result.notMintedYet;
+    if (owner!.address.hexEip55 != universalProfile.address.hexEip55) return Result.invalidOwnership;
+    if (verifiedOwnership) return Result.alreadyVerifiedOwnership;
+
+    try {
+      GlobalState().loadingWithText = "Verifying Ownership...";
+      Result result = await LuksoClient().verifyOwnershipAfterTransfer(
+        phygital: phygital,
+        universalProfileAddress: GlobalState().universalProfile!.address,
+      );
+
+      if (Result.success == result) {
+        verifiedOwnership = true;
+      }
+      GlobalState().loadingWithText = null;
+      return result;
+    } catch (e) {
+      if (kDebugMode) {
+        print("Ownership verification of ${phygital.id} failed ($e)");
+      }
+      GlobalState().loadingWithText = null;
+      return Result.ownershipVerificationFailed;
     }
   }
 

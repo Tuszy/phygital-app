@@ -2,10 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:phygital/component/universal_profile_preview.dart';
 import 'package:phygital/model/phygital_with_data.dart';
 import 'package:phygital/page/menu_page.dart';
-import 'package:phygital/page/phygital/phygital_data_page.dart';
+import 'package:phygital/page/phygital/phygital_page.dart';
 import 'package:phygital/service/blockchain/lukso_client.dart';
 import 'package:phygital/service/custom_dialog.dart';
-import 'package:phygital/component/image_preview.dart';
 import 'package:phygital/layout/standard_layout.dart';
 import 'package:phygital/model/lsp0/universal_profile.dart';
 import 'package:phygital/service/global_state.dart';
@@ -52,7 +51,7 @@ class _HomepageState extends State<Homepage> {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => PhygitalDataPage(phygitalWithData: result.$2!),
+          builder: (context) => PhygitalPage(phygitalWithData: result.$2!),
         ),
       );
     } catch (e) {
