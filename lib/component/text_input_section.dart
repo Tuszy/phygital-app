@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-typedef OnChangeCallback = void Function(String key, String value);
 typedef OnValidateCallback = String? Function(String key, String? value);
 
 class TextInputSection extends StatelessWidget {
@@ -8,18 +7,16 @@ class TextInputSection extends StatelessWidget {
     super.key,
     required this.name,
     required this.label,
-    required this.onChange,
+    required this.textEditingController,
     required this.onValidate,
     this.topBorder = true,
   });
 
   final String name;
   final String label;
-  final OnChangeCallback onChange;
+  final TextEditingController textEditingController;
   final OnValidateCallback onValidate;
   final bool topBorder;
-
-  void _onChange(String value) => onChange(name, value);
 
   String? _onValidate(String? value) => onValidate(name, value);
 
@@ -109,7 +106,7 @@ class TextInputSection extends StatelessWidget {
                       hintText: "Enter the $name...",
                       hintStyle: const TextStyle(color: Colors.white38),
                     ),
-                    onChanged: _onChange,
+                    controller: textEditingController,
                     autocorrect: false,
                     // The validator receives the text that the user has entered.
                     validator: _onValidate,

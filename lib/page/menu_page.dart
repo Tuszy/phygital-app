@@ -282,7 +282,7 @@ class _MenuPageState extends State<MenuPage> {
 
   Future<void> setContractAddress() async {
     EthereumAddress newContractAddress =
-        EthereumAddress("aa4EC04b31e6338CC90cEbd0F45202F2E335137b".toBytes());
+        EthereumAddress("3391e5B98daFBa29858F014027cA9bA1dE0342Bc".toBytes());
     scan(
       onSuccess: (Phygital phygital) {
         Navigator.push(
