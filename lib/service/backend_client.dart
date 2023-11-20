@@ -151,6 +151,10 @@ class BackendClient extends ChangeNotifier {
       return (Result.uploadingLSP4MetadataFailed, null);
     }
 
+    String? baseUri = await IpfsClient()
+        .uploadLSP4MetadataForPhygitals(metadata, phygitalCollection);
+    if (baseUri == null) return (Result.uploadingLSP4MetadataFailed, null);
+
     var data = {
       "universal_profile_address": universalProfileAddress.hexEip55,
       "name": name,
@@ -159,7 +163,7 @@ class BackendClient extends ChangeNotifier {
           .map((PhygitalTag phygitalTag) => phygitalTag.address.hexEip55)
           .toList(),
       "metadata": uploadedMetadataResult.$2,
-      "base_uri": "${uploadedMetadataResult.$1}/#"
+      "base_uri": baseUri
     };
 
     Response response = await _httpClient.post(createEndpoint,

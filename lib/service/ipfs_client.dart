@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:http_parser/http_parser.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart';
+import 'package:ndef/utilities.dart';
 import 'dart:io';
 import 'dart:convert';
 
@@ -11,7 +12,9 @@ import 'package:image_size_getter/file_input.dart';
 import 'package:phygital/model/image.dart';
 import 'package:phygital/model/lsp4/lsp4_image.dart';
 import 'package:mime/mime.dart';
+import 'package:phygital/model/lsp4/lsp4_metadata.dart';
 
+import '../model/phygital/phygital_tag.dart';
 import '../util/lsp2_utils.dart';
 
 class IpfsClient extends ChangeNotifier {
@@ -49,6 +52,45 @@ class IpfsClient extends ChangeNotifier {
   factory IpfsClient() => _shared;
 
   final Client _httpClient = Client();
+
+  Future<String?> uploadLSP4MetadataForPhygitals(LSP4Metadata lsp4metadata, List<PhygitalTag> phygitalTags) async {
+    MultipartRequest request = MultipartRequest("POST", pinFileEndpoint);
+    request.headers.addAll(contentTypeMultipartFormData);
+
+    List<int> metadataJson = utf8.encode(jsonEncode(lsp4metadata));
+    for(PhygitalTag phygitalTag in phygitalTags){
+      request.files.add(
+        MultipartFile.fromBytes(
+            "file",
+            metadataJson,
+            contentType: MediaType.parse("application/json"),
+            filename: "/baseuri/${phygitalTag.id.toHexString()}"
+        ),
+      );
+    }
+
+    StreamedResponse response = await _httpClient.send(request);
+    Uint8List responseBodyBytes = await response.stream.toBytes();
+
+    String jsonResponseStringified = utf8.decode(responseBodyBytes);
+    try {
+      Map<String, dynamic> jsonObject = json.decode(jsonResponseStringified);
+      if (kDebugMode) {
+        print(
+            "Upload LSP4 token id metadata for phygitals to ipfs response: $jsonObject");
+      }
+      if (response.statusCode == 200 && jsonObject.containsKey(ipfsHashKey)) {
+        return "$protocolPrefix${jsonObject[ipfsHashKey] as String}/";
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print(
+            "Error while parsing LSP4 token id metadata upload for phygitals ipfs response: $e");
+      }
+    }
+
+    return null;
+  }
 
   Future<LSP4Image?> uploadImage(String name, File file) async {
     String? mimeType = lookupMimeType(file.path);
