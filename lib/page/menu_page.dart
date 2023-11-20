@@ -250,10 +250,7 @@ class _MenuPageState extends State<MenuPage> {
                                   phygital: phygital,
                                 ),
                               ),
-                              (var route) {
-                                print(route);
-                                return route.settings.name == "menu";
-                              },
+                              (var route) => route.settings.name == "menu",
                             );
                           },
                         ),
@@ -277,44 +274,6 @@ class _MenuPageState extends State<MenuPage> {
       MaterialPageRoute(
         builder: (context) => const CreateCollectionPage(),
       ),
-    );
-  }
-
-  Future<void> setContractAddress() async {
-    EthereumAddress newContractAddress =
-        EthereumAddress("0ac80C76A8fbdA46E44Ab3402BfD335d5da48E19".toBytes());
-    scan(
-      onSuccess: (Phygital phygital) {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => PhygitalPage(
-              layoutButtonData: LayoutButtonData(
-                text: "Assign Collection",
-                onClick: () async {
-                  Result result =
-                      await phygital.setContractAddress(newContractAddress);
-                  await showInfoDialog(
-                    title: "Result",
-                    text: getMessageForResult(result),
-                  );
-                  if (Result.assigningCollectionSucceeded != result) return;
-                  if (!mounted) return;
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => PhygitalPage(
-                        phygital: phygital,
-                      ),
-                    ),
-                  );
-                },
-              ),
-              phygital: phygital,
-            ),
-          ),
-        );
-      },
     );
   }
 
@@ -346,10 +305,6 @@ class _MenuPageState extends State<MenuPage> {
           Button(
             text: "Create Collection",
             onPressed: create,
-          ),
-          Button(
-            text: "Assign Collection",
-            onPressed: setContractAddress,
           ),
         ],
       ),

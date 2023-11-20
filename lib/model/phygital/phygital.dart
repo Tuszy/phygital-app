@@ -124,33 +124,6 @@ class Phygital {
     }
   }
 
-  Future<Result> setContractAddress(EthereumAddress newContractAddress) async {
-    Result validationResult =
-        await LuksoClient().validatePhygitalContract(newContractAddress);
-    if (Result.success != validationResult) return validationResult;
-
-    try {
-      GlobalState().loadingWithText = "Assigning collection";
-      EthereumAddress? setContractAddress = await NFC().setContractAddress(
-        phygitalTag: tag,
-        contractAddress: newContractAddress,
-      );
-      if(setContractAddress != null) {
-        contractAddress = newContractAddress;
-      }else{
-        return Result.assigningCollectionFailed;
-      }
-      GlobalState().loadingWithText = null;
-      return Result.assigningCollectionSucceeded;
-    } catch (e) {
-      if (kDebugMode) {
-        print("Setting contract address ${newContractAddress.hexEip55} to ${tag.id} failed ($e)");
-      }
-      GlobalState().loadingWithText = null;
-      return Result.assigningCollectionFailed;
-    }
-  }
-
   PhygitalTag get tag => PhygitalTag(
         address: address,
         tagId: tagId,

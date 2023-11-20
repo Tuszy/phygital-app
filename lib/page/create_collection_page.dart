@@ -11,6 +11,8 @@ import 'package:phygital/layout/standard_layout.dart';
 import 'package:phygital/model/lsp0/universal_profile.dart';
 import 'package:phygital/model/lsp4/lsp4_link.dart';
 import 'package:phygital/model/lsp4/lsp4_metadata.dart';
+import 'package:phygital/page/assign_collection_page.dart';
+import 'package:phygital/page/phygital_collection_page.dart';
 import 'package:phygital/service/blockchain/lukso_client.dart';
 import 'package:phygital/service/global_state.dart';
 import 'package:phygital/service/ipfs_client.dart';
@@ -88,7 +90,7 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
 
   Future<void> _onAddPhygitalTag() async {
     try {
-      PhygitalTag phygitalTag = await NFC().read(mustHaveContractAddress: true);
+      PhygitalTag phygitalTag = await NFC().read();
       setState(() {
         _tags.add(phygitalTag);
       });
@@ -197,11 +199,11 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
               ),
             )
             .toList(),
-        icon: [images.$1],
+        icons: [images.$1],
         images: [
           [images.$2]
         ],
-        backgroundImage: [images.$3],
+        backgroundImages: [images.$3],
         assets: [],
         attributes: [],
       );
@@ -222,6 +224,15 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
             title: "Creation succeeded",
             text:
                 "Successfully created the collection. Now you need to assign the collection to the Phygitals.",
+          );
+          if (!mounted) return;
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(
+              builder: (context) => AssignCollectionPage(
+                  contractAddress: result.$2!, metadata: metadata, tags: _tags),
+            ),
+            (var route) => route.settings.name == "menu",
           );
         } else {
           GlobalState().loadingWithText = null;

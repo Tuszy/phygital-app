@@ -17,9 +17,9 @@ class LSP4Metadata {
     this.symbol,
     required this.description,
     required this.links,
-    required this.icon,
+    required this.icons,
     required this.images,
-    required this.backgroundImage,
+    required this.backgroundImages,
     required this.assets,
     required this.attributes,
   });
@@ -28,13 +28,15 @@ class LSP4Metadata {
   String? symbol;
   String description;
   List<LSP4Link> links;
-  List<LSP4Image> icon;
+  List<LSP4Image> icons;
   List<List<LSP4Image>> images;
-  List<LSP4Image> backgroundImage;
+  List<LSP4Image> backgroundImages;
   List<LSP4Asset> assets;
   List<LSP4Attribute> attributes;
 
+  LSP4Image? get icon => icons.elementAtOrNull(0);
   LSP4Image? get image => images.elementAtOrNull(0)?.elementAtOrNull(0);
+  LSP4Image? get backgroundImage => backgroundImages.elementAtOrNull(0);
 
   Future<(String, String)?> uploadToIpfs({
     required String name,
@@ -63,9 +65,9 @@ class LSP4Metadata {
         if (symbol != null) 'symbol': symbol,
         'description': description,
         'links': links,
-        'icon': icon,
+        'icon': icons,
         'images': images,
-        'backgroundImage': backgroundImage,
+        'backgroundImage': backgroundImages,
         'assets': assets,
         'attributes': attributes
       }
@@ -115,8 +117,8 @@ class LSP4Metadata {
       description: description,
       links: links,
       images: images,
-      icon: icon,
-      backgroundImage: backgroundImage,
+      icons: icon,
+      backgroundImages: backgroundImage,
       assets: assets,
       attributes: attributes,
     );

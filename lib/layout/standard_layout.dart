@@ -15,11 +15,13 @@ class StandardLayout extends StatefulWidget {
     required this.child,
     this.title,
     this.layoutButtonData,
+    this.hideBackButton = false,
   });
 
   final String? title;
   final Widget child;
   final LayoutButtonData? layoutButtonData;
+  final bool hideBackButton;
 
   @override
   State<StandardLayout> createState() => _StandardLayoutState();
@@ -36,7 +38,9 @@ class _StandardLayoutState extends State<StandardLayout>
       extendBodyBehindAppBar: true,
       appBar: widget.title != null
           ? AppBar(
-              automaticallyImplyLeading: !nfc.isActive && globalState.loadingWithText == null,
+              automaticallyImplyLeading: !widget.hideBackButton &&
+                  !nfc.isActive &&
+                  globalState.loadingWithText == null,
               iconTheme: const IconThemeData(
                 color: Colors.white,
               ),
