@@ -275,14 +275,14 @@ class _MenuPageState extends State<MenuPage> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => CreateCollectionPage(),
+        builder: (context) => const CreateCollectionPage(),
       ),
     );
   }
 
   Future<void> setContractAddress() async {
     EthereumAddress newContractAddress =
-        EthereumAddress("3391e5B98daFBa29858F014027cA9bA1dE0342Bc".toBytes());
+        EthereumAddress("0ac80C76A8fbdA46E44Ab3402BfD335d5da48E19".toBytes());
     scan(
       onSuccess: (Phygital phygital) {
         Navigator.push(

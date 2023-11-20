@@ -159,7 +159,7 @@ class BackendClient extends ChangeNotifier {
           .map((PhygitalTag phygitalTag) => phygitalTag.address.hexEip55)
           .toList(),
       "metadata": uploadedMetadataResult.$2,
-      "base_uri": "${IpfsClient.protocolPrefix}${uploadedMetadataResult.$2}/#"
+      "base_uri": "${IpfsClient.protocolPrefix}${uploadedMetadataResult.$1}/#"
     };
 
     Response response = await _httpClient.post(createEndpoint,
