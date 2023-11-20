@@ -59,6 +59,10 @@ class _AssignCollectionPageState extends State<AssignCollectionPage> {
         _tags.remove(phygitalTag);
         _assignedTags.add(phygitalTag);
         if (_tags.isNotEmpty) return;
+        await showInfoDialog(
+          title: "Assignment completed",
+          text: "Successfully assigned collection to all phygitals.",
+        );
         if (!mounted) return;
         Navigator.pushAndRemoveUntil(
           context,
@@ -72,7 +76,7 @@ class _AssignCollectionPageState extends State<AssignCollectionPage> {
         );
       } else {
         await showInfoDialog(
-          title: "Result",
+          title: "Assignment failed",
           text: getMessageForResult(result),
         );
         return;
