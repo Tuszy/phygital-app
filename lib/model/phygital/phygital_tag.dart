@@ -5,7 +5,6 @@ import 'package:ndef/utilities.dart';
 import 'package:pointycastle/api.dart';
 import 'package:web3dart/credentials.dart';
 
-import '../../service/blockchain/lukso_client.dart';
 import '../../service/global_state.dart';
 import '../../service/nfc.dart';
 import '../../service/result.dart';
@@ -22,17 +21,17 @@ class PhygitalTag {
       Digest('Keccak/256').process(address.hexNo0x.padLeft(64, '0').toBytes());
 
   Future<Result> setContractAddress(EthereumAddress newContractAddress) async {
-    Result validationResult =
+    /*Result validationResult =
         await LuksoClient().validatePhygitalContract(newContractAddress);
-    if (Result.success != validationResult) return validationResult;
+    if (Result.success != validationResult) return validationResult;*/
 
     try {
       GlobalState().loadingWithText = "Assigning collection";
-      EthereumAddress? setContractAddress = await NFC().setContractAddress(
-        phygitalTag: this,
+      PhygitalTag? phygitalTag = await NFC().setContractAddress(
+        phygitalTags: {this},
         contractAddress: newContractAddress,
       );
-      if (setContractAddress != null) {
+      if (phygitalTag != null) {
         contractAddress = newContractAddress;
       } else {
         return Result.assigningCollectionFailed;
@@ -51,14 +50,14 @@ class PhygitalTag {
 
   @override
   String toString() {
-    return "Phygital Address: ${address.hexEip55}\n\n${contractAddress != null ? "Contract Address: ${contractAddress!.hexEip55}\n" : ""}";
+    return "Tag Id: $tagId\nPhygital Address: ${address.hexEip55}\n${contractAddress != null ? "Contract Address: ${contractAddress!.hexEip55}" : ""}";
   }
 
   @override
   bool operator ==(Object other) {
-    return other is PhygitalTag && address.hexEip55 == other.address.hexEip55;
+    return other is PhygitalTag && tagId.hashCode == other.tagId.hashCode;
   }
 
   @override
-  int get hashCode => address.hexEip55.hashCode;
+  int get hashCode => tagId.hashCode;
 }

@@ -66,7 +66,7 @@ class NFC extends ChangeNotifier {
   Future<dynamic> _startNFCCommunication({
     required String message,
     Duration? energyHarvestingDuration,
-    PhygitalTag? expectedPhygital,
+    Set<PhygitalTag>? expectedPhygitals,
     bool? mustHaveContractAddress,
     bool? mustNotHaveContractAddress,
     required NFCTagCommandFunction nfcTagCommandFunction,
@@ -79,12 +79,20 @@ class NFC extends ChangeNotifier {
       NFCTag tag = await FlutterNfcKit.poll(
         iosAlertMessage: "Hold your iPhone near the Phygital",
       );
-      if (expectedPhygital != null && expectedPhygital.tagId != tag.id) {
-        throw "Different Phygital detected.";
+
+      PhygitalTag tagWrapper = PhygitalTag(
+        address: EthereumAddress("0".padLeft(40, '0').toBytes()),
+        tagId: tag.id,
+      );
+
+      if (expectedPhygitals != null &&
+          !expectedPhygitals.contains(tagWrapper)) {
+        throw "Unexpected Phygital detected.";
       }
       await FlutterNfcKit.setIosAlertMessage(message);
 
-      PhygitalTag? phygital = expectedPhygital ?? await _validate(tag);
+      PhygitalTag? phygital =
+          expectedPhygitals?.lookup(tagWrapper) ?? await _validate(tag);
       if (phygital == null) {
         throw "This is not a valid Phygital";
       }
@@ -241,7 +249,7 @@ class NFC extends ChangeNotifier {
     if (nonce < 0) throw "Invalid nonce";
 
     return await _startNFCCommunication(
-      expectedPhygital: phygitalTag,
+      expectedPhygitals: {phygitalTag},
       message:
           "Signing Universal Profile Address\n${universalProfileAddress.hexEip55}",
       energyHarvestingDuration: const Duration(seconds: 3),
@@ -298,14 +306,15 @@ class NFC extends ChangeNotifier {
     return value[0] == 0;
   }
 
-  Future<EthereumAddress?> setContractAddress({
-    required PhygitalTag phygitalTag,
+  Future<PhygitalTag?> setContractAddress({
+    required Set<PhygitalTag> phygitalTags,
     required EthereumAddress contractAddress,
   }) async {
     return await _startNFCCommunication(
+      expectedPhygitals: phygitalTags,
       message: "Setting Contract Address\n${contractAddress.hexEip55}",
       energyHarvestingDuration: const Duration(seconds: 3),
-      nfcTagCommandFunction: (NFCTag tag, PhygitalTag? phygital) async {
+      nfcTagCommandFunction: (NFCTag tag, PhygitalTag? phygitalTag) async {
         String errorMessage = "Failed to set the contract address";
         Uint8List contractAddressAsBytes =
             Uint8List.fromList(utf8.encode(contractAddress.hexEip55));
@@ -337,7 +346,7 @@ class NFC extends ChangeNotifier {
           throw errorMessage;
         }
 
-        return contractAddress;
+        return phygitalTag;
       },
     );
   }
@@ -348,7 +357,8 @@ class NFC extends ChangeNotifier {
       message: 'Reading Phygital',
       mustHaveContractAddress: mustHaveContractAddress,
       mustNotHaveContractAddress: mustNotHaveContractAddress,
-      nfcTagCommandFunction: (NFCTag tag, PhygitalTag phygitalTag) async => phygitalTag,
+      nfcTagCommandFunction: (NFCTag tag, PhygitalTag phygitalTag) async =>
+          phygitalTag,
     );
   }
 }

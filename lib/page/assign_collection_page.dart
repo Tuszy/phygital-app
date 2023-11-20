@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:phygital/component/phygital_assignment_list_section.dart';
 import 'package:phygital/layout/standard_layout.dart';
@@ -9,7 +10,6 @@ import '../model/phygital/phygital_tag.dart';
 import '../service/custom_dialog.dart';
 import '../service/global_state.dart';
 import '../service/nfc.dart';
-import '../service/result.dart';
 
 class AssignCollectionPage extends StatefulWidget {
   const AssignCollectionPage({
@@ -40,24 +40,17 @@ class _AssignCollectionPageState extends State<AssignCollectionPage> {
 
   Future<void> _onAssignCollection() async {
     try {
-      PhygitalTag phygitalTag = await NFC().read(mustHaveContractAddress: true);
-      if (!_tags.contains(phygitalTag)) {
-        showInfoDialog(
-          title: "Failed",
-          text: _assignedTags.contains(phygitalTag)
-              ? "This Phygital has already been assigned"
-              : "Phygital is not part of the collection",
-        );
-        return;
-      }
+      GlobalState().loadingWithText = "Assigning collection";
 
-      if (!mounted) return;
+      PhygitalTag? phygitalTag = await NFC().setContractAddress(
+        phygitalTags: _tags,
+        contractAddress: widget.contractAddress,
+      );
 
-      Result result =
-          await phygitalTag.setContractAddress(widget.contractAddress);
-      if (Result.assigningCollectionSucceeded == result) {
+      if (phygitalTag != null) {
         _tags.remove(phygitalTag);
         _assignedTags.add(phygitalTag);
+        GlobalState().loadingWithText = null;
         if (_tags.isNotEmpty) return;
         await showInfoDialog(
           title: "Assignment completed",
@@ -75,13 +68,18 @@ class _AssignCollectionPageState extends State<AssignCollectionPage> {
           (var route) => route.settings.name == "menu",
         );
       } else {
+        GlobalState().loadingWithText = null;
         await showInfoDialog(
           title: "Assignment failed",
-          text: getMessageForResult(result),
+          text: "Unknown error occurred. Please try again.",
         );
         return;
       }
     } catch (e) {
+      if (kDebugMode) {
+        print(
+            "Setting contract address ${widget.contractAddress.hexEip55} failed ($e)");
+      }
       GlobalState().loadingWithText = null;
       showInfoDialog(
         title: "Result",
@@ -124,7 +122,8 @@ class _AssignCollectionPageState extends State<AssignCollectionPage> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 PhygitalAssignmentListSection(
-                  label: "Left Phygitals to assign",
+                  topBorder: false,
+                  label: "Left Phygitals",
                   phygitalTags: _tags.toList(),
                   onAssign: _onAssignCollection,
                 )

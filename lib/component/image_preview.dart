@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:phygital/model/lsp0/lsp_image.dart';
 
 class ImagePreview extends StatefulWidget {
-  const ImagePreview(
-      {super.key,
-      required this.image,
-      required this.width,
-      required this.height});
+  const ImagePreview({
+    super.key,
+    required this.image,
+    required this.width,
+    required this.height,
+  });
 
   final LSPImage image;
   final double width;

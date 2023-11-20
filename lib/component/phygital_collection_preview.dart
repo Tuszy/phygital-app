@@ -41,16 +41,25 @@ class PhygitalCollectionPreview extends StatelessWidget {
               fontWeight: FontWeight.w800,
             ),
           ),
+          if (metadata.icon != null)
+            ImagePreviewSection(
+                image: metadata.icon!, label: "Icon", width: 200, height: 200),
+          if (metadata.image != null)
+            ImagePreviewSection(
+                image: metadata.image!,
+                label: "Phygital Image",
+                width: 200,
+                height: 200),
+          if (metadata.backgroundImage != null)
+            ImagePreviewSection(
+                image: metadata.backgroundImage!,
+                label: "Background Image",
+                width: 200,
+                height: 200),
           PreviewSection(
             label: "Contract Address",
             text: contractAddress.hexEip55,
           ),
-          if (metadata.icon != null)
-            ImagePreviewSection(image: metadata.icon!, label: "Icon", width: 200, height: 200),
-          if (metadata.image != null)
-            ImagePreviewSection(image: metadata.image!, label: "Phygital Image", width: 200, height: 200),
-          if (metadata.backgroundImage != null)
-            ImagePreviewSection(image: metadata.backgroundImage!, label: "Background Image", width: 200, height: 200),
           if (metadata.description.isNotEmpty)
             PreviewSection(
               label: "Description",

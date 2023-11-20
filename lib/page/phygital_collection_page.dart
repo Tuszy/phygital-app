@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:phygital/component/phygital_collection_preview.dart';
 import 'package:phygital/layout/standard_layout.dart';
 import 'package:phygital/model/layout_button_data.dart';
 import 'package:phygital/model/lsp4/lsp4_metadata.dart';
@@ -24,7 +25,7 @@ class PhygitalCollectionPage extends StatelessWidget {
       layoutButtonData: layoutButtonData,
       child: Column(
         children: [
-          PhygitalCollectionPage(
+          PhygitalCollectionPreview(
             contractAddress: contractAddress,
             metadata: metadata,
           )
