@@ -175,7 +175,7 @@ class BackendClient extends ChangeNotifier {
         return (
           Result.createSucceeded,
           EthereumAddress(
-            (jsonObject["contractAddress"] as String).toBytes().sublist(2),
+            (jsonObject["contractAddress"] as String).substring(2).toBytes(),
           )
         );
       } else {

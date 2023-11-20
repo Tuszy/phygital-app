@@ -21,8 +21,8 @@ class LinkController {
   }
 }
 
-class LinkInputSection extends StatefulWidget {
-  const LinkInputSection({
+class LinkListSection extends StatelessWidget {
+  const LinkListSection({
     super.key,
     required this.name,
     required this.label,
@@ -39,11 +39,6 @@ class LinkInputSection extends StatefulWidget {
   final List<LinkController> links;
   final bool topBorder;
 
-  @override
-  State<LinkInputSection> createState() => _LinkInputSectionState();
-}
-
-class _LinkInputSectionState extends State<LinkInputSection> {
   String? onValidate(String name, String? value) =>
       value == null || value.isEmpty ? "The $name must not be empty" : null;
 
@@ -54,7 +49,7 @@ class _LinkInputSectionState extends State<LinkInputSection> {
       margin: const EdgeInsets.only(top: 8),
       padding: const EdgeInsets.only(top: 8, left: 12, right: 12, bottom: 8),
       decoration: BoxDecoration(
-        border: widget.topBorder
+        border: topBorder
             ? const Border(
                 top: BorderSide(width: 2, color: Colors.white38),
               )
@@ -74,7 +69,7 @@ class _LinkInputSectionState extends State<LinkInputSection> {
                   children: [
                     Expanded(
                       child: Text(
-                        widget.label,
+                        label,
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 18,
@@ -84,11 +79,11 @@ class _LinkInputSectionState extends State<LinkInputSection> {
                     ),
                     _Button(
                       name: "ADD LINK",
-                      onClick: widget.onAdd,
+                      onClick: onAdd,
                     ),
                   ],
                 ),
-                ...widget.links.indexed.map(
+                ...links.indexed.map(
                   ((int, LinkController) link) => Container(
                     margin: const EdgeInsets.only(top: 8),
                     padding:
@@ -115,8 +110,8 @@ class _LinkInputSectionState extends State<LinkInputSection> {
                               ),
                             ),
                             _Button(
-                              name: "REMOVE LINK",
-                              onClick: () => widget.onRemove(link.$1),
+                              name: "REMOVE",
+                              onClick: () => onRemove(link.$1),
                             ),
                           ],
                         ),

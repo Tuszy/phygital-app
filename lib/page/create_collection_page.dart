@@ -4,7 +4,8 @@ import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:phygital/component/image_upload_section.dart';
-import 'package:phygital/component/link_input_section.dart';
+import 'package:phygital/component/link_list_section.dart';
+import 'package:phygital/component/phygital_list_section.dart';
 import 'package:phygital/component/text_input_section.dart';
 import 'package:phygital/layout/standard_layout.dart';
 import 'package:phygital/model/lsp0/universal_profile.dart';
@@ -18,6 +19,7 @@ import 'package:web3dart/credentials.dart';
 import '../model/lsp4/lsp4_image.dart';
 import '../model/phygital/phygital_tag.dart';
 import '../service/custom_dialog.dart';
+import '../service/nfc.dart';
 import '../service/result.dart';
 
 class CreateCollectionPage extends StatefulWidget {
@@ -81,6 +83,28 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
     _links[index].dispose();
     setState(() {
       _links.removeAt(index);
+    });
+  }
+
+  Future<void> _onAddPhygitalTag() async {
+    try {
+      PhygitalTag phygitalTag = await NFC().read(mustHaveContractAddress: true);
+      setState(() {
+        _tags.add(phygitalTag);
+      });
+    } catch (e) {
+      GlobalState().loadingWithText = null;
+      showInfoDialog(
+        title: "Result",
+        text: e.toString(),
+      );
+    }
+  }
+
+  void _onRemovePhygitalTag(int index) {
+    if (index < 0 || index >= _tags.length) return;
+    setState(() {
+      _tags.removeAt(index);
     });
   }
 
@@ -296,13 +320,19 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
                     textEditingController: _descriptionController,
                     onValidate: _onValidate,
                   ),
-                  LinkInputSection(
+                  LinkListSection(
                     name: "links",
                     label: "Links",
                     onAdd: _onAddLink,
                     onRemove: _onRemoveLink,
                     links: _links,
                   ),
+                  PhygitalListSection(
+                      name: "phygitals",
+                      label: "Phygitals",
+                      onAdd: _onAddPhygitalTag,
+                      onRemove: _onRemovePhygitalTag,
+                      phygitalTags: _tags)
                 ],
               ),
             ),
