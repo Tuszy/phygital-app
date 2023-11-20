@@ -255,7 +255,8 @@ class LuksoClient extends ChangeNotifier {
       try {
         PhygitalAsset contract = PhygitalAsset(
             address: phygitalTag.contractAddress!, client: _web3client!);
-        bool verificationStatus = await contract.verifiedOwnership(phygitalTag.id);
+        bool verificationStatus =
+            await contract.verifiedOwnership(phygitalTag.id);
         if (expectedVerificationStatus == verificationStatus) {
           return Result.success;
         }
@@ -278,7 +279,8 @@ class LuksoClient extends ChangeNotifier {
   }) async {
     if (!_initialized) return Result.notInitialized;
 
-    if (phygitalTag.contractAddress == null) return Result.notPartOfAnyCollection;
+    if (phygitalTag.contractAddress == null)
+      return Result.notPartOfAnyCollection;
 
     Result phygitalContractValidationResult =
         await validatePhygitalContract(phygitalTag.contractAddress);
@@ -438,7 +440,6 @@ class LuksoClient extends ChangeNotifier {
     required String symbol,
     required List<PhygitalTag> phygitalCollection,
     required LSP4Metadata metadata,
-    required String baseUri,
   }) async {
     Result validationResult = await validateUniversalProfilePermissions(
       address: universalProfileAddress,
@@ -450,17 +451,17 @@ class LuksoClient extends ChangeNotifier {
     }
     if (name.isEmpty) return (Result.nameMustNotBeEmpty, null);
     if (symbol.isEmpty) return (Result.symbolMustNotBeEmpty, null);
-    if (baseUri.isEmpty ||
+    /*if (baseUri.isEmpty ||
         !baseUri.startsWith(IpfsClient.protocolPrefix) ||
-        !baseUri.endsWith("/")) return (Result.invalidBaseUri, null);
+        !baseUri.endsWith("/")) return (Result.invalidBaseUri, null);*/
 
     return await BackendClient().create(
-        universalProfileAddress: universalProfileAddress,
-        name: name,
-        symbol: symbol,
-        phygitalCollection: phygitalCollection,
-        metadata: metadata,
-        baseUri: baseUri);
+      universalProfileAddress: universalProfileAddress,
+      name: name,
+      symbol: symbol,
+      phygitalCollection: phygitalCollection,
+      metadata: metadata,
+    );
   }
 
   Future<UniversalProfile?> fetchUniversalProfile({
@@ -489,20 +490,22 @@ class LuksoClient extends ChangeNotifier {
         await validatePhygitalContract(phygitalTag.contractAddress);
     if (validationResult != Result.success) return (validationResult, null);
 
-    PhygitalAsset contract =
-        PhygitalAsset(address: phygitalTag.contractAddress!, client: _web3client!);
+    PhygitalAsset contract = PhygitalAsset(
+        address: phygitalTag.contractAddress!, client: _web3client!);
 
     UniversalProfile? owner;
     try {
-      EthereumAddress ownerAddress = await contract.tokenOwnerOf(phygitalTag.id);
+      EthereumAddress ownerAddress =
+          await contract.tokenOwnerOf(phygitalTag.id);
       owner = await fetchUniversalProfile(
         universalProfileAddress: ownerAddress,
       );
     } catch (e) {
       /*Not minted yet*/
     }
-    bool verifiedOwnership =
-        owner == null ? false : await contract.verifiedOwnership(phygitalTag.id);
+    bool verifiedOwnership = owner == null
+        ? false
+        : await contract.verifiedOwnership(phygitalTag.id);
 
     List<Uint8List> data = await contract.getDataBatch([
       phygitalAssetMetadataKey,

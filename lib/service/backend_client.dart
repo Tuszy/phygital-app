@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart';
 import 'package:ndef/utilities.dart';
+import 'package:phygital/service/ipfs_client.dart';
 import 'dart:convert';
 import 'package:web3dart/web3dart.dart';
 
@@ -135,18 +136,18 @@ class BackendClient extends ChangeNotifier {
     return Result.transferFailed;
   }
 
-  Future<(Result, EthereumAddress?)> create(
-      {required EthereumAddress universalProfileAddress,
-      required String name,
-      required String symbol,
-      required List<PhygitalTag> phygitalCollection,
-      required LSP4Metadata metadata,
-      required String baseUri}) async {
-    String? metadataLsp2JsonUrl = await metadata.uploadToIpfs(
+  Future<(Result, EthereumAddress?)> create({
+    required EthereumAddress universalProfileAddress,
+    required String name,
+    required String symbol,
+    required List<PhygitalTag> phygitalCollection,
+    required LSP4Metadata metadata,
+  }) async {
+    (String, String)? uploadedMetadataResult = await metadata.uploadToIpfs(
         name: name,
         symbol: symbol,
         universalProfileAddress: universalProfileAddress);
-    if (metadataLsp2JsonUrl == null) {
+    if (uploadedMetadataResult == null) {
       return (Result.uploadingLSP4MetadataFailed, null);
     }
 
@@ -157,8 +158,8 @@ class BackendClient extends ChangeNotifier {
       "phygital_collection": phygitalCollection
           .map((PhygitalTag phygitalTag) => phygitalTag.address.hexEip55)
           .toList(),
-      "metadata": metadataLsp2JsonUrl,
-      "base_uri": baseUri
+      "metadata": uploadedMetadataResult.$2,
+      "base_uri": "${IpfsClient.protocolPrefix}${uploadedMetadataResult.$2}/#"
     };
 
     Response response = await _httpClient.post(createEndpoint,
@@ -174,7 +175,8 @@ class BackendClient extends ChangeNotifier {
         return (
           Result.createSucceeded,
           EthereumAddress(
-              (jsonObject["contractAddress"] as String).toBytes().sublist(2))
+            (jsonObject["contractAddress"] as String).toBytes().sublist(2),
+          )
         );
       } else {
         return (
