@@ -65,6 +65,8 @@ class NFC extends ChangeNotifier {
 
   Future<dynamic> _startNFCCommunication({
     required String message,
+    String? successMessage,
+    String? failMessage,
     Duration? energyHarvestingDuration,
     Set<PhygitalTag>? expectedPhygitals,
     bool? mustHaveContractAddress,
@@ -110,13 +112,14 @@ class NFC extends ChangeNotifier {
 
       active = false;
 
-      await FlutterNfcKit.finish(iosAlertMessage: "Succeeded!");
+      await FlutterNfcKit.finish(
+          iosAlertMessage: successMessage ?? "Succeeded!");
 
       return result;
     } catch (e) {
       if (kDebugMode) print("NFC communication failed ($e)");
       active = false;
-      await FlutterNfcKit.finish(iosAlertMessage: "Failed!");
+      await FlutterNfcKit.finish(iosAlertMessage: failMessage ?? "Failed!");
       if (e is PlatformException) {
         if (e.code == "409") {
           throw "You have cancelled the NFC communication"; // User cancelled
@@ -242,6 +245,8 @@ class NFC extends ChangeNotifier {
   }
 
   Future<String?> signUniversalProfileAddress({
+    required String message,
+    String? successMessage,
     required PhygitalTag phygitalTag,
     required EthereumAddress universalProfileAddress,
     required int nonce,
@@ -250,8 +255,8 @@ class NFC extends ChangeNotifier {
 
     return await _startNFCCommunication(
       expectedPhygitals: {phygitalTag},
-      message:
-          "Signing Universal Profile Address\n${universalProfileAddress.hexEip55}",
+      message: message,
+      successMessage: successMessage,
       energyHarvestingDuration: const Duration(seconds: 3),
       nfcTagCommandFunction: (NFCTag tag, PhygitalTag phygitalTag) async {
         String errorMessage = "Failed to sign the universal profile address";
@@ -312,7 +317,8 @@ class NFC extends ChangeNotifier {
   }) async {
     return await _startNFCCommunication(
       expectedPhygitals: phygitalTags,
-      message: "Setting Contract Address\n${contractAddress.hexEip55}",
+      message: "Assigning collection",
+      successMessage: "Collection assigned",
       energyHarvestingDuration: const Duration(seconds: 3),
       nfcTagCommandFunction: (NFCTag tag, PhygitalTag? phygitalTag) async {
         String errorMessage = "Failed to set the contract address";
@@ -354,7 +360,8 @@ class NFC extends ChangeNotifier {
   Future<PhygitalTag> read(
       {bool? mustHaveContractAddress, bool? mustNotHaveContractAddress}) async {
     return await _startNFCCommunication(
-      message: 'Reading Phygital',
+      message: "Validating Phygital",
+      successMessage: "Valid Phygital Detected",
       mustHaveContractAddress: mustHaveContractAddress,
       mustNotHaveContractAddress: mustNotHaveContractAddress,
       nfcTagCommandFunction: (NFCTag tag, PhygitalTag phygitalTag) async =>

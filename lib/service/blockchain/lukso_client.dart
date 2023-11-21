@@ -319,6 +319,7 @@ class LuksoClient extends ChangeNotifier {
     }
 
     String? phygitalSignature = await NFC().signUniversalProfileAddress(
+      message: "Minting Phygital",
       phygitalTag: phygitalTag,
       universalProfileAddress: universalProfileAddress,
       nonce: nonce.toInt(),
@@ -365,6 +366,7 @@ class LuksoClient extends ChangeNotifier {
     }
 
     String? phygitalSignature = await NFC().signUniversalProfileAddress(
+      message: "Verifying Ownership Of Phygital",
       phygitalTag: phygitalTag,
       universalProfileAddress: universalProfileAddress,
       nonce: nonce.toInt(),
@@ -420,6 +422,7 @@ class LuksoClient extends ChangeNotifier {
     }
 
     String? phygitalSignature = await NFC().signUniversalProfileAddress(
+      message: "Transferring Phygital",
       phygitalTag: phygitalTag,
       universalProfileAddress: toUniversalProfileAddress,
       nonce: nonce.toInt(),
@@ -451,9 +454,6 @@ class LuksoClient extends ChangeNotifier {
     }
     if (name.isEmpty) return (Result.nameMustNotBeEmpty, null);
     if (symbol.isEmpty) return (Result.symbolMustNotBeEmpty, null);
-    /*if (baseUri.isEmpty ||
-        !baseUri.startsWith(IpfsClient.protocolPrefix) ||
-        !baseUri.endsWith("/")) return (Result.invalidBaseUri, null);*/
 
     return await BackendClient().create(
       universalProfileAddress: universalProfileAddress,
