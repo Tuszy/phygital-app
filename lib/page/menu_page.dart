@@ -40,6 +40,17 @@ class _MenuPageState extends State<MenuPage> {
   void scan(
       {bool mustHaveValidPhygitalData = true,
       required Function(Phygital) onSuccess}) async {
+    if (!await BackendClient().verifyLoginToken(
+        universalProfileAddress: GlobalState().universalProfile!.address)) {
+      await showInfoDialog(
+        title: "Login required",
+        text: getMessageForResult(Result.authenticationSessionExpired),
+      );
+      GlobalState().logout();
+      if (mounted) Navigator.popUntil(context, (route) => route.isFirst);
+      return;
+    }
+
     try {
       PhygitalTag phygitalTag = await NFC().read(mustHaveContractAddress: true);
       GlobalState().loadingWithText = "Fetching Phygital Data";
@@ -81,16 +92,6 @@ class _MenuPageState extends State<MenuPage> {
 
   Future<void> mint() async {
     if (GlobalState().universalProfile == null) return;
-    if (!await BackendClient().verifyLoginToken(
-        universalProfileAddress: GlobalState().universalProfile!.address)) {
-      await showInfoDialog(
-        title: "Login required",
-        text: getMessageForResult(Result.authenticationSessionExpired),
-      );
-      GlobalState().logout();
-      if (mounted) Navigator.popUntil(context, (route) => route.isFirst);
-      return;
-    }
 
     scan(
       onSuccess: (Phygital phygital) async {
@@ -142,16 +143,6 @@ class _MenuPageState extends State<MenuPage> {
 
   Future<void> verifyOwnershipAfterTransfer() async {
     if (GlobalState().universalProfile == null) return;
-    if (!await BackendClient().verifyLoginToken(
-        universalProfileAddress: GlobalState().universalProfile!.address)) {
-      await showInfoDialog(
-        title: "Login required",
-        text: getMessageForResult(Result.authenticationSessionExpired),
-      );
-      GlobalState().logout();
-      if (mounted) Navigator.popUntil(context, (route) => route.isFirst);
-      return;
-    }
 
     scan(
       onSuccess: (Phygital phygital) async {
@@ -250,16 +241,6 @@ class _MenuPageState extends State<MenuPage> {
 
   Future<void> transfer() async {
     if (GlobalState().universalProfile == null) return;
-    if (!await BackendClient().verifyLoginToken(
-        universalProfileAddress: GlobalState().universalProfile!.address)) {
-      await showInfoDialog(
-        title: "Login required",
-        text: getMessageForResult(Result.authenticationSessionExpired),
-      );
-      GlobalState().logout();
-      if (mounted) Navigator.popUntil(context, (route) => route.isFirst);
-      return;
-    }
 
     scan(
       onSuccess: (Phygital phygital) async {
