@@ -23,7 +23,7 @@ class LuksoClient extends ChangeNotifier {
 
   static final universalProfileInterfaceId = "24871b3d".toBytes();
   static final lsp6KeyManagerInterfaceId = "23f34c62".toBytes();
-  static final phygitalAssetInterfaceId = "f6021190".toBytes();
+  static final phygitalAssetInterfaceId = "ae8205e1".toBytes();
   static final phygitalAssetCollectionUriKey =
       "4eff76d745d12fd5e5f7b38e8f396dd0d099124739e69a289ca1faa7ebc53768"
           .toBytes();
