@@ -53,19 +53,17 @@ class IpfsClient extends ChangeNotifier {
 
   final Client _httpClient = Client();
 
-  Future<String?> uploadLSP4MetadataForPhygitals(LSP4Metadata lsp4metadata, List<PhygitalTag> phygitalTags) async {
+  Future<String?> uploadLSP4MetadataForPhygitals(
+      LSP4Metadata lsp4metadata, List<PhygitalTag> phygitalTags) async {
     MultipartRequest request = MultipartRequest("POST", pinFileEndpoint);
     request.headers.addAll(contentTypeMultipartFormData);
 
     List<int> metadataJson = utf8.encode(jsonEncode(lsp4metadata));
-    for(PhygitalTag phygitalTag in phygitalTags){
+    for (PhygitalTag phygitalTag in phygitalTags) {
       request.files.add(
-        MultipartFile.fromBytes(
-            "file",
-            metadataJson,
+        MultipartFile.fromBytes("file", metadataJson,
             contentType: MediaType.parse("application/json"),
-            filename: "/baseuri/${phygitalTag.id.toHexString()}"
-        ),
+            filename: "/baseuri/${phygitalTag.id.toHexString()}"),
       );
     }
 
@@ -122,11 +120,12 @@ class IpfsClient extends ChangeNotifier {
         return LSP4Image.fromImage(
             "$protocolPrefix$cid",
             Image(
-                bytes: bytes,
-                width: size.width,
-                height: size.height,
-                mediaType: contentType,
-                hash: hash));
+              bytes: bytes,
+              width: size.needRotate ? size.height : size.width,
+              height: size.needRotate ? size.width : size.height,
+              mediaType: contentType,
+              hash: hash,
+            ));
       }
     } catch (e) {
       if (kDebugMode) {
