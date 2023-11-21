@@ -95,9 +95,14 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
     FocusManager.instance.primaryFocus?.unfocus();
     try {
       PhygitalTag phygitalTag = await NFC().read();
-      setState(() {
-        _tags.add(phygitalTag);
-      });
+      if (!_tags.contains(phygitalTag)) {
+        setState(() {
+          _tags.add(phygitalTag);
+        });
+      } else {
+        showInfoDialog(
+            title: "Attention", text: "This phygital has already been added");
+      }
     } catch (e) {
       GlobalState().loadingWithText = null;
       showInfoDialog(
@@ -295,7 +300,9 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
             ),
             child: Form(
               key: _formKey,
-              autovalidateMode: triedToSubmit ? AutovalidateMode.onUserInteraction : AutovalidateMode.disabled,
+              autovalidateMode: triedToSubmit
+                  ? AutovalidateMode.onUserInteraction
+                  : AutovalidateMode.disabled,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.start,
