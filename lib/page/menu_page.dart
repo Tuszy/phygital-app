@@ -85,7 +85,12 @@ class _MenuPageState extends State<MenuPage> {
     if (GlobalState().universalProfile == null) return;
 
     scan(
-      onSuccess: (Phygital phygital) {
+      onSuccess: (Phygital phygital) async {
+        if (phygital.owner != null) {
+          await showInfoDialog(
+              title: "Result", text: getMessageForResult(Result.alreadyMinted));
+        }
+        if (!mounted) return;
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -123,7 +128,21 @@ class _MenuPageState extends State<MenuPage> {
     if (GlobalState().universalProfile == null) return;
 
     scan(
-      onSuccess: (Phygital phygital) {
+      onSuccess: (Phygital phygital) async {
+        if (phygital.owner == null) {
+          await showInfoDialog(
+              title: "Result", text: getMessageForResult(Result.notMintedYet));
+        } else if (phygital.owner!.address.hexEip55 !=
+            GlobalState().universalProfile!.address.hexEip55) {
+          await showInfoDialog(
+              title: "Result",
+              text: getMessageForResult(Result.invalidOwnership));
+        } else if (phygital.verifiedOwnership) {
+          await showInfoDialog(
+              title: "Result",
+              text: getMessageForResult(Result.alreadyVerifiedOwnership));
+        }
+        if (!mounted) return;
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -201,18 +220,39 @@ class _MenuPageState extends State<MenuPage> {
     if (GlobalState().universalProfile == null) return;
 
     scan(
-      onSuccess: (Phygital phygital) {
+      onSuccess: (Phygital phygital) async {
+        if (phygital.owner == null) {
+          await showInfoDialog(
+              title: "Result", text: getMessageForResult(Result.notMintedYet));
+        } else if (phygital.owner!.address.hexEip55 !=
+            GlobalState().universalProfile!.address.hexEip55) {
+          await showInfoDialog(
+              title: "Result",
+              text: getMessageForResult(Result.invalidOwnership));
+        } else if (!phygital.verifiedOwnership) {
+          await showInfoDialog(
+              title: "Result",
+              text: getMessageForResult(Result.unverifiedOwnership));
+        }
+        if (!mounted) return;
+
         Navigator.push(
           context,
           MaterialPageRoute(
             builder: (context) => PhygitalPage(
               layoutButtonData: LayoutButtonData(
-                text: phygital.owner == null
+                text: (phygital.owner == null
                     ? "NOT MINTED YET"
-                    : !phygital.verifiedOwnership
-                        ? "UNVERIFIED OWNER"
-                        : "TRANSFER",
-                disabled: phygital.owner == null || !phygital.verifiedOwnership,
+                    : (phygital.owner!.address.hexEip55 !=
+                            GlobalState().universalProfile!.address.hexEip55)
+                        ? "OTHER OWNER"
+                        : (!phygital.verifiedOwnership
+                            ? "UNVERIFIED OWNER"
+                            : "TRANSFER")),
+                disabled: phygital.owner == null ||
+                    phygital.owner!.address.hexEip55 !=
+                        GlobalState().universalProfile!.address.hexEip55 ||
+                    !phygital.verifiedOwnership,
                 onClick: () async {
                   UniversalProfile? toUniversalProfile =
                       await scanUniversalProfile();
