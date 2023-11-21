@@ -40,7 +40,7 @@ class BackendClient extends ChangeNotifier {
 
   Future<bool> verifyLoginToken({
     required EthereumAddress universalProfileAddress,
-    required String jwt,
+    String? jwt,
   }) async {
     var data = {"universal_profile_address": universalProfileAddress.hexEip55};
 
@@ -63,6 +63,9 @@ class BackendClient extends ChangeNotifier {
     };
     Response response = await _httpClient.post(mintEndpoint,
         headers: contentTypeApplicationJson(), body: json.encode(data));
+
+    if (response.statusCode == 401) return Result.authenticationSessionExpired;
+
     String jsonStringified = utf8.decode(response.bodyBytes);
     try {
       var jsonObject = json.decode(jsonStringified);
@@ -98,6 +101,9 @@ class BackendClient extends ChangeNotifier {
         verifyOwnershipAfterTransferEndpoint,
         headers: contentTypeApplicationJson(),
         body: json.encode(data));
+
+    if (response.statusCode == 401) return Result.authenticationSessionExpired;
+
     String jsonStringified = utf8.decode(response.bodyBytes);
     try {
       var jsonObject = json.decode(jsonStringified);
@@ -133,6 +139,9 @@ class BackendClient extends ChangeNotifier {
     };
     Response response = await _httpClient.post(transferEndpoint,
         headers: contentTypeApplicationJson(), body: json.encode(data));
+
+    if (response.statusCode == 401) return Result.authenticationSessionExpired;
+
     String jsonStringified = utf8.decode(response.bodyBytes);
     try {
       var jsonObject = json.decode(jsonStringified);
@@ -185,6 +194,10 @@ class BackendClient extends ChangeNotifier {
 
     Response response = await _httpClient.post(createEndpoint,
         headers: contentTypeApplicationJson(), body: json.encode(data));
+
+    if (response.statusCode == 401)
+      return (Result.authenticationSessionExpired, null);
+
     String jsonStringified = utf8.decode(response.bodyBytes);
     try {
       Map<String, dynamic> jsonObject = json.decode(jsonStringified);

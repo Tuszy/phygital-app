@@ -1,15 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:ndef/utilities.dart';
 import 'package:phygital/model/layout_button_data.dart';
 import 'package:phygital/page/create_collection_page.dart';
 import 'package:phygital/page/phygital_page.dart';
 import 'package:phygital/page/universal_profile_page.dart';
+import 'package:phygital/service/backend_client.dart';
 import 'package:phygital/service/custom_dialog.dart';
 import 'package:phygital/layout/standard_layout.dart';
 import 'package:phygital/service/blockchain/lukso_client.dart';
 import 'package:phygital/service/global_state.dart';
-import 'package:provider/provider.dart';
-import 'package:web3dart/credentials.dart';
 
 import '../component/button.dart';
 import '../model/lsp0/universal_profile.dart';
@@ -83,6 +81,16 @@ class _MenuPageState extends State<MenuPage> {
 
   Future<void> mint() async {
     if (GlobalState().universalProfile == null) return;
+    if (!await BackendClient().verifyLoginToken(
+        universalProfileAddress: GlobalState().universalProfile!.address)) {
+      await showInfoDialog(
+        title: "Login required",
+        text: getMessageForResult(Result.authenticationSessionExpired),
+      );
+      GlobalState().logout();
+      if (mounted) Navigator.popUntil(context, (route) => route.isFirst);
+      return;
+    }
 
     scan(
       onSuccess: (Phygital phygital) async {
@@ -104,6 +112,14 @@ class _MenuPageState extends State<MenuPage> {
                     title: "Result",
                     text: getMessageForResult(result),
                   );
+
+                  if (mounted &&
+                      Result.authenticationSessionExpired == result) {
+                    GlobalState().logout();
+                    Navigator.popUntil(context, (route) => route.isFirst);
+                    return;
+                  }
+
                   if (Result.mintSucceeded != result) return;
                   if (!mounted) return;
                   Navigator.pushReplacement(
@@ -126,6 +142,16 @@ class _MenuPageState extends State<MenuPage> {
 
   Future<void> verifyOwnershipAfterTransfer() async {
     if (GlobalState().universalProfile == null) return;
+    if (!await BackendClient().verifyLoginToken(
+        universalProfileAddress: GlobalState().universalProfile!.address)) {
+      await showInfoDialog(
+        title: "Login required",
+        text: getMessageForResult(Result.authenticationSessionExpired),
+      );
+      GlobalState().logout();
+      if (mounted) Navigator.popUntil(context, (route) => route.isFirst);
+      return;
+    }
 
     scan(
       onSuccess: (Phygital phygital) async {
@@ -166,6 +192,12 @@ class _MenuPageState extends State<MenuPage> {
                     title: "Result",
                     text: getMessageForResult(result),
                   );
+                  if (mounted &&
+                      Result.authenticationSessionExpired == result) {
+                    GlobalState().logout();
+                    Navigator.popUntil(context, (route) => route.isFirst);
+                    return;
+                  }
                   if (Result.ownershipVerificationSucceeded != result) return;
                   if (!mounted) return;
                   Navigator.pushReplacement(
@@ -218,6 +250,16 @@ class _MenuPageState extends State<MenuPage> {
 
   Future<void> transfer() async {
     if (GlobalState().universalProfile == null) return;
+    if (!await BackendClient().verifyLoginToken(
+        universalProfileAddress: GlobalState().universalProfile!.address)) {
+      await showInfoDialog(
+        title: "Login required",
+        text: getMessageForResult(Result.authenticationSessionExpired),
+      );
+      GlobalState().logout();
+      if (mounted) Navigator.popUntil(context, (route) => route.isFirst);
+      return;
+    }
 
     scan(
       onSuccess: (Phygital phygital) async {
@@ -281,6 +323,13 @@ class _MenuPageState extends State<MenuPage> {
                               title: "Result",
                               text: getMessageForResult(result),
                             );
+                            if (mounted &&
+                                Result.authenticationSessionExpired == result) {
+                              GlobalState().logout();
+                              Navigator.popUntil(
+                                  context, (route) => route.isFirst);
+                              return;
+                            }
                             if (Result.transferSucceeded != result) return;
                             if (!mounted) return;
                             Navigator.pushAndRemoveUntil(
@@ -309,6 +358,19 @@ class _MenuPageState extends State<MenuPage> {
   }
 
   Future<void> create() async {
+    if (GlobalState().universalProfile == null) return;
+    if (!await BackendClient().verifyLoginToken(
+        universalProfileAddress: GlobalState().universalProfile!.address)) {
+      await showInfoDialog(
+        title: "Login required",
+        text: getMessageForResult(Result.authenticationSessionExpired),
+      );
+      GlobalState().logout();
+      if (mounted) Navigator.popUntil(context, (route) => route.isFirst);
+      return;
+    }
+
+    if (!mounted) return;
     Navigator.push(
       context,
       MaterialPageRoute(

@@ -255,7 +255,11 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
             title: "Creation failed",
             text: getMessageForResult(result.$1),
           );
-          return;
+          if(mounted && Result.authenticationSessionExpired == result.$1){
+            GlobalState().logout();
+            Navigator.popUntil(context, (route) => route.isFirst);
+            return;
+          }
         }
       } catch (e) {
         GlobalState().loadingWithText = null;

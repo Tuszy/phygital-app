@@ -44,7 +44,9 @@ enum Result {
   assigningCollectionFailed,
 
   notInitialized,
-  unknownError
+  unknownError,
+
+  authenticationSessionExpired
 }
 
 String getMessageForResult(Result result){
@@ -53,7 +55,7 @@ String getMessageForResult(Result result){
 
     case Result.invalidPhygital: return "Invalid Phygital.";
 
-    case Result.invalidAppLoginQRCode: return "Invalid App Login QR Code.";
+    case Result.invalidAppLoginQRCode: return "Invalid or expired App Login QR Code.";
     case Result.invalidUniversalProfileAddress: return "Invalid Universal Profile.";
     case Result.invalidUniversalProfileData: return "Invalid Universal Profile Data.";
     case Result.invalidReceivingUniversalProfileAddress: return "Invalid receiving Universal Profile.";
@@ -95,6 +97,8 @@ String getMessageForResult(Result result){
 
     case Result.notInitialized: return "Lukso Client not initialized.\nRestart the app.";
     case Result.unknownError: return "Unknown error occurred.\nTry again.";
+
+    case Result.authenticationSessionExpired: return "Authentication session expired.";
   }
 }
 
