@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart';
 import 'package:ndef/utilities.dart';
+import 'package:phygital/service/global_state.dart';
 import 'package:phygital/service/ipfs_client.dart';
 import 'dart:convert';
 import 'package:web3dart/web3dart.dart';
@@ -15,10 +16,14 @@ class BackendClient extends ChangeNotifier {
   static const String backendUrl =
       "http://192.168.178.70:8888"; // TODO change after tests
 
-  static const contentTypeApplicationJson = {
-    "Content-Type": "application/json"
-  };
+  static contentTypeApplicationJson({String? jwt}) => {
+        "Content-Type": "application/json",
+        if (jwt != null || GlobalState().jwt != null)
+          "Authorization": "Bearer ${jwt ?? GlobalState().jwt}"
+      };
 
+  static final verifyLoginTokenEndpoint =
+      Uri.parse("$backendUrl/api/verify-token");
   static final mintEndpoint = Uri.parse("$backendUrl/api/mint");
   static final verifyOwnershipAfterTransferEndpoint =
       Uri.parse("$backendUrl/api/verify-ownership-after-transfer");
@@ -33,6 +38,18 @@ class BackendClient extends ChangeNotifier {
 
   final Client _httpClient = Client();
 
+  Future<bool> verifyLoginToken({
+    required EthereumAddress universalProfileAddress,
+    required String jwt,
+  }) async {
+    var data = {"universal_profile_address": universalProfileAddress.hexEip55};
+
+    Response response = await _httpClient.post(verifyLoginTokenEndpoint,
+        headers: contentTypeApplicationJson(jwt: jwt), body: json.encode(data));
+
+    return response.statusCode == 200;
+  }
+
   Future<Result> mint({
     required EthereumAddress universalProfileAddress,
     required String phygitalSignature,
@@ -45,7 +62,7 @@ class BackendClient extends ChangeNotifier {
       "phygital_signature": "0x$phygitalSignature"
     };
     Response response = await _httpClient.post(mintEndpoint,
-        headers: contentTypeApplicationJson, body: json.encode(data));
+        headers: contentTypeApplicationJson(), body: json.encode(data));
     String jsonStringified = utf8.decode(response.bodyBytes);
     try {
       var jsonObject = json.decode(jsonStringified);
@@ -79,7 +96,7 @@ class BackendClient extends ChangeNotifier {
     };
     Response response = await _httpClient.post(
         verifyOwnershipAfterTransferEndpoint,
-        headers: contentTypeApplicationJson,
+        headers: contentTypeApplicationJson(),
         body: json.encode(data));
     String jsonStringified = utf8.decode(response.bodyBytes);
     try {
@@ -115,7 +132,7 @@ class BackendClient extends ChangeNotifier {
       "phygital_signature": "0x$phygitalSignature"
     };
     Response response = await _httpClient.post(transferEndpoint,
-        headers: contentTypeApplicationJson, body: json.encode(data));
+        headers: contentTypeApplicationJson(), body: json.encode(data));
     String jsonStringified = utf8.decode(response.bodyBytes);
     try {
       var jsonObject = json.decode(jsonStringified);
@@ -167,7 +184,7 @@ class BackendClient extends ChangeNotifier {
     };
 
     Response response = await _httpClient.post(createEndpoint,
-        headers: contentTypeApplicationJson, body: json.encode(data));
+        headers: contentTypeApplicationJson(), body: json.encode(data));
     String jsonStringified = utf8.decode(response.bodyBytes);
     try {
       Map<String, dynamic> jsonObject = json.decode(jsonStringified);

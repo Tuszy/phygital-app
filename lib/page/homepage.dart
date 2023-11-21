@@ -83,25 +83,31 @@ class _HomepageState extends State<Homepage> {
     if (!mounted || scannedCode == null) return;
 
     GlobalState().loadingWithText = "Login...";
-    (Result, UniversalProfile?)? result = await QRCode().getUniversalProfile(
+    (Result, UniversalProfile?, String?)? result = await QRCode().getUniversalProfileWithJWT(
       scannedCode: scannedCode,
       validatePermissions: true,
     );
     if (Result.necessaryPermissionsNotSet == result.$1) {
       showQRCode(
           "Missing permissions.\nSet them on: $frontendUrl", frontendUrl);
+      GlobalState().logout();
+      GlobalState().loadingWithText = null;
+      return;
     } else if (Result.success != result.$1) {
       showInfoDialog(
         title: "Result",
         text: getMessageForResult(result.$1),
       );
+      GlobalState().logout();
+      GlobalState().loadingWithText = null;
+      return;
     }
 
-    GlobalState().universalProfile = result.$2;
+    GlobalState().login(result.$2!, result.$3!);
     GlobalState().loadingWithText = null;
   }
 
-  void logout() => GlobalState().universalProfile = null;
+  void logout() => GlobalState().logout();
 
   void showQRCode(String title, String data) {
     CustomDialog.showQrCode(

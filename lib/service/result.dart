@@ -3,6 +3,7 @@ enum Result {
 
   invalidPhygital,
 
+  invalidAppLoginQRCode,
   invalidUniversalProfileAddress,
   invalidUniversalProfileData,
   invalidReceivingUniversalProfileAddress,
@@ -52,6 +53,7 @@ String getMessageForResult(Result result){
 
     case Result.invalidPhygital: return "Invalid Phygital.";
 
+    case Result.invalidAppLoginQRCode: return "Invalid App Login QR Code.";
     case Result.invalidUniversalProfileAddress: return "Invalid Universal Profile.";
     case Result.invalidUniversalProfileData: return "Invalid Universal Profile Data.";
     case Result.invalidReceivingUniversalProfileAddress: return "Invalid receiving Universal Profile.";
