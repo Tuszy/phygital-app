@@ -94,6 +94,7 @@ class _StandardLayoutState extends State<StandardLayout>
                     builder: (BuildContext context,
                         BoxConstraints viewportConstraints) {
                       return SingleChildScrollView(
+                        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
                         child: ConstrainedBox(
                           constraints: BoxConstraints(
                             minHeight: viewportConstraints.maxHeight,

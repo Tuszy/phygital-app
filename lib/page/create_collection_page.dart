@@ -12,7 +12,6 @@ import 'package:phygital/model/lsp0/universal_profile.dart';
 import 'package:phygital/model/lsp4/lsp4_link.dart';
 import 'package:phygital/model/lsp4/lsp4_metadata.dart';
 import 'package:phygital/page/assign_collection_page.dart';
-import 'package:phygital/page/phygital_collection_page.dart';
 import 'package:phygital/service/blockchain/lukso_client.dart';
 import 'package:phygital/service/global_state.dart';
 import 'package:phygital/service/ipfs_client.dart';
@@ -46,6 +45,7 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
   final List<LinkController> _links = <LinkController>[];
   final List<PhygitalTag> _tags = <PhygitalTag>[];
 
+  bool triedToSubmit = false;
   bool disabled = false;
 
   @override
@@ -76,9 +76,12 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
   String? _onValidate(String name, String? value) =>
       value == null || value.isEmpty ? "The $name must not be empty" : null;
 
-  void _onAddLink() => setState(() {
-        _links.add(LinkController());
-      });
+  void _onAddLink() {
+    FocusManager.instance.primaryFocus?.unfocus();
+    setState(() {
+      _links.add(LinkController());
+    });
+  }
 
   void _onRemoveLink(int index) {
     if (index < 0 || index >= _links.length) return;
@@ -89,6 +92,7 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
   }
 
   Future<void> _onAddPhygitalTag() async {
+    FocusManager.instance.primaryFocus?.unfocus();
     try {
       PhygitalTag phygitalTag = await NFC().read();
       setState(() {
@@ -105,6 +109,7 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
 
   void _onRemovePhygitalTag(int index) {
     if (index < 0 || index >= _tags.length) return;
+    FocusManager.instance.primaryFocus?.unfocus();
     setState(() {
       _tags.removeAt(index);
     });
@@ -164,6 +169,11 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
   Future<void> _onCreate() async {
     if (GlobalState().universalProfile == null) return;
     UniversalProfile universalProfile = GlobalState().universalProfile!;
+
+    FocusManager.instance.primaryFocus?.unfocus();
+    setState(() {
+      triedToSubmit = true;
+    });
 
     GlobalState().loadingWithText = "Validating Form";
     if (_formKey.currentState!.validate()) {
@@ -285,7 +295,7 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
             ),
             child: Form(
               key: _formKey,
-              autovalidateMode: AutovalidateMode.onUserInteraction,
+              autovalidateMode: triedToSubmit ? AutovalidateMode.onUserInteraction : AutovalidateMode.disabled,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.start,

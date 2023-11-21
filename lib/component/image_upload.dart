@@ -233,6 +233,7 @@ class _ImageUploadState extends State<ImageUpload> {
                                 bottomLeft: Radius.circular(32)),
                             gradientColors: _backgroundGradientColors,
                             onPressed: () {
+                              FocusManager.instance.primaryFocus?.unfocus();
                               _onImageButtonPressed(ImageSource.gallery,
                                   context: context);
                             },
@@ -244,6 +245,7 @@ class _ImageUploadState extends State<ImageUpload> {
                                   bottomRight: Radius.circular(32)),
                               gradientColors: _backgroundGradientColors,
                               onPressed: () {
+                                FocusManager.instance.primaryFocus?.unfocus();
                                 _onImageButtonPressed(ImageSource.camera,
                                     context: context);
                               },
