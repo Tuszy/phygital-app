@@ -8,6 +8,7 @@ import 'package:phygital/model/phygital/phygital.dart';
 import 'package:phygital/model/phygital/phygital_collection.dart';
 import 'package:phygital/service/blockchain/lukso_client.dart';
 import 'package:phygital/service/global_state.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../page/phygital_collection_page.dart';
 import '../service/custom_dialog.dart';
@@ -50,6 +51,11 @@ class _PhygitalPreviewState extends State<PhygitalPreview> {
     return CustomDialog.showInfo(
         context: context, title: title, text: text, onPressed: () {});
   }
+
+  void _showOnUniversalPage() => launchUrl(
+        Uri.parse(
+            "https://universalpage.dev/collections/${widget.phygital.contractAddress.hexEip55}/0x${widget.phygital.id.toHexString()}"),
+      );
 
   @override
   Widget build(BuildContext context) {
@@ -96,6 +102,8 @@ class _PhygitalPreviewState extends State<PhygitalPreview> {
           PreviewSection(
             label: "Phygital ID",
             text: widget.phygital.id.toHexString(),
+            trailingLabel: "UniversalPage",
+            trailingAction: _showOnUniversalPage,
           ),
           if (widget.phygital.metadata.description.isNotEmpty)
             PreviewSection(

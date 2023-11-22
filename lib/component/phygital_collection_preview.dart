@@ -3,6 +3,7 @@ import 'package:phygital/component/image_preview_section.dart';
 import 'package:phygital/component/preview_section.dart';
 import 'package:phygital/component/viewable_link_list_section.dart';
 import 'package:phygital/component/viewable_universal_profile_list_section.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../model/phygital/phygital_collection.dart';
 
@@ -11,6 +12,11 @@ class PhygitalCollectionPreview extends StatelessWidget {
       {super.key, required this.phygitalCollection});
 
   final PhygitalCollection phygitalCollection;
+
+  void _showOnUniversalPage() => launchUrl(
+        Uri.parse(
+            "https://universalpage.dev/collections/${phygitalCollection.contractAddress}"),
+      );
 
   @override
   Widget build(BuildContext context) {
@@ -52,6 +58,8 @@ class PhygitalCollectionPreview extends StatelessWidget {
           PreviewSection(
             label: "Name",
             text: phygitalCollection.name,
+            trailingLabel: "UniversalPage",
+            trailingAction: _showOnUniversalPage,
           ),
           PreviewSection(
             label: "Symbol",
