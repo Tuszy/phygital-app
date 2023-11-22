@@ -63,7 +63,7 @@ class LuksoClient extends ChangeNotifier {
   ];
   static final List<Uint8List> necessaryPermissionValues = [
     // assign permissions to controller key
-    "0000000000000000000000000000000000000000000000000000000000040800"
+    "0000000000000000000000000000000000000000000000000000000000440800"
         .toBytes(),
     "002000000002ffffffffffffffffffffffffffffffffffffffffae8205e131646613002000000002ffffffffffffffffffffffffffffffffffffffffae8205e141b3d513002000000002ffffffffffffffffffffffffffffffffffffffffae8205e1511b6952"
         .toBytes(),
