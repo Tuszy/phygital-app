@@ -57,7 +57,7 @@ class _AssignCollectionPageState extends State<AssignCollectionPage> {
           _tags.remove(phygitalTagData);
           _assignedTags.add(phygitalTagData);
         });
-        print(_tags);
+
         GlobalState().loadingWithText = null;
         if (_tags.isNotEmpty) return;
         await showInfoDialog(
