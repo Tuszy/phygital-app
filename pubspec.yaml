@@ -53,6 +53,7 @@ dependencies:
       url: https://github.com/Tuszy/qr_code_scanner
   shared_preferences: ^2.2.2
   uuid: ^4.2.1
+  url_launcher: ^6.2.1
 
 dev_dependencies:
   flutter_test:
