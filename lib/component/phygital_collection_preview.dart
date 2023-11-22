@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:phygital/component/image_preview_section.dart';
 import 'package:phygital/component/preview_section.dart';
+import 'package:phygital/component/viewable_link_list_section.dart';
 
 import '../model/phygital/phygital_collection.dart';
 
@@ -71,11 +72,9 @@ class PhygitalCollectionPreview extends StatelessWidget {
               text: phygitalCollection.metadata.description,
             ),
           if (phygitalCollection.metadata.links.isNotEmpty)
-            PreviewSection(
+            ViewableLinkListSection(
               label: "Links",
-              text: phygitalCollection.metadata.links
-                  .map((link) => "- ${link.title}: ${link.url}")
-                  .join("\n"),
+              links: phygitalCollection.metadata.links,
             ),
           if (phygitalCollection.creators.isNotEmpty)
             PreviewSection(

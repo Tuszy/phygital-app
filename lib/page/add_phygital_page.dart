@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:ndef/utilities.dart';
 import 'package:phygital/component/attribute_list_section.dart';
 import 'package:phygital/component/image_upload_section.dart';
-import 'package:phygital/component/link_list_section.dart';
+import 'package:phygital/component/editable_link_list_section.dart';
 import 'package:phygital/component/phygital_list_section.dart';
 import 'package:phygital/component/text_input_section.dart';
 import 'package:phygital/layout/standard_layout.dart';
@@ -214,7 +214,7 @@ class _AddPhygitalPageState extends State<AddPhygitalPage> {
                     textEditingController: _descriptionController,
                     onValidate: _onValidate,
                   ),
-                  LinkListSection(
+                  EditableLinkListSection(
                     name: "links",
                     label: "Links",
                     onAdd: _onAddLink,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:phygital/component/image_preview.dart';
 import 'package:phygital/component/preview_section.dart';
+import 'package:phygital/component/viewable_link_list_section.dart';
 import 'package:phygital/model/lsp0/universal_profile.dart';
 import 'package:phygital/service/qr_code.dart';
 
@@ -23,8 +24,7 @@ class _UniversalProfilePreviewState extends State<UniversalProfilePreview> {
     CustomDialog.showQrCode(
       context: context,
       title: "Universal Profile Address",
-      data:
-          QRCode().createCodeFromAddress(widget.universalProfile.address),
+      data: QRCode().createCodeFromAddress(widget.universalProfile.address),
       onPressed: () {},
     );
   }
@@ -85,11 +85,9 @@ class _UniversalProfilePreviewState extends State<UniversalProfilePreview> {
             ),
           if (widget.universalProfile.links != null &&
               widget.universalProfile.links!.isNotEmpty)
-            PreviewSection(
+            ViewableLinkListSection(
               label: "Links",
-              text: widget.universalProfile.links!
-                  .map((link) => "- ${link.title}: ${link.url}")
-                  .join("\n"),
+              links: widget.universalProfile.links!,
             ),
         ],
       ),

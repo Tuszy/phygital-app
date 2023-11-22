@@ -26,8 +26,8 @@ class LinkController {
   }
 }
 
-class LinkListSection extends StatelessWidget {
-  const LinkListSection({
+class EditableLinkListSection extends StatelessWidget {
+  const EditableLinkListSection({
     super.key,
     required this.name,
     required this.label,
@@ -45,7 +45,9 @@ class LinkListSection extends StatelessWidget {
   final bool topBorder;
 
   String? onValidate(String name, String? value) =>
-      value == null || value.trim().isEmpty ? "The $name must not be empty" : null;
+      value == null || value.trim().isEmpty
+          ? "The $name must not be empty"
+          : null;
 
   @override
   Widget build(BuildContext context) {
@@ -56,8 +58,8 @@ class LinkListSection extends StatelessWidget {
       decoration: BoxDecoration(
         border: topBorder
             ? const Border(
-          top: BorderSide(width: 2, color: Colors.white38),
-        )
+                top: BorderSide(width: 2, color: Colors.white38),
+              )
             : null,
       ),
       child: Row(
@@ -89,60 +91,59 @@ class LinkListSection extends StatelessWidget {
                   ],
                 ),
                 ...links.indexed.map(
-                      ((int, LinkController) link) =>
-                      Container(
-                        key: Key(link.$2.id),
-                        margin: const EdgeInsets.only(top: 8),
-                        padding:
+                  ((int, LinkController) link) => Container(
+                    key: Key(link.$2.id),
+                    margin: const EdgeInsets.only(top: 8),
+                    padding:
                         const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
-                        decoration: BoxDecoration(
-                          color: const Color(0x22ffffff),
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(
-                            color: const Color(0x33ffffff),
-                          ),
-                        ),
-                        child: Column(
+                    decoration: BoxDecoration(
+                      color: const Color(0x22ffffff),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: const Color(0x33ffffff),
+                      ),
+                    ),
+                    child: Column(
+                      children: [
+                        Row(
                           children: [
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: Text(
-                                    "#${link.$1 + 1} Link",
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.w800,
-                                    ),
-                                  ),
+                            Expanded(
+                              child: Text(
+                                "#${link.$1 + 1} Link",
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w800,
                                 ),
-                                _Button(
-                                  name: "REMOVE",
-                                  onClick: () => onRemove(link.$1),
-                                ),
-                              ],
+                              ),
                             ),
-                            const SizedBox(
-                              height: 4,
+                            _Button(
+                              name: "REMOVE",
+                              onClick: () => onRemove(link.$1),
                             ),
-                            _TextInput(
-                              index: link.$1,
-                              name: "Title",
-                              onValidate: onValidate,
-                              textEditingController: link.$2.titleController,
-                            ),
-                            const SizedBox(
-                              height: 8,
-                            ),
-                            _TextInput(
-                              index: link.$1,
-                              name: "URL",
-                              onValidate: onValidate,
-                              textEditingController: link.$2.urlController,
-                            )
                           ],
                         ),
-                      ),
+                        const SizedBox(
+                          height: 4,
+                        ),
+                        _TextInput(
+                          index: link.$1,
+                          name: "Title",
+                          onValidate: onValidate,
+                          textEditingController: link.$2.titleController,
+                        ),
+                        const SizedBox(
+                          height: 8,
+                        ),
+                        _TextInput(
+                          index: link.$1,
+                          name: "URL",
+                          onValidate: onValidate,
+                          textEditingController: link.$2.urlController,
+                        )
+                      ],
+                    ),
+                  ),
                 ),
               ],
             ),

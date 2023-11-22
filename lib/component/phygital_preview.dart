@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:ndef/utilities.dart';
 import 'package:phygital/component/image_preview.dart';
 import 'package:phygital/component/preview_section.dart';
+import 'package:phygital/component/viewable_link_list_section.dart';
 import 'package:phygital/model/phygital/phygital.dart';
 import 'package:phygital/model/phygital/phygital_collection.dart';
 import 'package:phygital/service/blockchain/lukso_client.dart';
@@ -118,11 +119,9 @@ class _PhygitalPreviewState extends State<PhygitalPreview> {
                   .join("\n"),
             ),
           if (widget.phygital.metadata.links.isNotEmpty)
-            PreviewSection(
+            ViewableLinkListSection(
               label: "Links",
-              text: widget.phygital.metadata.links
-                  .map((link) => "- ${link.title}: ${link.url}")
-                  .join("\n"),
+              links: widget.phygital.metadata.links,
             ),
           if (widget.phygital.creators.isNotEmpty)
             PreviewSection(
