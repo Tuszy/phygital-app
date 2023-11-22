@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:phygital/component/image_preview_section.dart';
 import 'package:phygital/component/preview_section.dart';
 import 'package:phygital/component/viewable_link_list_section.dart';
+import 'package:phygital/component/viewable_universal_profile_list_section.dart';
 
 import '../model/phygital/phygital_collection.dart';
 
@@ -77,12 +78,11 @@ class PhygitalCollectionPreview extends StatelessWidget {
               links: phygitalCollection.metadata.links,
             ),
           if (phygitalCollection.creators.isNotEmpty)
-            PreviewSection(
-              label: "Creators",
-              text: phygitalCollection.creators
-                  .map((creator) => "- ${creator.formattedName}")
-                  .join("\n"),
-            )
+            if (phygitalCollection.creators.isNotEmpty)
+              ViewableUniversalProfileListSection(
+                label: "Creators",
+                universalProfiles: phygitalCollection.creators,
+              ),
         ],
       ),
     );

@@ -3,6 +3,7 @@ import 'package:ndef/utilities.dart';
 import 'package:phygital/component/image_preview.dart';
 import 'package:phygital/component/preview_section.dart';
 import 'package:phygital/component/viewable_link_list_section.dart';
+import 'package:phygital/component/viewable_universal_profile_list_section.dart';
 import 'package:phygital/model/phygital/phygital.dart';
 import 'package:phygital/model/phygital/phygital_collection.dart';
 import 'package:phygital/service/blockchain/lukso_client.dart';
@@ -101,15 +102,18 @@ class _PhygitalPreviewState extends State<PhygitalPreview> {
               label: "Description",
               text: widget.phygital.metadata.description,
             ),
-          PreviewSection(
-            label: "Owner",
-            trailingLabel: widget.phygital.owner != null
-                ? "${widget.phygital.verifiedOwnership ? "VERIFIED" : "UNVERIFIED"} OWNERSHIP"
-                : null,
-            text: widget.phygital.owner == null
-                ? "NOT MINTED YET"
-                : widget.phygital.owner!.formattedName,
-          ),
+          if (widget.phygital.owner != null)
+            ViewableUniversalProfileListSection(
+              label: "Owner",
+              universalProfiles: widget.phygital.creators,
+              trailingLabel:
+                  "${widget.phygital.verifiedOwnership ? "VERIFIED" : "UNVERIFIED"} OWNERSHIP",
+            ),
+          if (widget.phygital.owner == null)
+            const PreviewSection(
+              label: "Owner",
+              text: "NOT MINTED YET",
+            ),
           if (widget.phygital.metadata.attributes.isNotEmpty)
             PreviewSection(
               label: "Attributes",
@@ -124,12 +128,10 @@ class _PhygitalPreviewState extends State<PhygitalPreview> {
               links: widget.phygital.metadata.links,
             ),
           if (widget.phygital.creators.isNotEmpty)
-            PreviewSection(
+            ViewableUniversalProfileListSection(
               label: "Creators",
-              text: widget.phygital.creators
-                  .map((creator) => "- ${creator.formattedName}")
-                  .join("\n"),
-            )
+              universalProfiles: widget.phygital.creators,
+            ),
         ],
       ),
     );
