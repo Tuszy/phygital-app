@@ -7,10 +7,10 @@ typedef OnRemoveCallback = void Function(int);
 class AttributeController {
   static Uuid uuid = const Uuid();
 
-  AttributeController({String? key, String? value})
+  AttributeController({String? key, dynamic value})
       : id = uuid.v4(),
         keyController = TextEditingController(text: key),
-        valueController = TextEditingController(text: value);
+        valueController = TextEditingController(text: value.toString());
 
   final String id;
   final TextEditingController keyController;

@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:ndef/utilities.dart';
+import 'package:phygital/model/phygital/phygital_tag_data.dart';
 import 'package:pointycastle/api.dart';
 import 'package:web3dart/credentials.dart';
 
@@ -55,7 +56,9 @@ class PhygitalTag {
 
   @override
   bool operator ==(Object other) {
-    return other is PhygitalTag && tagId.hashCode == other.tagId.hashCode;
+    return (other is PhygitalTagData &&
+            tagId.hashCode == other.phygitalTag.tagId.hashCode) ||
+        (other is PhygitalTag && tagId.hashCode == other.tagId.hashCode);
   }
 
   @override

@@ -25,12 +25,12 @@ import '../model/lsp4/lsp4_image.dart';
 import '../model/phygital/phygital_tag.dart';
 import '../model/phygital/phygital_tag_data.dart';
 import '../service/custom_dialog.dart';
-import '../service/nfc.dart';
-import '../service/result.dart';
 
 class AddPhygitalPage extends StatefulWidget {
-  const AddPhygitalPage({super.key, required this.phygitalTag});
+  const AddPhygitalPage({super.key, required this.phygitalTag, required this.number, required this.name});
 
+  final int number;
+  final String name;
   final PhygitalTag phygitalTag;
 
   @override
@@ -42,13 +42,22 @@ typedef OnImageChangeCallback = void Function(File?);
 class _AddPhygitalPageState extends State<AddPhygitalPage> {
   final _formKey = GlobalKey<FormState>();
   File? _phygitalImage;
-  final TextEditingController _nameController = TextEditingController();
-  final TextEditingController _descriptionController = TextEditingController();
+  late final TextEditingController _nameController;
+  late final TextEditingController _descriptionController;
   final List<LinkController> _links = <LinkController>[];
-  final List<AttributeController> _attributes = <AttributeController>[];
+  late final List<AttributeController> _attributes;
 
   bool triedToSubmit = false;
   bool disabled = false;
+
+  @override
+  void initState() {
+    _nameController = TextEditingController(text: "${widget.name} #${widget.number}");
+    _descriptionController = TextEditingController(text: "${widget.name} #${widget.number}");
+    _attributes = <AttributeController>[AttributeController(key: "Number", value: widget.number)];
+
+    super.initState();
+  }
 
   @override
   void dispose() {

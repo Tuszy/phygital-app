@@ -20,4 +20,15 @@ class PhygitalTagData {
   final String description;
   final List<LSP4Link> links;
   final List<LSP4Attribute> attributes;
+
+  @override
+  bool operator ==(Object other) {
+    return (other is PhygitalTagData &&
+            phygitalTag.tagId.hashCode == other.phygitalTag.tagId.hashCode) ||
+        (other is PhygitalTag &&
+            phygitalTag.tagId.hashCode == other.tagId.hashCode);
+  }
+
+  @override
+  int get hashCode => phygitalTag.tagId.hashCode;
 }

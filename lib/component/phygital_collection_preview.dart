@@ -44,12 +44,6 @@ class PhygitalCollectionPreview extends StatelessWidget {
           if (metadata.icon != null)
             ImagePreviewSection(
                 image: metadata.icon!, label: "Icon", width: 200, height: 200),
-          if (metadata.image != null)
-            ImagePreviewSection(
-                image: metadata.image!,
-                label: "Phygital Image",
-                width: 200,
-                height: 200),
           if (metadata.backgroundImage != null)
             ImagePreviewSection(
                 image: metadata.backgroundImage!,

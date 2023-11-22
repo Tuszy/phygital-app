@@ -52,7 +52,6 @@ class _AssignCollectionPageState extends State<AssignCollectionPage> {
       if (phygitalTag != null) {
         PhygitalTagData phygitalTagData = _tags.firstWhere(
             (element) => element.phygitalTag.tagId == phygitalTag.tagId);
-        print(_tags);
         setState(() {
           _tags.remove(phygitalTagData);
           _assignedTags.add(phygitalTagData);

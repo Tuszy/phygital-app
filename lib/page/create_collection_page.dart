@@ -39,7 +39,6 @@ typedef OnImageChangeCallback = void Function(File?);
 class _CreateCollectionPageState extends State<CreateCollectionPage> {
   final _formKey = GlobalKey<FormState>();
   File? _icon;
-  File? _phygitalImage;
   File? _backgroundImage;
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _symbolController = TextEditingController();
@@ -65,10 +64,6 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
 
   void _onIconChange(File? newIcon) => setState(() {
         _icon = newIcon;
-      });
-
-  void _onImageChange(File? newImage) => setState(() {
-        _phygitalImage = newImage;
       });
 
   void _onBackgroundImageChange(File? newBackgroundImage) => setState(() {
@@ -103,7 +98,11 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
         PhygitalTagData? phygitalTagData = await Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => AddPhygitalPage(phygitalTag: phygitalTag),
+            builder: (context) => AddPhygitalPage(
+              number: _tags.length + 1,
+              name: _nameController.text.trim(),
+              phygitalTag: phygitalTag,
+            ),
           ),
         );
 
@@ -133,12 +132,10 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
     });
   }
 
-  Future<(LSP4Image, LSP4Image, LSP4Image)?> _validateAndUploadImages() async {
+  Future<(LSP4Image, LSP4Image)?> _validateAndUploadImages() async {
     String? error;
     if (_icon == null) {
       error = "Please upload the icon";
-    } else if (_phygitalImage == null) {
-      error = "Please upload the phygital image";
     } else if (_backgroundImage == null) {
       error = "Please upload the background image";
     }
@@ -159,13 +156,6 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
         throw "Failed to upload the icon";
       }
 
-      GlobalState().loadingWithText = "Uploading the phygital image to IPFS";
-      LSP4Image? phygitalImage = await IpfsClient().uploadImage(
-          "PhygitalAsset:PhygitalImage:$name:$symbol", _phygitalImage!);
-      if (phygitalImage == null) {
-        throw "Failed to upload the phygital image";
-      }
-
       GlobalState().loadingWithText = "Uploading the background image to IPFS";
       LSP4Image? backgroundImage = await IpfsClient().uploadImage(
           "PhygitalAsset:BackgroundImage:$name:$symbol", _backgroundImage!);
@@ -173,7 +163,7 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
         throw "Failed to upload the background image";
       }
 
-      return (icon, phygitalImage, backgroundImage);
+      return (icon, backgroundImage);
     } catch (e) {
       if (kDebugMode) {
         print("Uploading images failed ($e)");
@@ -204,8 +194,7 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
         return;
       }
 
-      (LSP4Image, LSP4Image, LSP4Image)? images =
-          await _validateAndUploadImages();
+      (LSP4Image, LSP4Image)? images = await _validateAndUploadImages();
       if (images == null) {
         GlobalState().loadingWithText = null;
         return;
@@ -229,9 +218,9 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
             .toList(),
         icons: [images.$1],
         images: [
-          [images.$2]
+          [images.$1]
         ],
-        backgroundImages: [images.$3],
+        backgroundImages: [images.$2],
         assets: [],
         attributes: [],
       );
@@ -258,7 +247,9 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
             context,
             MaterialPageRoute(
               builder: (context) => AssignCollectionPage(
-                  contractAddress: result.$2!, metadata: metadata, tags: _tags.toList()),
+                  contractAddress: result.$2!,
+                  metadata: metadata,
+                  tags: _tags.toList()),
             ),
             (var route) => route.settings.name == "menu",
           );
@@ -332,13 +323,6 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
                     height: 200,
                     onImageChange: _onIconChange,
                     topBorder: false,
-                  ),
-                  ImageUploadSection(
-                    name: "phygital image",
-                    label: "Phygital Image",
-                    width: 250,
-                    height: 250,
-                    onImageChange: _onImageChange,
                   ),
                   ImageUploadSection(
                     name: "backgroundImage",
