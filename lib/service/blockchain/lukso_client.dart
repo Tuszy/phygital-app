@@ -4,6 +4,7 @@ import 'package:http/http.dart';
 import 'package:ndef/utilities.dart';
 import 'package:phygital/model/lsp4/lsp4_metadata.dart';
 import 'package:phygital/model/phygital/phygital.dart';
+import 'package:phygital/model/phygital/phygital_tag_data.dart';
 import 'dart:convert';
 import 'package:phygital/service/backend_client.dart';
 import 'package:phygital/service/blockchain/contracts/LSP0ERC725Account.g.dart';
@@ -441,7 +442,7 @@ class LuksoClient extends ChangeNotifier {
     required EthereumAddress universalProfileAddress,
     required String name,
     required String symbol,
-    required List<PhygitalTag> phygitalCollection,
+    required List<PhygitalTagData> phygitalCollection,
     required LSP4Metadata metadata,
   }) async {
     Result validationResult = await validateUniversalProfilePermissions(

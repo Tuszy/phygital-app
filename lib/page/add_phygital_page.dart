@@ -3,15 +3,18 @@ import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:ndef/utilities.dart';
+import 'package:phygital/component/attribute_list_section.dart';
 import 'package:phygital/component/image_upload_section.dart';
 import 'package:phygital/component/link_list_section.dart';
 import 'package:phygital/component/phygital_list_section.dart';
 import 'package:phygital/component/text_input_section.dart';
 import 'package:phygital/layout/standard_layout.dart';
 import 'package:phygital/model/lsp0/universal_profile.dart';
+import 'package:phygital/model/lsp4/lsp4_attribute.dart';
 import 'package:phygital/model/lsp4/lsp4_link.dart';
 import 'package:phygital/model/lsp4/lsp4_metadata.dart';
-import 'package:phygital/page/add_phygital_page.dart';
+import 'package:phygital/model/phygital/phygital.dart';
 import 'package:phygital/page/assign_collection_page.dart';
 import 'package:phygital/service/blockchain/lukso_client.dart';
 import 'package:phygital/service/global_state.dart';
@@ -25,27 +28,24 @@ import '../service/custom_dialog.dart';
 import '../service/nfc.dart';
 import '../service/result.dart';
 
-class CreateCollectionPage extends StatefulWidget {
-  const CreateCollectionPage({
-    super.key,
-  });
+class AddPhygitalPage extends StatefulWidget {
+  const AddPhygitalPage({super.key, required this.phygitalTag});
+
+  final PhygitalTag phygitalTag;
 
   @override
-  State<StatefulWidget> createState() => _CreateCollectionPageState();
+  State<StatefulWidget> createState() => _AddPhygitalPageState();
 }
 
 typedef OnImageChangeCallback = void Function(File?);
 
-class _CreateCollectionPageState extends State<CreateCollectionPage> {
+class _AddPhygitalPageState extends State<AddPhygitalPage> {
   final _formKey = GlobalKey<FormState>();
-  File? _icon;
   File? _phygitalImage;
-  File? _backgroundImage;
   final TextEditingController _nameController = TextEditingController();
-  final TextEditingController _symbolController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
   final List<LinkController> _links = <LinkController>[];
-  final List<PhygitalTagData> _tags = <PhygitalTagData>[];
+  final List<AttributeController> _attributes = <AttributeController>[];
 
   bool triedToSubmit = false;
   bool disabled = false;
@@ -56,29 +56,22 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
       link.dispose();
     }
 
+    for (AttributeController attribute in _attributes) {
+      attribute.dispose();
+    }
+
     _nameController.dispose();
-    _symbolController.dispose();
     _descriptionController.dispose();
 
     super.dispose();
   }
 
-  void _onIconChange(File? newIcon) => setState(() {
-        _icon = newIcon;
-      });
-
   void _onImageChange(File? newImage) => setState(() {
         _phygitalImage = newImage;
       });
 
-  void _onBackgroundImageChange(File? newBackgroundImage) => setState(() {
-        _backgroundImage = newBackgroundImage;
-      });
-
   String? _onValidate(String name, String? value) =>
-      value == null || value.trim().isEmpty
-          ? "The $name must not be empty"
-          : null;
+      value == null || value.isEmpty ? "The $name must not be empty" : null;
 
   void _onAddLink() {
     FocusManager.instance.primaryFocus?.unfocus();
@@ -95,130 +88,43 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
     });
   }
 
-  Future<void> _onAddPhygitalTag() async {
-    FocusManager.instance.primaryFocus?.unfocus();
-    try {
-      PhygitalTag phygitalTag = await NFC().read();
-      if (!_tags.contains(phygitalTag) && mounted) {
-        PhygitalTagData? phygitalTagData = await Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => AddPhygitalPage(phygitalTag: phygitalTag),
-          ),
-        );
-
-        if (phygitalTagData != null) {
-          setState(() {
-            _tags.add(phygitalTagData);
-          });
-        }
-      } else {
-        showInfoDialog(
-            title: "Attention", text: "This phygital has already been added");
-      }
-    } catch (e) {
-      GlobalState().loadingWithText = null;
-      showInfoDialog(
-        title: "Result",
-        text: e.toString(),
-      );
-    }
-  }
-
-  void _onRemovePhygitalTag(int index) {
-    if (index < 0 || index >= _tags.length) return;
+  void _onAddAttribute() {
     FocusManager.instance.primaryFocus?.unfocus();
     setState(() {
-      _tags.removeAt(index);
+      _attributes.add(AttributeController());
     });
   }
 
-  Future<(LSP4Image, LSP4Image, LSP4Image)?> _validateAndUploadImages() async {
-    String? error;
-    if (_icon == null) {
-      error = "Please upload the icon";
-    } else if (_phygitalImage == null) {
-      error = "Please upload the phygital image";
-    } else if (_backgroundImage == null) {
-      error = "Please upload the background image";
-    }
-
-    if (error != null) {
-      showInfoDialog(title: "Incomplete Form", text: error);
-      return null;
-    }
-
-    String name = _nameController.text;
-    String symbol = _symbolController.text;
-
-    try {
-      GlobalState().loadingWithText = "Uploading the icon to IPFS";
-      LSP4Image? icon = await IpfsClient()
-          .uploadImage("PhygitalAsset:Icon:$name:$symbol", _icon!);
-      if (icon == null) {
-        throw "Failed to upload the icon";
-      }
-
-      GlobalState().loadingWithText = "Uploading the phygital image to IPFS";
-      LSP4Image? phygitalImage = await IpfsClient().uploadImage(
-          "PhygitalAsset:PhygitalImage:$name:$symbol", _phygitalImage!);
-      if (phygitalImage == null) {
-        throw "Failed to upload the phygital image";
-      }
-
-      GlobalState().loadingWithText = "Uploading the background image to IPFS";
-      LSP4Image? backgroundImage = await IpfsClient().uploadImage(
-          "PhygitalAsset:BackgroundImage:$name:$symbol", _backgroundImage!);
-      if (backgroundImage == null) {
-        throw "Failed to upload the background image";
-      }
-
-      return (icon, phygitalImage, backgroundImage);
-    } catch (e) {
-      if (kDebugMode) {
-        print("Uploading images failed ($e)");
-      }
-      showInfoDialog(title: "Image upload failed", text: e.toString());
-      GlobalState().loadingWithText = null;
-      return null;
-    }
+  void _onRemoveAttribute(int index) {
+    if (index < 0 || index >= _attributes.length) return;
+    _attributes[index].dispose();
+    setState(() {
+      _attributes.removeAt(index);
+    });
   }
 
-  Future<void> _onCreate() async {
-    if (GlobalState().universalProfile == null) return;
-    UniversalProfile universalProfile = GlobalState().universalProfile!;
-
+  Future<void> _onSubmit() async {
     FocusManager.instance.primaryFocus?.unfocus();
     setState(() {
       triedToSubmit = true;
     });
 
-    GlobalState().loadingWithText = "Validating Form";
     if (_formKey.currentState!.validate()) {
-      GlobalState().loadingWithText = "Validating Phygital list";
-      if (_tags.isEmpty) {
-        GlobalState().loadingWithText = null;
+      if (_phygitalImage == null) {
         showInfoDialog(
-            title: "Form Incomplete",
-            text: "You must add atleast one phygital to the collection.");
-        return;
-      }
-
-      (LSP4Image, LSP4Image, LSP4Image)? images =
-          await _validateAndUploadImages();
-      if (images == null) {
+            title: "Incomplete Form", text: "Please upload the phygital image");
         GlobalState().loadingWithText = null;
         return;
       }
 
       String name = _nameController.text;
-      String symbol = _symbolController.text;
       String description = _descriptionController.text;
 
-      LSP4Metadata metadata = LSP4Metadata(
+      PhygitalTagData phygitalTagData = PhygitalTagData(
+        phygitalTag: widget.phygitalTag,
+        phygitalImage: _phygitalImage!,
         name: name,
         description: description,
-        symbol: symbol,
         links: _links
             .map(
               (LinkController link) => LSP4Link(
@@ -227,65 +133,19 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
               ),
             )
             .toList(),
-        icons: [images.$1],
-        images: [
-          [images.$2]
-        ],
-        backgroundImages: [images.$3],
-        assets: [],
-        attributes: [],
+        attributes: _attributes
+            .map(
+              (AttributeController attribute) => LSP4Attribute(
+                key: attribute.key,
+                value: attribute.value,
+                type: attribute.type,
+              ),
+            )
+            .toList(),
       );
 
-      GlobalState().loadingWithText = "Deploying the collection";
-      try {
-        (Result, EthereumAddress?) result = await LuksoClient().create(
-          universalProfileAddress: universalProfile.address,
-          name: name,
-          symbol: symbol,
-          phygitalCollection: _tags,
-          metadata: metadata,
-        );
-
-        if (Result.createSucceeded == result.$1) {
-          GlobalState().loadingWithText = null;
-          await showInfoDialog(
-            title: "Creation succeeded",
-            text:
-                "Successfully created the collection. Now you need to assign the collection to the Phygitals.",
-          );
-          if (!mounted) return;
-          Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(
-              builder: (context) => AssignCollectionPage(
-                  contractAddress: result.$2!, metadata: metadata, tags: _tags.toList()),
-            ),
-            (var route) => route.settings.name == "menu",
-          );
-        } else {
-          GlobalState().loadingWithText = null;
-          showInfoDialog(
-            title: "Creation failed",
-            text: getMessageForResult(result.$1),
-          );
-          if (mounted && Result.authenticationSessionExpired == result.$1) {
-            GlobalState().logout();
-            Navigator.popUntil(context, (route) => route.isFirst);
-            return;
-          }
-        }
-      } catch (e) {
-        GlobalState().loadingWithText = null;
-        if (kDebugMode) {
-          print("Deploying Phygital contract failed ($e)");
-        }
-        showInfoDialog(
-          title: "Creation failed",
-          text: e.toString(),
-        );
-      }
+      Navigator.pop(context, phygitalTagData);
     }
-    GlobalState().loadingWithText = null;
   }
 
   Future<void> showInfoDialog(
@@ -297,7 +157,7 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
   @override
   Widget build(BuildContext context) {
     return StandardLayout(
-      title: "Create Collection",
+      title: "Add Phygital",
       child: Column(
         children: [
           Container(
@@ -326,37 +186,17 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   ImageUploadSection(
-                    name: "icon",
-                    label: "Icon",
-                    width: 200,
-                    height: 200,
-                    onImageChange: _onIconChange,
                     topBorder: false,
-                  ),
-                  ImageUploadSection(
                     name: "phygital image",
                     label: "Phygital Image",
                     width: 250,
                     height: 250,
                     onImageChange: _onImageChange,
                   ),
-                  ImageUploadSection(
-                    name: "backgroundImage",
-                    label: "Background Image",
-                    width: 250,
-                    height: 250,
-                    onImageChange: _onBackgroundImageChange,
-                  ),
                   TextInputSection(
                     name: "name",
                     label: "Name",
                     textEditingController: _nameController,
-                    onValidate: _onValidate,
-                  ),
-                  TextInputSection(
-                    name: "symbol",
-                    label: "Symbol",
-                    textEditingController: _symbolController,
                     onValidate: _onValidate,
                   ),
                   TextInputSection(
@@ -372,20 +212,20 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
                     onRemove: _onRemoveLink,
                     links: _links,
                   ),
-                  PhygitalListSection(
-                    name: "phygitals",
-                    label: "Phygitals",
-                    onAdd: _onAddPhygitalTag,
-                    onRemove: _onRemovePhygitalTag,
-                    phygitalTags: _tags,
-                  )
+                  AttributeListSection(
+                    name: "attributes",
+                    label: "Attributes",
+                    onAdd: _onAddAttribute,
+                    onRemove: _onRemoveAttribute,
+                    attributes: _attributes,
+                  ),
                 ],
               ),
             ),
           ),
           _SubmitButton(
             disabled: false,
-            onSubmit: _onCreate,
+            onSubmit: _onSubmit,
           )
         ],
       ),

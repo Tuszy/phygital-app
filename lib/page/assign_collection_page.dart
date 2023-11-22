@@ -7,6 +7,7 @@ import 'package:phygital/page/phygital_collection_page.dart';
 import 'package:web3dart/credentials.dart';
 
 import '../model/phygital/phygital_tag.dart';
+import '../model/phygital/phygital_tag_data.dart';
 import '../service/custom_dialog.dart';
 import '../service/global_state.dart';
 import '../service/nfc.dart';
@@ -21,21 +22,21 @@ class AssignCollectionPage extends StatefulWidget {
 
   final EthereumAddress contractAddress;
   final LSP4Metadata metadata;
-  final List<PhygitalTag> tags;
+  final List<PhygitalTagData> tags;
 
   @override
   State<StatefulWidget> createState() => _AssignCollectionPageState();
 }
 
 class _AssignCollectionPageState extends State<AssignCollectionPage> {
-  late final Set<PhygitalTag> _tags;
-  final Set<PhygitalTag> _assignedTags = <PhygitalTag>{};
+  late List<PhygitalTagData> _tags;
+  final List<PhygitalTagData> _assignedTags = <PhygitalTagData>[];
 
   @override
   void initState() {
     super.initState();
 
-    _tags = widget.tags.toSet();
+    _tags = widget.tags;
   }
 
   Future<void> _onAssignCollection() async {
@@ -43,15 +44,20 @@ class _AssignCollectionPageState extends State<AssignCollectionPage> {
       GlobalState().loadingWithText = "Assigning collection";
 
       PhygitalTag? phygitalTag = await NFC().setContractAddress(
-        phygitalTags: _tags,
+        phygitalTags:
+            _tags.map((phygitalTagData) => phygitalTagData.phygitalTag).toSet(),
         contractAddress: widget.contractAddress,
       );
 
       if (phygitalTag != null) {
+        PhygitalTagData phygitalTagData = _tags.firstWhere(
+            (element) => element.phygitalTag.tagId == phygitalTag.tagId);
+        print(_tags);
         setState(() {
-          _tags.remove(phygitalTag);
-          _assignedTags.add(phygitalTag);
+          _tags.remove(phygitalTagData);
+          _assignedTags.add(phygitalTagData);
         });
+        print(_tags);
         GlobalState().loadingWithText = null;
         if (_tags.isNotEmpty) return;
         await showInfoDialog(

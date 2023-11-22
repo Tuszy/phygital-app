@@ -4,36 +4,54 @@ import 'package:uuid/uuid.dart';
 typedef OnAddCallback = void Function();
 typedef OnRemoveCallback = void Function(int);
 
-class LinkController {
+class AttributeController {
   static Uuid uuid = const Uuid();
 
-  LinkController({String? title, String? url})
+  AttributeController({String? key, String? value})
       : id = uuid.v4(),
-        titleController = TextEditingController(text: title),
-        urlController = TextEditingController(text: url);
+        keyController = TextEditingController(text: key),
+        valueController = TextEditingController(text: value);
 
   final String id;
-  final TextEditingController titleController;
-  final TextEditingController urlController;
+  final TextEditingController keyController;
+  final TextEditingController valueController;
 
-  String get title => titleController.text;
+  String get key => keyController.text.trim();
 
-  String get url => urlController.text;
+  dynamic get value {
+    String trimmedValue = valueController.text.trim();
+    if (_isNumeric(trimmedValue)) return double.parse(trimmedValue);
+    if (_isBool(trimmedValue)) return bool.parse(trimmedValue, caseSensitive: false);
+
+    return trimmedValue;
+  }
+
+  String get type {
+    String trimmedValue = valueController.text.trim();
+    if (_isNumeric(trimmedValue)) return "number";
+    if (_isBool(trimmedValue)) return "boolean";
+
+    return "string";
+  }
+
+  bool _isNumeric(String s) => double.tryParse(s) != null;
+
+  bool _isBool(String s) => bool.tryParse(s, caseSensitive: false) != null;
 
   void dispose() {
-    titleController.dispose();
-    urlController.dispose();
+    keyController.dispose();
+    valueController.dispose();
   }
 }
 
-class LinkListSection extends StatelessWidget {
-  const LinkListSection({
+class AttributeListSection extends StatelessWidget {
+  const AttributeListSection({
     super.key,
     required this.name,
     required this.label,
     required this.onAdd,
     required this.onRemove,
-    required this.links,
+    required this.attributes,
     this.topBorder = true,
   });
 
@@ -41,11 +59,13 @@ class LinkListSection extends StatelessWidget {
   final String label;
   final OnAddCallback onAdd;
   final OnRemoveCallback onRemove;
-  final List<LinkController> links;
+  final List<AttributeController> attributes;
   final bool topBorder;
 
   String? onValidate(String name, String? value) =>
-      value == null || value.trim().isEmpty ? "The $name must not be empty" : null;
+      value == null || value.trim().isEmpty
+          ? "The $name must not be empty"
+          : null;
 
   @override
   Widget build(BuildContext context) {
@@ -56,8 +76,8 @@ class LinkListSection extends StatelessWidget {
       decoration: BoxDecoration(
         border: topBorder
             ? const Border(
-          top: BorderSide(width: 2, color: Colors.white38),
-        )
+                top: BorderSide(width: 2, color: Colors.white38),
+              )
             : null,
       ),
       child: Row(
@@ -88,61 +108,60 @@ class LinkListSection extends StatelessWidget {
                     ),
                   ],
                 ),
-                ...links.indexed.map(
-                      ((int, LinkController) link) =>
-                      Container(
-                        key: Key(link.$2.id),
-                        margin: const EdgeInsets.only(top: 8),
-                        padding:
+                ...attributes.indexed.map(
+                  ((int, AttributeController) attribute) => Container(
+                    key: Key(attribute.$2.id),
+                    margin: const EdgeInsets.only(top: 8),
+                    padding:
                         const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
-                        decoration: BoxDecoration(
-                          color: const Color(0x22ffffff),
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(
-                            color: const Color(0x33ffffff),
-                          ),
-                        ),
-                        child: Column(
+                    decoration: BoxDecoration(
+                      color: const Color(0x22ffffff),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: const Color(0x33ffffff),
+                      ),
+                    ),
+                    child: Column(
+                      children: [
+                        Row(
                           children: [
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: Text(
-                                    "#${link.$1 + 1} Link",
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.w800,
-                                    ),
-                                  ),
+                            Expanded(
+                              child: Text(
+                                "#${attribute.$1 + 1} Attribute",
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w800,
                                 ),
-                                _Button(
-                                  name: "REMOVE",
-                                  onClick: () => onRemove(link.$1),
-                                ),
-                              ],
+                              ),
                             ),
-                            const SizedBox(
-                              height: 4,
+                            _Button(
+                              name: "REMOVE",
+                              onClick: () => onRemove(attribute.$1),
                             ),
-                            _TextInput(
-                              index: link.$1,
-                              name: "Title",
-                              onValidate: onValidate,
-                              textEditingController: link.$2.titleController,
-                            ),
-                            const SizedBox(
-                              height: 8,
-                            ),
-                            _TextInput(
-                              index: link.$1,
-                              name: "URL",
-                              onValidate: onValidate,
-                              textEditingController: link.$2.urlController,
-                            )
                           ],
                         ),
-                      ),
+                        const SizedBox(
+                          height: 4,
+                        ),
+                        _TextInput(
+                          index: attribute.$1,
+                          name: "Key",
+                          onValidate: onValidate,
+                          textEditingController: attribute.$2.keyController,
+                        ),
+                        const SizedBox(
+                          height: 8,
+                        ),
+                        _TextInput(
+                          index: attribute.$1,
+                          name: "Value",
+                          onValidate: onValidate,
+                          textEditingController: attribute.$2.valueController,
+                        )
+                      ],
+                    ),
+                  ),
                 ),
               ],
             ),

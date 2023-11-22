@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-
-import '../model/phygital/phygital_tag.dart';
+import 'package:phygital/model/phygital/phygital_tag_data.dart';
 
 class PhygitalAssignmentListSection extends StatelessWidget {
   const PhygitalAssignmentListSection({
@@ -12,7 +11,7 @@ class PhygitalAssignmentListSection extends StatelessWidget {
   });
 
   final String label;
-  final List<PhygitalTag> phygitalTags;
+  final List<PhygitalTagData> phygitalTags;
   final bool topBorder;
   final VoidCallback onAssign;
 
@@ -58,7 +57,7 @@ class PhygitalAssignmentListSection extends StatelessWidget {
                   ],
                 ),
                 ...phygitalTags.indexed.map(
-                  ((int, PhygitalTag) phygitalTag) => Container(
+                  ((int, PhygitalTagData) phygitalTag) => Container(
                     margin: const EdgeInsets.only(top: 8),
                     padding:
                         const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
@@ -72,7 +71,7 @@ class PhygitalAssignmentListSection extends StatelessWidget {
                     child: Column(
                       children: [
                         Text(
-                          phygitalTag.$2.address.hexEip55,
+                          phygitalTag.$2.phygitalTag.address.hexEip55,
                           style: const TextStyle(
                               color: Colors.white,
                               fontSize: 10,

@@ -13,8 +13,10 @@ import 'package:phygital/model/image.dart';
 import 'package:phygital/model/lsp4/lsp4_image.dart';
 import 'package:mime/mime.dart';
 import 'package:phygital/model/lsp4/lsp4_metadata.dart';
+import 'package:phygital/model/lsp4/lsp4_verification.dart';
 
 import '../model/phygital/phygital_tag.dart';
+import '../model/phygital/phygital_tag_data.dart';
 import '../util/lsp2_utils.dart';
 
 class IpfsClient extends ChangeNotifier {
@@ -53,31 +55,113 @@ class IpfsClient extends ChangeNotifier {
 
   final Client _httpClient = Client();
 
-  Future<String?> uploadLSP4MetadataForPhygitals(
-      LSP4Metadata lsp4metadata, List<PhygitalTag> phygitalTags) async {
-    MultipartRequest request = MultipartRequest("POST", pinFileEndpoint);
-    request.headers.addAll(contentTypeMultipartFormData);
-
-    List<int> metadataJson = utf8.encode(jsonEncode(lsp4metadata));
-    for (PhygitalTag phygitalTag in phygitalTags) {
-      request.files.add(
-        MultipartFile.fromBytes("file", metadataJson,
-            contentType: MediaType.parse("application/json"),
-            filename: "/baseuri/${phygitalTag.id.toHexString()}"),
+  Future<String?> uploadLSP4MetadataAndImagesForPhygitals(
+      LSP4Metadata lsp4metadata,
+      List<PhygitalTagData> phygitalTagsWithData) async {
+    MultipartRequest imageUploadRequest =
+        MultipartRequest("POST", pinFileEndpoint);
+    imageUploadRequest.headers.addAll(contentTypeMultipartFormData);
+    Map<String, Uint8List> imageAsBytes = {};
+    for (PhygitalTagData phygitalTagData in phygitalTagsWithData) {
+      imageAsBytes[phygitalTagData.phygitalTag.tagId] =
+          await phygitalTagData.phygitalImage.readAsBytes();
+      imageUploadRequest.files.add(
+        MultipartFile.fromBytes(
+          "file",
+          imageAsBytes[phygitalTagData.phygitalTag.tagId]!,
+          filename: "/image/${phygitalTagData.phygitalTag.id.toHexString()}",
+        ),
       );
     }
 
-    StreamedResponse response = await _httpClient.send(request);
-    Uint8List responseBodyBytes = await response.stream.toBytes();
+    StreamedResponse imageUploadResponse =
+        await _httpClient.send(imageUploadRequest);
+    Uint8List imageUploadResponseBodyBytes =
+        await imageUploadResponse.stream.toBytes();
 
-    String jsonResponseStringified = utf8.decode(responseBodyBytes);
+    String imageJsonResponseStringified =
+        utf8.decode(imageUploadResponseBodyBytes);
+
+    String? imageBaseUri;
+    Map<String, LSP4Image> images = {};
     try {
-      Map<String, dynamic> jsonObject = json.decode(jsonResponseStringified);
+      Map<String, dynamic> jsonObject =
+          json.decode(imageJsonResponseStringified);
+      if (kDebugMode) {
+        print(
+            "Upload LSP4 token id image for phygitals to ipfs response: $jsonObject");
+      }
+      if (imageUploadResponse.statusCode == 200 &&
+          jsonObject.containsKey(ipfsHashKey)) {
+        imageBaseUri = "$protocolPrefix${jsonObject[ipfsHashKey] as String}/";
+        for (PhygitalTagData phygitalTagData in phygitalTagsWithData) {
+          Size size =
+              ImageSizeGetter.getSize(FileInput(phygitalTagData.phygitalImage));
+          Uint8List hash = LSP2Utils()
+              .hashBytes(imageAsBytes[phygitalTagData.phygitalTag.tagId]!);
+          images[phygitalTagData.phygitalTag.tagId] = LSP4Image(
+            width: size.needRotate ? size.height : size.width,
+            height: size.needRotate ? size.width : size.height,
+            url: "$imageBaseUri${phygitalTagData.phygitalTag.id.toHexString()}",
+            verification: LSP4Verification(data: "0x${hash.toHexString()}"),
+          );
+        }
+      } else {
+        return null;
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print(
+            "Error while parsing LSP4 token id image upload for phygitals ipfs response: $e");
+      }
+      return null;
+    }
+
+    MultipartRequest metadataUploadRequest =
+        MultipartRequest("POST", pinFileEndpoint);
+    metadataUploadRequest.headers.addAll(contentTypeMultipartFormData);
+    for (PhygitalTagData phygitalTagData in phygitalTagsWithData) {
+      List<int> lsp4MetadataForPhygital = utf8.encode(
+        jsonEncode(
+          LSP4Metadata(
+            name: phygitalTagData.name,
+            description: phygitalTagData.description,
+            links: phygitalTagData.links,
+            icons: lsp4metadata.icons,
+            images: [[images[phygitalTagData.phygitalTag.tagId]!]],
+            backgroundImages: lsp4metadata.backgroundImages,
+            assets: [],
+            attributes: phygitalTagData.attributes,
+          ),
+        ),
+      );
+
+      metadataUploadRequest.files.add(
+        MultipartFile.fromBytes(
+          "file",
+          lsp4MetadataForPhygital,
+          contentType: MediaType.parse("application/json"),
+          filename: "/baseuri/${phygitalTagData.phygitalTag.id.toHexString()}",
+        ),
+      );
+    }
+
+    StreamedResponse metadataUploadResponse =
+        await _httpClient.send(metadataUploadRequest);
+    Uint8List metadataUploadResponseBodyBytes =
+        await metadataUploadResponse.stream.toBytes();
+
+    String metadataUploadJsonResponseStringified =
+        utf8.decode(metadataUploadResponseBodyBytes);
+    try {
+      Map<String, dynamic> jsonObject =
+          json.decode(metadataUploadJsonResponseStringified);
       if (kDebugMode) {
         print(
             "Upload LSP4 token id metadata for phygitals to ipfs response: $jsonObject");
       }
-      if (response.statusCode == 200 && jsonObject.containsKey(ipfsHashKey)) {
+      if (metadataUploadResponse.statusCode == 200 &&
+          jsonObject.containsKey(ipfsHashKey)) {
         return "$protocolPrefix${jsonObject[ipfsHashKey] as String}/";
       }
     } catch (e) {

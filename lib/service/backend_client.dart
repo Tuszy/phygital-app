@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart';
 import 'package:ndef/utilities.dart';
+import 'package:phygital/model/phygital/phygital_tag_data.dart';
 import 'package:phygital/service/global_state.dart';
 import 'package:phygital/service/ipfs_client.dart';
 import 'dart:convert';
@@ -166,7 +167,7 @@ class BackendClient extends ChangeNotifier {
     required EthereumAddress universalProfileAddress,
     required String name,
     required String symbol,
-    required List<PhygitalTag> phygitalCollection,
+    required List<PhygitalTagData> phygitalCollection,
     required LSP4Metadata metadata,
   }) async {
     (String, String)? uploadedMetadataResult = await metadata.uploadToIpfs(
@@ -178,7 +179,7 @@ class BackendClient extends ChangeNotifier {
     }
 
     String? baseUri = await IpfsClient()
-        .uploadLSP4MetadataForPhygitals(metadata, phygitalCollection);
+        .uploadLSP4MetadataAndImagesForPhygitals(metadata, phygitalCollection);
     if (baseUri == null) return (Result.uploadingLSP4MetadataFailed, null);
 
     var data = {
@@ -186,7 +187,7 @@ class BackendClient extends ChangeNotifier {
       "name": name,
       "symbol": symbol,
       "phygital_collection": phygitalCollection
-          .map((PhygitalTag phygitalTag) => phygitalTag.address.hexEip55)
+          .map((PhygitalTagData phygitalTagData) => phygitalTagData.phygitalTag.address.hexEip55)
           .toList(),
       "metadata": uploadedMetadataResult.$2,
       "base_uri": baseUri
@@ -195,8 +196,9 @@ class BackendClient extends ChangeNotifier {
     Response response = await _httpClient.post(createEndpoint,
         headers: contentTypeApplicationJson(), body: json.encode(data));
 
-    if (response.statusCode == 401)
+    if (response.statusCode == 401) {
       return (Result.authenticationSessionExpired, null);
+    }
 
     String jsonStringified = utf8.decode(response.bodyBytes);
     try {

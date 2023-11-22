@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../model/phygital/phygital_tag.dart';
+import '../model/phygital/phygital_tag_data.dart';
 
 typedef OnAddCallback = void Function();
 typedef OnRemoveCallback = void Function(int);
@@ -20,7 +20,7 @@ class PhygitalListSection extends StatelessWidget {
   final String label;
   final OnAddCallback onAdd;
   final OnRemoveCallback onRemove;
-  final List<PhygitalTag> phygitalTags;
+  final List<PhygitalTagData> phygitalTags;
   final bool topBorder;
 
   @override
@@ -59,13 +59,13 @@ class PhygitalListSection extends StatelessWidget {
                       ),
                     ),
                     _Button(
-                      name: "ADD PHYGITAL",
+                      name: "ADD",
                       onClick: onAdd,
                     ),
                   ],
                 ),
                 ...phygitalTags.indexed.map(
-                  ((int, PhygitalTag) phygitalTag) => Container(
+                  ((int, PhygitalTagData) phygitalTagData) => Container(
                     margin: const EdgeInsets.only(top: 8),
                     padding:
                         const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
@@ -82,7 +82,7 @@ class PhygitalListSection extends StatelessWidget {
                           children: [
                             Expanded(
                               child: Text(
-                                "#${phygitalTag.$1 + 1} Phygital",
+                                "#${phygitalTagData.$1 + 1} Phygital",
                                 style: const TextStyle(
                                   color: Colors.white,
                                   fontSize: 18,
@@ -92,7 +92,7 @@ class PhygitalListSection extends StatelessWidget {
                             ),
                             _Button(
                               name: "REMOVE",
-                              onClick: () => onRemove(phygitalTag.$1),
+                              onClick: () => onRemove(phygitalTagData.$1),
                             ),
                           ],
                         ),
@@ -100,13 +100,12 @@ class PhygitalListSection extends StatelessWidget {
                           height: 4,
                         ),
                         Text(
-                          phygitalTag.$2.address.hexEip55,
+                          phygitalTagData.$2.phygitalTag.address.hexEip55,
                           style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 10,
-                            fontWeight: FontWeight.w600,
-                            letterSpacing: 0.7
-                          ),
+                              color: Colors.white,
+                              fontSize: 10,
+                              fontWeight: FontWeight.w600,
+                              letterSpacing: 0.7),
                         )
                       ],
                     ),
