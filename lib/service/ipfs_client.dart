@@ -55,8 +55,7 @@ class IpfsClient extends ChangeNotifier {
 
   final Client _httpClient = Client();
 
-  Future<String?> uploadLSP4MetadataAndImagesForPhygitals(
-      LSP4Metadata lsp4metadata,
+  Future<Map<String, LSP4Image>?> _uploadPhygitalTagImages(
       List<PhygitalTagData> phygitalTagsWithData) async {
     MultipartRequest imageUploadRequest =
         MultipartRequest("POST", pinFileEndpoint);
@@ -79,14 +78,11 @@ class IpfsClient extends ChangeNotifier {
     Uint8List imageUploadResponseBodyBytes =
         await imageUploadResponse.stream.toBytes();
 
-    String imageJsonResponseStringified =
-        utf8.decode(imageUploadResponseBodyBytes);
-
     String? imageBaseUri;
     Map<String, LSP4Image> images = {};
     try {
       Map<String, dynamic> jsonObject =
-          json.decode(imageJsonResponseStringified);
+          json.decode(utf8.decode(imageUploadResponseBodyBytes));
       if (kDebugMode) {
         print(
             "Upload LSP4 token id image for phygitals to ipfs response: $jsonObject");
@@ -106,17 +102,24 @@ class IpfsClient extends ChangeNotifier {
             verification: LSP4Verification(data: "0x${hash.toHexString()}"),
           );
         }
-      } else {
-        return null;
+
+        return images;
       }
     } catch (e) {
       if (kDebugMode) {
         print(
             "Error while parsing LSP4 token id image upload for phygitals ipfs response: $e");
       }
-      return null;
     }
 
+    return null;
+  }
+
+  Future<String?> _uploadPhygitalTagMetadata(
+    LSP4Metadata collectionMetadata,
+    List<PhygitalTagData> phygitalTagsWithData,
+    Map<String, LSP4Image> images,
+  ) async {
     MultipartRequest metadataUploadRequest =
         MultipartRequest("POST", pinFileEndpoint);
     metadataUploadRequest.headers.addAll(contentTypeMultipartFormData);
@@ -127,9 +130,11 @@ class IpfsClient extends ChangeNotifier {
             name: phygitalTagData.name,
             description: phygitalTagData.description,
             links: phygitalTagData.links,
-            icons: lsp4metadata.icons,
-            images: [[images[phygitalTagData.phygitalTag.tagId]!]],
-            backgroundImages: lsp4metadata.backgroundImages,
+            icons: collectionMetadata.icons,
+            images: [
+              [images[phygitalTagData.phygitalTag.tagId]!]
+            ],
+            backgroundImages: collectionMetadata.backgroundImages,
             assets: [],
             attributes: phygitalTagData.attributes,
           ),
@@ -174,6 +179,17 @@ class IpfsClient extends ChangeNotifier {
     return null;
   }
 
+  Future<String?> uploadLSP4MetadataAndImagesForPhygitals(
+      LSP4Metadata collectionMetadata,
+      List<PhygitalTagData> phygitalTagsWithData) async {
+    Map<String, LSP4Image>? images =
+        await _uploadPhygitalTagImages(phygitalTagsWithData);
+    if (images == null) return null;
+
+    return await _uploadPhygitalTagMetadata(
+        collectionMetadata, phygitalTagsWithData, images);
+  }
+
   Future<LSP4Image?> uploadImage(String name, File file) async {
     String? mimeType = lookupMimeType(file.path);
     MediaType? contentType =
@@ -192,10 +208,9 @@ class IpfsClient extends ChangeNotifier {
 
     StreamedResponse response = await _httpClient.send(request);
     Uint8List responseBodyBytes = await response.stream.toBytes();
-
-    String jsonResponseStringified = utf8.decode(responseBodyBytes);
     try {
-      Map<String, dynamic> jsonObject = json.decode(jsonResponseStringified);
+      Map<String, dynamic> jsonObject =
+          json.decode(utf8.decode(responseBodyBytes));
       if (kDebugMode) {
         print("Upload image to ipfs response: $jsonObject");
       }
