@@ -68,15 +68,16 @@ class PhygitalAssignmentListSection extends StatelessWidget {
                         color: const Color(0x33ffffff),
                       ),
                     ),
-                    child: Column(
+                    child: Row(
                       children: [
                         Text(
                           phygitalTag.$2.phygitalTag.address.hexEip55,
                           style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 10,
-                              fontWeight: FontWeight.w600,
-                              letterSpacing: 0.7),
+                            color: Colors.white,
+                            fontSize: 9,
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: 0.7,
+                          ),
                         )
                       ],
                     ),

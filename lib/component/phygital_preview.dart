@@ -3,11 +3,51 @@ import 'package:ndef/utilities.dart';
 import 'package:phygital/component/image_preview.dart';
 import 'package:phygital/component/preview_section.dart';
 import 'package:phygital/model/phygital/phygital.dart';
+import 'package:phygital/model/phygital/phygital_collection.dart';
+import 'package:phygital/service/blockchain/lukso_client.dart';
+import 'package:phygital/service/global_state.dart';
 
-class PhygitalPreview extends StatelessWidget {
+import '../page/phygital_collection_page.dart';
+import '../service/custom_dialog.dart';
+import '../service/result.dart';
+
+class PhygitalPreview extends StatefulWidget {
   const PhygitalPreview({super.key, required this.phygital});
 
   final Phygital phygital;
+
+  @override
+  State<StatefulWidget> createState() => _PhygitalPreviewState();
+}
+
+class _PhygitalPreviewState extends State<PhygitalPreview> {
+  Future<void> _showPhygitalCollection() async {
+    GlobalState().loadingWithText = "Fetching Phygital Collection Data";
+    (Result, PhygitalCollection?) result = await LuksoClient()
+        .fetchPhygitalCollectionData(
+            contractAddress: widget.phygital.contractAddress);
+    GlobalState().loadingWithText = null;
+
+    if (result.$2 == null) {
+      showInfoDialog(title: "Result", text: getMessageForResult(result.$1));
+      return;
+    }
+
+    if (!mounted) return;
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => PhygitalCollectionPage(
+            phygitalCollection: result.$2!,
+          ),
+        ));
+  }
+
+  Future<void> showInfoDialog(
+      {required String title, required String text}) async {
+    return CustomDialog.showInfo(
+        context: context, title: title, text: text, onPressed: () {});
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,46 +72,62 @@ class PhygitalPreview extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            phygital.name,
+            widget.phygital.metadata.name,
             style: const TextStyle(
               color: Colors.white,
               fontSize: 28,
               fontWeight: FontWeight.w800,
             ),
           ),
-          if (phygital.metadata.image != null)
+          if (widget.phygital.metadata.image != null)
             ImagePreview(
-              image: phygital.metadata.image!,
+              image: widget.phygital.metadata.image!,
               width: 200,
               height: 200,
             ),
-          Text(
-            "\$${phygital.symbol}",
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 22,
-              fontWeight: FontWeight.w800,
-            ),
-          ),
           PreviewSection(
-            label: "Contract Address",
-            text: phygital.contractAddress.hexEip55,
+            label: "Collection",
+            text: widget.phygital.name,
+            trailingLabel: "Show",
+            trailingAction: _showPhygitalCollection,
           ),
           PreviewSection(
             label: "Phygital ID",
-            text: phygital.id.toHexString(),
+            text: widget.phygital.id.toHexString(),
           ),
+          if (widget.phygital.metadata.description.isNotEmpty)
+            PreviewSection(
+              label: "Description",
+              text: widget.phygital.metadata.description,
+            ),
           PreviewSection(
             label: "Owner",
-            trailingLabel: phygital.owner != null ? "${phygital.verifiedOwnership ? "VERIFIED" : "UNVERIFIED"} OWNERSHIP" :null,
-            text: phygital.owner == null
+            trailingLabel: widget.phygital.owner != null
+                ? "${widget.phygital.verifiedOwnership ? "VERIFIED" : "UNVERIFIED"} OWNERSHIP"
+                : null,
+            text: widget.phygital.owner == null
                 ? "NOT MINTED YET"
-                : phygital.owner!.formattedName,
+                : widget.phygital.owner!.formattedName,
           ),
-          if (phygital.creators.isNotEmpty)
+          if (widget.phygital.metadata.attributes.isNotEmpty)
+            PreviewSection(
+              label: "Attributes",
+              text: widget.phygital.metadata.attributes
+                  .map((attribute) =>
+                      "${attribute.key}: ${attribute.formattedValue}")
+                  .join("\n"),
+            ),
+          if (widget.phygital.metadata.links.isNotEmpty)
+            PreviewSection(
+              label: "Links",
+              text: widget.phygital.metadata.links
+                  .map((link) => "- ${link.title}: ${link.url}")
+                  .join("\n"),
+            ),
+          if (widget.phygital.creators.isNotEmpty)
             PreviewSection(
               label: "Creators",
-              text: phygital.creators
+              text: widget.phygital.creators
                   .map((creator) => "- ${creator.formattedName}")
                   .join("\n"),
             )

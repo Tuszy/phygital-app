@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:phygital/component/image_preview_section.dart';
 import 'package:phygital/component/preview_section.dart';
-import 'package:phygital/model/lsp4/lsp4_metadata.dart';
-import 'package:web3dart/credentials.dart';
+
+import '../model/phygital/phygital_collection.dart';
 
 class PhygitalCollectionPreview extends StatelessWidget {
   const PhygitalCollectionPreview(
-      {super.key, required this.contractAddress, required this.metadata});
+      {super.key, required this.phygitalCollection});
 
-  final EthereumAddress contractAddress;
-  final LSP4Metadata metadata;
+  final PhygitalCollection phygitalCollection;
 
   @override
   Widget build(BuildContext context) {
@@ -33,39 +32,58 @@ class PhygitalCollectionPreview extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(
-            metadata.name,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 28,
-              fontWeight: FontWeight.w800,
+          if (phygitalCollection.metadata.icon != null)
+            ImagePreviewSection(
+              topBorder: false,
+              image: phygitalCollection.metadata.icon!,
+              label: "Icon",
+              width: 200,
+              height: 200,
             ),
+          if (phygitalCollection.metadata.backgroundImage != null)
+            ImagePreviewSection(
+              image: phygitalCollection.metadata.backgroundImage!,
+              label: "Background Image",
+              width: 200,
+              height: 200,
+            ),
+          PreviewSection(
+            label: "Name",
+            text: phygitalCollection.name,
           ),
-          if (metadata.icon != null)
-            ImagePreviewSection(
-                image: metadata.icon!, label: "Icon", width: 200, height: 200),
-          if (metadata.backgroundImage != null)
-            ImagePreviewSection(
-                image: metadata.backgroundImage!,
-                label: "Background Image",
-                width: 200,
-                height: 200),
+          PreviewSection(
+            label: "Symbol",
+            text: phygitalCollection.symbol,
+          ),
           PreviewSection(
             label: "Contract Address",
-            text: contractAddress.hexEip55,
+            text: phygitalCollection.contractAddress.hexEip55,
           ),
-          if (metadata.description.isNotEmpty)
+          PreviewSection(
+            label: "Total Supply",
+            text: phygitalCollection.totalSupply == 0
+                ? "None minted yet."
+                : phygitalCollection.totalSupply.toString(),
+          ),
+          if (phygitalCollection.metadata.description.isNotEmpty)
             PreviewSection(
               label: "Description",
-              text: metadata.description,
+              text: phygitalCollection.metadata.description,
             ),
-          if (metadata.links.isNotEmpty)
+          if (phygitalCollection.metadata.links.isNotEmpty)
             PreviewSection(
               label: "Links",
-              text: metadata.links
+              text: phygitalCollection.metadata.links
                   .map((link) => "- ${link.title}: ${link.url}")
                   .join("\n"),
             ),
+          if (phygitalCollection.creators.isNotEmpty)
+            PreviewSection(
+              label: "Creators",
+              text: phygitalCollection.creators
+                  .map((creator) => "- ${creator.formattedName}")
+                  .join("\n"),
+            )
         ],
       ),
     );

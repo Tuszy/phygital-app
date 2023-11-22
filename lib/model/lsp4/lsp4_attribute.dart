@@ -5,6 +5,15 @@ class LSP4Attribute {
   final dynamic value;
   final String type;
 
+  String get formattedValue {
+    if (type == "number") {
+      return value.toStringAsFixed(value.truncateToDouble() == value ? 0 : 1);
+    } else if (type == "boolean") {
+      return value as bool ? "true" : "false";
+    }
+    return value.toString();
+  }
+
   Map<String, dynamic> toJson() {
     return {'key': key, 'value': value, 'type': type};
   }

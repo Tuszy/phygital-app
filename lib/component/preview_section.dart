@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
 
 class PreviewSection extends StatelessWidget {
-  const PreviewSection({
-    super.key,
-    required this.label,
-    required this.text,
-    this.trailingLabel,
-  });
+  const PreviewSection(
+      {super.key,
+      required this.label,
+      required this.text,
+      this.trailingLabel,
+      this.trailingAction});
 
   final String label;
   final String text;
   final String? trailingLabel;
+  final VoidCallback? trailingAction;
 
   @override
   Widget build(BuildContext context) {
@@ -45,7 +46,7 @@ class PreviewSection extends StatelessWidget {
                         ),
                       ),
                     ),
-                    if (trailingLabel != null)
+                    if (trailingLabel != null && trailingAction == null)
                       Text(
                         trailingLabel!,
                         style: const TextStyle(
@@ -54,7 +55,12 @@ class PreviewSection extends StatelessWidget {
                           fontSize: 12,
                           fontWeight: FontWeight.w700,
                         ),
-                      )
+                      ),
+                    if (trailingLabel != null && trailingAction != null)
+                      _Button(
+                        name: trailingLabel!,
+                        onClick: trailingAction!,
+                      ),
                   ],
                 ),
                 const SizedBox(
@@ -75,6 +81,42 @@ class PreviewSection extends StatelessWidget {
             ),
           )
         ],
+      ),
+    );
+  }
+}
+
+class _Button extends StatelessWidget {
+  const _Button({required this.name, required this.onClick});
+
+  final String name;
+  final VoidCallback onClick;
+
+  @override
+  Widget build(BuildContext context) {
+    return TextButton(
+      onPressed: onClick,
+      style: TextButton.styleFrom(
+        foregroundColor: Colors.white70,
+        backgroundColor: const Color(0x20ffffff),
+        padding: const EdgeInsets.symmetric(horizontal: 8),
+        textStyle: const TextStyle(
+          letterSpacing: 3,
+          fontSize: 24,
+          fontWeight: FontWeight.w900,
+        ),
+        side: const BorderSide(color: Colors.white60, width: 2),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+      ),
+      child: Text(
+        name,
+        style: const TextStyle(
+          color: Colors.white70,
+          fontWeight: FontWeight.w700,
+          fontSize: 14,
+        ),
       ),
     );
   }

@@ -99,13 +99,17 @@ class PhygitalListSection extends StatelessWidget {
                         const SizedBox(
                           height: 4,
                         ),
-                        Text(
-                          phygitalTagData.$2.phygitalTag.address.hexEip55,
-                          style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 10,
-                              fontWeight: FontWeight.w600,
-                              letterSpacing: 0.7),
+                        Row(
+                          children: [
+                            Text(
+                              phygitalTagData.$2.phygitalTag.address.hexEip55,
+                              style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 9,
+                                  fontWeight: FontWeight.w600,
+                                  letterSpacing: 0.7),
+                            ),
+                          ],
                         )
                       ],
                     ),

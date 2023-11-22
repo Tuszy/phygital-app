@@ -13,6 +13,7 @@ import 'package:phygital/service/ipfs_client.dart';
 import 'package:phygital/util/lsp2_utils.dart';
 import 'package:web3dart/web3dart.dart';
 
+import '../../model/phygital/phygital_collection.dart';
 import '../../model/phygital/phygital_tag.dart';
 import '../../model/lsp0/universal_profile.dart';
 import '../nfc.dart';
@@ -482,6 +483,82 @@ class LuksoClient extends ChangeNotifier {
     Map<String, dynamic> universalProfileData = jsonDecode(json);
     return UniversalProfile.fromJson(
         universalProfileAddress, universalProfileData);
+  }
+
+  Future<(Result, PhygitalCollection?)> fetchPhygitalCollectionData({
+    required EthereumAddress contractAddress,
+  }) async {
+    Result validationResult =
+    await validatePhygitalContract(contractAddress);
+    if (validationResult != Result.success) return (validationResult, null);
+
+    PhygitalAsset contract = PhygitalAsset(
+        address: contractAddress, client: _web3client!);
+
+    int totalSupply = (await contract.totalSupply()).toInt();
+
+    List<Uint8List> data = await contract.getDataBatch([
+      phygitalAssetMetadataKey,
+      phygitalAssetNameKey,
+      phygitalAssetSymbolKey,
+      phygitalAssetCreatorsArrayKey
+    ]);
+
+    Uint8List metadataJsonUrl = data[0];
+    if (metadataJsonUrl.isEmpty) {
+      return (Result.invalidPhygitalCollectionData, null);
+    }
+
+    String name = utf8.decode(data[1]);
+    if (name.isEmpty) return (Result.nameMustNotBeEmpty, null);
+
+    String symbol = utf8.decode(data[2]);
+    if (symbol.isEmpty) return (Result.symbolMustNotBeEmpty, null);
+
+    int creatorsLength =
+    ByteUtils.bytesToBigInt(data[3], endianness: Endianness.Little).toInt();
+
+    List<Uint8List> creatorsIndexKeys = [];
+    for (int i = 0; i < creatorsLength; i++) {
+      creatorsIndexKeys.add(
+        LSP2Utils().getArrayIndexKey(
+          phygitalAssetCreatorsArrayKey,
+          i,
+        ),
+      );
+    }
+
+    List<Uint8List> creatorsData = creatorsIndexKeys.isNotEmpty
+        ? await contract.getDataBatch(creatorsIndexKeys)
+        : [];
+    List<EthereumAddress> creatorAddresses = creatorsData
+        .map((creatorAddress) => EthereumAddress(creatorAddress))
+        .toList();
+    List<UniversalProfile> creators = [];
+    for (int i = 0; i < creatorAddresses.length; i++) {
+      UniversalProfile? creatorUniversalProfile = await fetchUniversalProfile(
+        universalProfileAddress: creatorAddresses[i],
+      );
+      if (creatorUniversalProfile != null) {
+        creators.add(creatorUniversalProfile);
+      }
+    }
+
+    String json =
+    await LSP2Utils().fetchJsonUrl(metadataJsonUrl);
+    if (json.isEmpty) return (Result.invalidPhygitalCollectionData, null);
+    Map<String, dynamic> rawData = jsonDecode(json);
+    return (
+    Result.success,
+    PhygitalCollection(
+      contractAddress: contractAddress,
+      name: name,
+      symbol: symbol,
+      metadata: LSP4Metadata.fromJson(rawData),
+      creators: creators,
+      totalSupply: totalSupply,
+    ),
+    );
   }
 
   Future<(Result, Phygital?)> fetchPhygitalData({

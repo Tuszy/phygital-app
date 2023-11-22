@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:phygital/component/phygital_assignment_list_section.dart';
 import 'package:phygital/layout/standard_layout.dart';
 import 'package:phygital/model/lsp4/lsp4_metadata.dart';
+import 'package:phygital/model/phygital/phygital_collection.dart';
 import 'package:phygital/page/phygital_collection_page.dart';
 import 'package:web3dart/credentials.dart';
 
@@ -63,16 +64,26 @@ class _AssignCollectionPageState extends State<AssignCollectionPage> {
           title: "Assignment completed",
           text: "Successfully assigned collection to all phygitals.",
         );
+
+        PhygitalCollection phygitalCollection = PhygitalCollection(
+            contractAddress: widget.contractAddress,
+            name: widget.metadata.name,
+            symbol: widget.metadata.symbol!,
+            metadata: widget.metadata,
+            creators: GlobalState().universalProfile == null
+                ? []
+                : [GlobalState().universalProfile!],
+            totalSupply: 0);
+
         if (!mounted) return;
         Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(
             builder: (context) => PhygitalCollectionPage(
-              contractAddress: widget.contractAddress,
-              metadata: widget.metadata,
+              phygitalCollection: phygitalCollection,
             ),
           ),
-          (var route) => route.settings.name == "menu",
+          (route) => route.settings.name == "menu",
         );
       } else {
         GlobalState().loadingWithText = null;
