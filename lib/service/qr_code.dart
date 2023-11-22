@@ -27,7 +27,7 @@ class QRCode {
   }
 
   String createCodeFromAddress(EthereumAddress address) {
-    return "ethereum:0x${address.hexEip55}@${LuksoClient.chainId}";
+    return "ethereum:${address.hexEip55}@${LuksoClient.chainId}";
   }
 
   Future<(Result, UniversalProfile?, String?)> getUniversalProfileWithJWT(

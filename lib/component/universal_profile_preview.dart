@@ -2,12 +2,32 @@ import 'package:flutter/material.dart';
 import 'package:phygital/component/image_preview.dart';
 import 'package:phygital/component/preview_section.dart';
 import 'package:phygital/model/lsp0/universal_profile.dart';
+import 'package:phygital/service/qr_code.dart';
 
-class UniversalProfilePreview extends StatelessWidget {
-  const UniversalProfilePreview(
-      {super.key, required this.universalProfile});
+import '../service/custom_dialog.dart';
+
+class UniversalProfilePreview extends StatefulWidget {
+  const UniversalProfilePreview({
+    super.key,
+    required this.universalProfile,
+  });
 
   final UniversalProfile universalProfile;
+
+  @override
+  State<StatefulWidget> createState() => _UniversalProfilePreviewState();
+}
+
+class _UniversalProfilePreviewState extends State<UniversalProfilePreview> {
+  void _showQRCode() {
+    CustomDialog.showQrCode(
+      context: context,
+      title: "Universal Profile Address",
+      data:
+          QRCode().createCodeFromAddress(widget.universalProfile.address),
+      onPressed: () {},
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,40 +52,42 @@ class UniversalProfilePreview extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            universalProfile.formattedName,
+            widget.universalProfile.formattedName,
             style: const TextStyle(
               color: Colors.white,
               fontSize: 28,
               fontWeight: FontWeight.w800,
             ),
           ),
-          if (universalProfile.profileImage != null)
+          if (widget.universalProfile.profileImage != null)
             ImagePreview(
-              image: universalProfile.profileImage!,
+              image: widget.universalProfile.profileImage!,
               width: 200,
               height: 200,
             ),
           PreviewSection(
             label: "Lukso Address",
-            text: universalProfile.address.hexEip55,
+            text: widget.universalProfile.address.hexEip55,
+            trailingLabel: "QR Code",
+            trailingAction: _showQRCode,
           ),
-          if (universalProfile.description != null &&
-              universalProfile.description!.isNotEmpty)
+          if (widget.universalProfile.description != null &&
+              widget.universalProfile.description!.isNotEmpty)
             PreviewSection(
               label: "Description",
-              text: universalProfile.description!,
+              text: widget.universalProfile.description!,
             ),
-          if (universalProfile.tags != null &&
-              universalProfile.tags!.isNotEmpty)
+          if (widget.universalProfile.tags != null &&
+              widget.universalProfile.tags!.isNotEmpty)
             PreviewSection(
               label: "Tags",
-              text: universalProfile.tags!.join(", "),
+              text: widget.universalProfile.tags!.join(", "),
             ),
-          if (universalProfile.links != null &&
-              universalProfile.links!.isNotEmpty)
+          if (widget.universalProfile.links != null &&
+              widget.universalProfile.links!.isNotEmpty)
             PreviewSection(
               label: "Links",
-              text: universalProfile.links!
+              text: widget.universalProfile.links!
                   .map((link) => "- ${link.title}: ${link.url}")
                   .join("\n"),
             ),
