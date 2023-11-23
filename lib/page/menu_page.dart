@@ -221,6 +221,8 @@ class _MenuPageState extends State<MenuPage> {
     (Result, UniversalProfile?)? result = await QRCode().getUniversalProfile(
       scannedCode: scannedCode,
     );
+    GlobalState().loadingWithText = null;
+
     if (Result.success != result.$1) {
       showInfoDialog(
         title: "Result",
@@ -235,7 +237,6 @@ class _MenuPageState extends State<MenuPage> {
       return null;
     }
 
-    GlobalState().loadingWithText = null;
     return result.$2;
   }
 
