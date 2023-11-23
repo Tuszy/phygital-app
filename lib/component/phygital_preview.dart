@@ -113,7 +113,7 @@ class _PhygitalPreviewState extends State<PhygitalPreview> {
           if (widget.phygital.owner != null)
             ViewableUniversalProfileListSection(
               label: "Owner",
-              universalProfiles: widget.phygital.creators,
+              universalProfiles: [widget.phygital.owner!],
               trailingLabel:
                   "${widget.phygital.verifiedOwnership ? "VERIFIED" : "UNVERIFIED"} OWNERSHIP",
             ),
