@@ -1,3 +1,7 @@
+<p align="center">
+<img src="screenshots/mockup.png" align="center" height="300px">
+</p>
+
 # Phygital App
 
 Mobile application for creating, transferring, minting and verifying phygitals.
