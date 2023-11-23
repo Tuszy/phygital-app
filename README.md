@@ -2,6 +2,16 @@
 
 Mobile application for creating, transferring, minting and verifying phygitals.
 
+# Remarks
+Due to the tight schedule, I wasn't able to upload the app to the *App Store* nor *App Store Connect*. But even if I were able to upload the app, it wouldn't make a lot of sense downloading it as you wouldn't be able to do more than just log in as you would need the [Phygital NFC Tags](https://github.com/Tuszy/phygital-nfc-tag) to play around with it. Because of this reason I have created a bunch of videos of all the possible scenarios that may come up during its usage.
+
+# Dev Tools
+1. [Flutter](https://flutter.dev/)
+   1. App has been developed and tested on an iOS mobile (iPhone 13 mini), but should theoretically work on Android aswell
+   2.  Attention: Due to time restrictions I have neglected to test it on Android and any other screen resolutions.
+2. [Android Studio](https://developer.android.com/studio)
+3. [XCode](https://developer.apple.com/xcode/)
+
 ## Login - Workflow
 1. Open the [Frontend](https://github.com/Tuszy/phygital-frontend)
    1. Press the **LOGIN WITH UNIVERSAL PROFILE** button
