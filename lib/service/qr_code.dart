@@ -39,8 +39,7 @@ class QRCode {
 
     String? jwt = getJWTFromCode(scannedCode);
     if (jwt == null) return (Result.invalidAppLoginQRCode, null, null);
-    if (!await BackendClient()
-        .verifyLoginToken(universalProfileAddress: address, jwt: jwt)) {
+    if (!await BackendClient().verifyLoginToken(jwt: jwt)) {
       return (Result.invalidAppLoginQRCode, null, null);
     }
 

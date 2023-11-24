@@ -27,8 +27,7 @@ class GlobalState extends ChangeNotifier {
       EthereumAddress? universalProfileEthAddress = EthereumAddress(
         universalProfileAddress.toBytes(),
       );
-      if (await BackendClient().verifyLoginToken(
-          universalProfileAddress: universalProfileEthAddress, jwt: jwt)) {
+      if (await BackendClient().verifyLoginToken(jwt: jwt)) {
         _universalProfile = await LuksoClient().fetchUniversalProfile(
           universalProfileAddress: universalProfileEthAddress,
         );

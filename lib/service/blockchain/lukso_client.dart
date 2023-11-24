@@ -329,7 +329,6 @@ class LuksoClient extends ChangeNotifier {
     if (phygitalSignature == null) return Result.signingFailed;
 
     return await BackendClient().mint(
-      universalProfileAddress: universalProfileAddress,
       phygitalSignature: phygitalSignature,
       phygitalTag: phygitalTag,
     );
@@ -376,7 +375,6 @@ class LuksoClient extends ChangeNotifier {
     if (phygitalSignature == null) return Result.signingFailed;
 
     return await BackendClient().verifyOwnershipAfterTransfer(
-      universalProfileAddress: universalProfileAddress,
       phygitalSignature: phygitalSignature,
       phygitalTag: phygitalTag,
     );
@@ -433,7 +431,6 @@ class LuksoClient extends ChangeNotifier {
 
     return await BackendClient().transfer(
       toUniversalProfileAddress: toUniversalProfileAddress,
-      universalProfileAddress: universalProfileAddress,
       phygitalSignature: phygitalSignature,
       phygitalTag: phygitalTag,
     );

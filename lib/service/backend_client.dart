@@ -40,24 +40,19 @@ class BackendClient extends ChangeNotifier {
   final Client _httpClient = Client();
 
   Future<bool> verifyLoginToken({
-    required EthereumAddress universalProfileAddress,
     String? jwt,
   }) async {
-    var data = {"universal_profile_address": universalProfileAddress.hexEip55};
-
-    Response response = await _httpClient.post(verifyLoginTokenEndpoint,
-        headers: contentTypeApplicationJson(jwt: jwt), body: json.encode(data));
+    Response response = await _httpClient.get(verifyLoginTokenEndpoint,
+        headers: contentTypeApplicationJson(jwt: jwt));
 
     return response.statusCode == 200;
   }
 
   Future<Result> mint({
-    required EthereumAddress universalProfileAddress,
     required String phygitalSignature,
     required PhygitalTag phygitalTag,
   }) async {
     var data = {
-      "universal_profile_address": universalProfileAddress.hexEip55,
       "phygital_asset_contract_address": phygitalTag.contractAddress!.hexEip55,
       "phygital_address": phygitalTag.address.hexEip55,
       "phygital_signature": "0x$phygitalSignature"
@@ -88,12 +83,10 @@ class BackendClient extends ChangeNotifier {
   }
 
   Future<Result> verifyOwnershipAfterTransfer({
-    required EthereumAddress universalProfileAddress,
     required String phygitalSignature,
     required PhygitalTag phygitalTag,
   }) async {
     var data = {
-      "universal_profile_address": universalProfileAddress.hexEip55,
       "phygital_asset_contract_address": phygitalTag.contractAddress!.hexEip55,
       "phygital_address": phygitalTag.address.hexEip55,
       "phygital_signature": "0x$phygitalSignature"
@@ -126,13 +119,11 @@ class BackendClient extends ChangeNotifier {
   }
 
   Future<Result> transfer({
-    required EthereumAddress universalProfileAddress,
     required EthereumAddress toUniversalProfileAddress,
     required String phygitalSignature,
     required PhygitalTag phygitalTag,
   }) async {
     var data = {
-      "universal_profile_address": universalProfileAddress.hexEip55,
       "to_universal_profile_address": toUniversalProfileAddress.hexEip55,
       "phygital_asset_contract_address": phygitalTag.contractAddress!.hexEip55,
       "phygital_address": phygitalTag.address.hexEip55,
@@ -183,7 +174,6 @@ class BackendClient extends ChangeNotifier {
     if (baseUri == null) return (Result.uploadingLSP4MetadataFailed, null);
 
     var data = {
-      "universal_profile_address": universalProfileAddress.hexEip55,
       "name": name,
       "symbol": symbol,
       "phygital_collection": phygitalCollection

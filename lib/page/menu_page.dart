@@ -40,8 +40,7 @@ class _MenuPageState extends State<MenuPage> {
   void scan(
       {bool mustHaveValidPhygitalData = true,
       required Function(Phygital) onSuccess}) async {
-    if (!await BackendClient().verifyLoginToken(
-        universalProfileAddress: GlobalState().universalProfile!.address)) {
+    if (!await BackendClient().verifyLoginToken()) {
       await showInfoDialog(
         title: "Login required",
         text: getMessageForResult(Result.authenticationSessionExpired),
@@ -341,8 +340,7 @@ class _MenuPageState extends State<MenuPage> {
 
   Future<void> create() async {
     if (GlobalState().universalProfile == null) return;
-    if (!await BackendClient().verifyLoginToken(
-        universalProfileAddress: GlobalState().universalProfile!.address)) {
+    if (!await BackendClient().verifyLoginToken()) {
       await showInfoDialog(
         title: "Login required",
         text: getMessageForResult(Result.authenticationSessionExpired),
