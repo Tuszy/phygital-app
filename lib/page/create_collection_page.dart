@@ -13,6 +13,7 @@ import 'package:phygital/model/lsp4/lsp4_link.dart';
 import 'package:phygital/model/lsp4/lsp4_metadata.dart';
 import 'package:phygital/page/add_phygital_page.dart';
 import 'package:phygital/page/assign_collection_page.dart';
+import 'package:phygital/page/edit_phygital_page.dart';
 import 'package:phygital/service/blockchain/lukso_client.dart';
 import 'package:phygital/service/global_state.dart';
 import 'package:phygital/service/ipfs_client.dart';
@@ -114,6 +115,33 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
       } else {
         showInfoDialog(
             title: "Attention", text: "This phygital has already been added");
+      }
+    } catch (e) {
+      GlobalState().loadingWithText = null;
+      showInfoDialog(
+        title: "Result",
+        text: e.toString(),
+      );
+    }
+  }
+
+  Future<void> _onEditPhygitalTag(PhygitalTagData phygitalTagData) async {
+    if(!_tags.contains(phygitalTagData)) return;
+    FocusManager.instance.primaryFocus?.unfocus();
+    try {
+      PhygitalTagData? newPhygitalTagData = await Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => EditPhygitalPage(
+            phygitalTagData: phygitalTagData,
+          ),
+        ),
+      );
+
+      if (newPhygitalTagData != null) {
+        setState(() {
+          _tags[_tags.indexOf(phygitalTagData)] = newPhygitalTagData;
+        });
       }
     } catch (e) {
       GlobalState().loadingWithText = null;
@@ -361,6 +389,7 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
                     label: "Phygitals",
                     onAdd: _onAddPhygitalTag,
                     onRemove: _onRemovePhygitalTag,
+                    onEdit: _onEditPhygitalTag,
                     phygitalTags: _tags,
                   )
                 ],

@@ -11,15 +11,18 @@ import 'package:phygital/component/custom_icon_button.dart';
 typedef OnImageChangeCallback = void Function(File?);
 
 class ImageUpload extends StatefulWidget {
-  const ImageUpload(
-      {super.key,
-      required this.width,
-      required this.height,
-      required this.onChange});
+  const ImageUpload({
+    super.key,
+    required this.width,
+    required this.height,
+    required this.onChange,
+    this.initialImage,
+  });
 
   final double width;
   final double height;
   final OnImageChangeCallback onChange;
+  final File? initialImage;
 
   @override
   State<ImageUpload> createState() => _ImageUploadState();
@@ -51,6 +54,15 @@ class _ImageUploadState extends State<ImageUpload> {
 
   final TextStyle _textStyle = const TextStyle(
       color: Colors.white60, fontSize: 20, fontWeight: FontWeight.w500);
+
+  @override
+  initState() {
+    super.initState();
+
+    if(widget.initialImage != null){
+      _image = XFile(widget.initialImage!.path);
+    }
+  }
 
   Future<void> _onImageButtonPressed(ImageSource source,
       {required BuildContext context}) async {

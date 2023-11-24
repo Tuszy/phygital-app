@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 
 import '../model/phygital/phygital_tag_data.dart';
+import 'file_image_preview.dart';
 
 typedef OnAddCallback = void Function();
 typedef OnRemoveCallback = void Function(int);
+typedef OnEditCallback = void Function(PhygitalTagData phygitalTagData);
 
 class PhygitalListSection extends StatelessWidget {
   const PhygitalListSection({
@@ -12,6 +14,7 @@ class PhygitalListSection extends StatelessWidget {
     required this.label,
     required this.onAdd,
     required this.onRemove,
+    required this.onEdit,
     required this.phygitalTags,
     this.topBorder = true,
   });
@@ -20,6 +23,7 @@ class PhygitalListSection extends StatelessWidget {
   final String label;
   final OnAddCallback onAdd;
   final OnRemoveCallback onRemove;
+  final OnEditCallback onEdit;
   final List<PhygitalTagData> phygitalTags;
   final bool topBorder;
 
@@ -99,18 +103,33 @@ class PhygitalListSection extends StatelessWidget {
                         const SizedBox(
                           height: 4,
                         ),
-                        Row(
-                          children: [
-                            Text(
-                              phygitalTagData.$2.phygitalTag.address.hexEip55,
-                              style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 9,
-                                  fontWeight: FontWeight.w600,
-                                  letterSpacing: 0.7),
-                            ),
-                          ],
-                        )
+                        Text(
+                          phygitalTagData.$2.name,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: 0.7,
+                          ),
+                        ),
+                        GestureDetector(
+                          onTap: () => onEdit(phygitalTagData.$2),
+                          child: FileImagePreview(
+                            image: phygitalTagData.$2.phygitalImage,
+                            width: 200,
+                            height: 200,
+                            keepContainerSize: false,
+                          ),
+                        ),
+                        Text(
+                          phygitalTagData.$2.phygitalTag.address.hexEip55,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 9,
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: 0.7,
+                          ),
+                        ),
                       ],
                     ),
                   ),

@@ -1,50 +1,36 @@
 import 'dart:io';
 import 'dart:ui';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:ndef/utilities.dart';
 import 'package:phygital/component/attribute_list_section.dart';
 import 'package:phygital/component/image_upload_section.dart';
 import 'package:phygital/component/editable_link_list_section.dart';
-import 'package:phygital/component/phygital_list_section.dart';
 import 'package:phygital/component/text_input_section.dart';
 import 'package:phygital/layout/standard_layout.dart';
-import 'package:phygital/model/lsp0/universal_profile.dart';
 import 'package:phygital/model/lsp4/lsp4_attribute.dart';
 import 'package:phygital/model/lsp4/lsp4_link.dart';
-import 'package:phygital/model/lsp4/lsp4_metadata.dart';
-import 'package:phygital/model/phygital/phygital.dart';
-import 'package:phygital/page/assign_collection_page.dart';
-import 'package:phygital/service/blockchain/lukso_client.dart';
 import 'package:phygital/service/global_state.dart';
-import 'package:phygital/service/ipfs_client.dart';
-import 'package:web3dart/credentials.dart';
 
-import '../model/lsp4/lsp4_image.dart';
-import '../model/phygital/phygital_tag.dart';
 import '../model/phygital/phygital_tag_data.dart';
 import '../service/custom_dialog.dart';
 
-class AddPhygitalPage extends StatefulWidget {
-  const AddPhygitalPage({super.key, required this.phygitalTag, required this.number, required this.name});
+class EditPhygitalPage extends StatefulWidget {
+  const EditPhygitalPage({super.key, required this.phygitalTagData});
 
-  final int number;
-  final String name;
-  final PhygitalTag phygitalTag;
+  final PhygitalTagData phygitalTagData;
 
   @override
-  State<StatefulWidget> createState() => _AddPhygitalPageState();
+  State<StatefulWidget> createState() => _EditPhygitalPageState();
 }
 
 typedef OnImageChangeCallback = void Function(File?);
 
-class _AddPhygitalPageState extends State<AddPhygitalPage> {
+class _EditPhygitalPageState extends State<EditPhygitalPage> {
   final _formKey = GlobalKey<FormState>();
   File? _phygitalImage;
   late final TextEditingController _nameController;
   late final TextEditingController _descriptionController;
-  final List<LinkController> _links = <LinkController>[];
+  late final List<LinkController> _links;
   late final List<AttributeController> _attributes;
 
   bool triedToSubmit = false;
@@ -52,9 +38,11 @@ class _AddPhygitalPageState extends State<AddPhygitalPage> {
 
   @override
   void initState() {
-    _nameController = TextEditingController(text: "${widget.name} #${widget.number}");
-    _descriptionController = TextEditingController(text: "${widget.name} #${widget.number}");
-    _attributes = <AttributeController>[AttributeController(key: "Number", value: widget.number)];
+    _phygitalImage = widget.phygitalTagData.phygitalImage;
+    _nameController = TextEditingController(text: widget.phygitalTagData.name);
+    _descriptionController = TextEditingController(text: widget.phygitalTagData.description);
+    _attributes = widget.phygitalTagData.attributes.map((e) => AttributeController(key: e.key, value: e.value)).toList();
+    _links = widget.phygitalTagData.links.map((e) => LinkController(title: e.title, url: e.url)).toList();
 
     super.initState();
   }
@@ -130,7 +118,7 @@ class _AddPhygitalPageState extends State<AddPhygitalPage> {
       String description = _descriptionController.text;
 
       PhygitalTagData phygitalTagData = PhygitalTagData(
-        phygitalTag: widget.phygitalTag,
+        phygitalTag: widget.phygitalTagData.phygitalTag,
         phygitalImage: _phygitalImage!,
         name: name,
         description: description,
@@ -166,7 +154,7 @@ class _AddPhygitalPageState extends State<AddPhygitalPage> {
   @override
   Widget build(BuildContext context) {
     return StandardLayout(
-      title: "Add Phygital",
+      title: "Edit Phygital",
       child: Column(
         children: [
           Container(
@@ -201,6 +189,7 @@ class _AddPhygitalPageState extends State<AddPhygitalPage> {
                     width: 250,
                     height: 250,
                     onImageChange: _onImageChange,
+                    initialImage: _phygitalImage
                   ),
                   TextInputSection(
                     name: "name",
@@ -300,7 +289,7 @@ class _SubmitButton extends StatelessWidget {
               child: const Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 mainAxisSize: MainAxisSize.max,
-                children: [Text("Add")],
+                children: [Text("Update")],
               ),
             ),
           ),

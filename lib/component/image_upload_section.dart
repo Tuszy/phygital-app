@@ -14,6 +14,7 @@ class ImageUploadSection extends StatelessWidget {
       required this.width,
       required this.height,
       required this.onImageChange,
+      this.initialImage,
       this.topBorder = true});
 
   final String name;
@@ -21,6 +22,7 @@ class ImageUploadSection extends StatelessWidget {
   final double width;
   final double height;
   final OnImageChangeCallback onImageChange;
+  final File? initialImage;
   final bool topBorder;
 
   @override
@@ -69,6 +71,7 @@ class ImageUploadSection extends StatelessWidget {
                   width: width,
                   height: height,
                   onChange: onImageChange,
+                  initialImage: initialImage,
                 ),
               ],
             ),
