@@ -41,7 +41,7 @@ class _EditPhygitalPageState extends State<EditPhygitalPage> {
     _phygitalImage = widget.phygitalTagData.phygitalImage;
     _nameController = TextEditingController(text: widget.phygitalTagData.name);
     _descriptionController = TextEditingController(text: widget.phygitalTagData.description);
-    _attributes = widget.phygitalTagData.attributes.map((e) => AttributeController(key: e.key, value: e.value)).toList();
+    _attributes = widget.phygitalTagData.attributes.map((e) => AttributeController(key: e.key, value: e.formattedValue)).toList();
     _links = widget.phygitalTagData.links.map((e) => LinkController(title: e.title, url: e.url)).toList();
 
     super.initState();
