@@ -32,7 +32,6 @@ class _ImageUploadState extends State<ImageUpload> {
   XFile? _image;
   double? _width;
   double? _height;
-  bool? _rotate;
 
   dynamic _pickImageError;
 
@@ -60,8 +59,48 @@ class _ImageUploadState extends State<ImageUpload> {
     super.initState();
 
     if(widget.initialImage != null){
+      String path = widget.initialImage!.path;
       _image = XFile(widget.initialImage!.path);
+
+      var size = _getSize(path);
+      _width = size.$1;
+      _height = size.$2;
     }
+  }
+
+  (double, double) _getSize(String imagePath){
+    double width = 0;
+    double height = 0;
+
+    Size size =
+    ImageSizeGetter.getSize(FileInput(File(imagePath)));
+    bool rotate = size.needRotate;
+
+    width = size.width.toDouble();
+    height = size.height.toDouble();
+
+    if (size.height > widget.width ||
+        size.height > widget.height ||
+        size.width > widget.width ||
+        size.width > widget.height) {
+      if (size.width > size.height) {
+        height = widget.height * ((size.height) / (size.width)) + 2;
+      } else if (size.width < size.height) {
+        width = widget.width * ((size.width) / (size.height)) + 2;
+      }
+    }
+
+    if (rotate) {
+      double temp = height;
+      height = width;
+      width = temp;
+    }
+
+    if (width < minImageWidth) {
+      width = minImageWidth;
+    }
+
+    return (width, height);
   }
 
   Future<void> _onImageButtonPressed(ImageSource source,
@@ -78,33 +117,9 @@ class _ImageUploadState extends State<ImageUpload> {
         double? width;
         double? height;
         if (pickedImage != null) {
-          Size size =
-              ImageSizeGetter.getSize(FileInput(File(pickedImage.path)));
-          _rotate = size.needRotate;
-
-          if (size.height > widget.width ||
-              size.height > widget.height ||
-              size.width > widget.width ||
-              size.width > widget.height) {
-            if (size.width > size.height) {
-              height = widget.height * ((size.height) / (size.width)) + 2;
-            } else if (size.width < size.height) {
-              width = widget.width * ((size.width) / (size.height)) + 2;
-            }
-          } else {
-            width = size.width.toDouble();
-            height = size.height.toDouble();
-          }
-
-          if (_rotate as bool) {
-            double? temp = height;
-            height = width;
-            width = temp;
-          }
-
-          if (width != null && width < minImageWidth) {
-            width = minImageWidth;
-          }
+          var newSize = _getSize(pickedImage.path);
+          width = newSize.$1;
+          height = newSize.$2;
         }
 
         setState(() {
