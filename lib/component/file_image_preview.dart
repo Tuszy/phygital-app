@@ -40,7 +40,6 @@ class _FileImagePreviewState extends State<FileImagePreview> {
 
     _width = size.needRotate ? size.height.toDouble() : size.width.toDouble();
     _height = size.needRotate ? size.width.toDouble() : size.height.toDouble();
-    print(size);
 
     if (_height > widget.width ||
         _height > widget.height ||
@@ -57,8 +56,9 @@ class _FileImagePreviewState extends State<FileImagePreview> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: widget.keepContainerSize ? widget.width : null,
-      height: widget.keepContainerSize ? widget.height : null,
+      width: widget.keepContainerSize ? widget.width : _width,
+      height: widget.keepContainerSize ? widget.height : _height,
+      constraints: BoxConstraints(maxWidth: widget.width, maxHeight: widget.height),
       margin: const EdgeInsets.all(8),
       child: Center(
         child: Container(

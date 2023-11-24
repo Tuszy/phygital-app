@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:phygital/model/phygital/phygital_tag_data.dart';
 
+import 'file_image_preview.dart';
+
 class PhygitalAssignmentListSection extends StatelessWidget {
   const PhygitalAssignmentListSection({
     super.key,
@@ -57,7 +59,7 @@ class PhygitalAssignmentListSection extends StatelessWidget {
                   ],
                 ),
                 ...phygitalTags.indexed.map(
-                  ((int, PhygitalTagData) phygitalTag) => Container(
+                  ((int, PhygitalTagData) phygitalTagData) => Container(
                     margin: const EdgeInsets.only(top: 8),
                     padding:
                         const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
@@ -69,16 +71,38 @@ class PhygitalAssignmentListSection extends StatelessWidget {
                       ),
                     ),
                     child: Row(
+                      mainAxisSize: MainAxisSize.max,
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text(
-                          phygitalTag.$2.phygitalTag.address.hexEip55,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 9,
-                            fontWeight: FontWeight.w600,
-                            letterSpacing: 0.7,
-                          ),
-                        )
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Text(
+                              phygitalTagData.$2.name,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 18,
+                                fontWeight: FontWeight.w600,
+                                letterSpacing: 0.7,
+                              ),
+                            ),
+                            FileImagePreview(
+                              image: phygitalTagData.$2.phygitalImage,
+                              width: 200,
+                              height: 200,
+                              keepContainerSize: false,
+                            ),
+                            Text(
+                              phygitalTagData.$2.phygitalTag.address.hexEip55,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 9,
+                                fontWeight: FontWeight.w600,
+                                letterSpacing: 0.7,
+                              ),
+                            )
+                          ],
+                        ),
                       ],
                     ),
                   ),
