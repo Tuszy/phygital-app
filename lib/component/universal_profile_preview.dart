@@ -64,6 +64,7 @@ class _UniversalProfilePreviewState extends State<UniversalProfilePreview> {
               image: widget.universalProfile.profileImage!,
               width: 200,
               height: 200,
+              keepContainerSize: false,
             ),
           PreviewSection(
             label: "Lukso Address",

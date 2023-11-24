@@ -47,6 +47,7 @@ class PhygitalCollectionPreview extends StatelessWidget {
               label: "Icon",
               width: 200,
               height: 200,
+              keepContainerSize: false,
             ),
           if (phygitalCollection.metadata.backgroundImage != null)
             ImagePreviewSection(
@@ -54,6 +55,7 @@ class PhygitalCollectionPreview extends StatelessWidget {
               label: "Background Image",
               width: 200,
               height: 200,
+              keepContainerSize: false,
             ),
           PreviewSection(
             label: "Name",

@@ -92,6 +92,7 @@ class _PhygitalPreviewState extends State<PhygitalPreview> {
               image: widget.phygital.metadata.image!,
               width: 200,
               height: 200,
+              keepContainerSize: false,
             ),
           PreviewSection(
             label: "Collection",

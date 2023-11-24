@@ -257,7 +257,6 @@ class NFC extends ChangeNotifier {
       expectedPhygitals: {phygitalTag},
       message: message,
       successMessage: successMessage,
-      energyHarvestingDuration: const Duration(seconds: 2),
       nfcTagCommandFunction: (NFCTag tag, PhygitalTag phygitalTag) async {
         String errorMessage = "Failed to sign the universal profile address";
 
@@ -319,7 +318,6 @@ class NFC extends ChangeNotifier {
       expectedPhygitals: phygitalTags,
       message: "Assigning collection",
       successMessage: "Collection assigned",
-      energyHarvestingDuration: const Duration(seconds: 2),
       nfcTagCommandFunction: (NFCTag tag, PhygitalTag? phygitalTag) async {
         String errorMessage = "Failed to set the contract address";
         Uint8List contractAddressAsBytes =

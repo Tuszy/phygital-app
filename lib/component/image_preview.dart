@@ -7,11 +7,13 @@ class ImagePreview extends StatefulWidget {
     required this.image,
     required this.width,
     required this.height,
+    this.keepContainerSize = true,
   });
 
   final LSPImage image;
   final double width;
   final double height;
+  final bool keepContainerSize;
 
   @override
   State<ImagePreview> createState() => _ImagePreviewState();
@@ -48,56 +50,51 @@ class _ImagePreviewState extends State<ImagePreview> {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Container(
-          width: widget.width,
-          height: widget.height,
-          margin: const EdgeInsets.all(8),
-          child: Center(
-            child: Container(
-              width: _width,
-              height: _height,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(32),
-                boxShadow: const [
-                  BoxShadow(
-                    color: Color(0x7700ffff),
-                    spreadRadius: 2,
-                    blurRadius: 8,
-                  ),
-                ],
+    return Container(
+      width: widget.keepContainerSize ? widget.width : _width,
+      height: widget.keepContainerSize ? widget.height : _height,
+      constraints: BoxConstraints(maxWidth: widget.width, maxHeight: widget.height),
+      margin: const EdgeInsets.all(8),
+      child: Center(
+        child: Container(
+          width: _width,
+          height: _height,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(32),
+            boxShadow: const [
+              BoxShadow(
+                color: Color(0x7700ffff),
+                spreadRadius: 2,
+                blurRadius: 8,
               ),
+            ],
+          ),
+          child: Container(
+            clipBehavior: Clip.antiAlias,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(32),
+              border: Border.all(color: Colors.white38, width: 5),
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: _backgroundGradientColors,
+              ),
+            ),
+            child: Center(
               child: Container(
                 clipBehavior: Clip.antiAlias,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(32),
-                  border: Border.all(color: Colors.white38, width: 5),
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: _backgroundGradientColors,
-                  ),
-                ),
-                child: Center(
-                  child: Container(
-                    clipBehavior: Clip.antiAlias,
-                    decoration:
-                        BoxDecoration(borderRadius: BorderRadius.circular(26)),
-                    child: Image.network(
-                      widget.image.gatewayUrl,
-                      width: _width,
-                      height: _height,
-                    ),
-                  ),
+                decoration:
+                BoxDecoration(borderRadius: BorderRadius.circular(26)),
+                child: Image.network(
+                  widget.image.gatewayUrl,
+                  width: _width,
+                  height: _height,
                 ),
               ),
             ),
           ),
         ),
-      ],
+      ),
     );
   }
 }

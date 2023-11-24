@@ -10,6 +10,7 @@ class ImagePreviewSection extends StatelessWidget {
     required this.width,
     required this.height,
     this.topBorder = true,
+    this.keepContainerSize = true,
   });
 
   final LSPImage image;
@@ -17,6 +18,7 @@ class ImagePreviewSection extends StatelessWidget {
   final double width;
   final double height;
   final bool topBorder;
+  final bool keepContainerSize;
 
   @override
   Widget build(BuildContext context) {
@@ -64,6 +66,7 @@ class ImagePreviewSection extends StatelessWidget {
                   width: width,
                   height: height,
                   image: image,
+                  keepContainerSize: keepContainerSize,
                 ),
               ],
             ),
